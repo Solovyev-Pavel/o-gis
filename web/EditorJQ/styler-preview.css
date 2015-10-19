@@ -1,0 +1,127 @@
+/* ************************************************************************** *
+ *   Copyright © 2015       Pavel Solovyev (solovyev.p.a@gmail.com)           *
+ *                          Sergey Sevryukov (sevrukovs@gmail.com)            *
+ *                          Alexander Afonin (acer737@yandex.ru)              *
+ *                                                                            *
+ *   Licensed under the Apache License, Version 2.0 (the "License");          *
+ *   you may not use this file except in compliance with the License.         *
+ *   You may obtain a copy of the License at                                  *
+ *               http://www.apache.org/licenses/LICENSE-2.0                   *
+ *                                                                            *
+ *   Unless required by applicable law or agreed to in writing, software      *
+ *   distributed under the License is distributed on an "AS IS" BASIS,        *
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. *
+ *   See the License for the specific language governing permissions and      *
+ *   limitations under the License.                                           *
+ * ************************************************************************** */
+
+.circle{
+	float: left;
+	background: #ff0000;
+	border-radius: 50%;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #000000;
+	width: 100%;
+	height: 100%;
+	margin: auto
+}
+
+.rectangle{
+	float: left;
+	width: 100%;
+	height: 100%;
+	margin: auto;
+}
+
+.rhombus{
+	position: relative;
+	top: -60px;
+	width: 0;
+	height: 0;
+	border: 60px solid transparent;
+	border-bottom: 75px solid #000000;
+	margin: auto;
+}
+
+.rhombusalt{
+	margin: 25% auto;
+	display: block;
+	background: #808080;
+	border-width: 1px;
+	border-style: solid;
+	border-color: #ff0000;
+	width: 100%;
+	height: 100%;
+	transform: rotate(45deg);
+	-ms-transform: rotate(45deg); /* IE 9 */
+	-webkit-transform: rotate(45deg); /* Safari and Chrome */
+	position: relative;
+}
+
+.triangleinner{
+	width: 0;
+	height: 0;
+	border-bottom: 100px solid #ff0000;
+	border-left: 60px solid transparent;
+	border-right: 60px solid transparent;
+}
+
+.triangle{
+	content: "\25b2";
+	color: transparent;
+}
+
+.triangle {
+	fill: #808080;
+	stroke: #ff0000;
+	stroke-width: 1;
+	fill-rule: nonzero;
+}
+
+.clear{
+	width: 100%;
+	height: 100%;
+	background: #ffffff;
+}
+
+.line-preview{
+	height: 100%;
+        width: 100%;
+}
+
+.red .ui-slider-range { background: #ef2929; }
+.green .ui-slider-range { background: #8ae234; }
+.blue .ui-slider-range { background: #729fcf; }
+
+.selects{ height: 70px; }
+
+#fill-color > span {
+	height: 128px;
+	float: left;
+	margin-right: 15px;
+}
+
+#ctr-color > span {
+	height: 128px;
+	float: left;
+	margin-right: 15px;
+}
+
+#line-color > span {
+	height: 128px;
+	float: left;
+	margin-right: 15px;
+}
+
+#point-base-color > span {
+	height: 128px;
+	float: left;
+	margin-right: 15px;
+}
+
+#point-ctr-color > span {
+	height: 128px;
+	float: left;
+	margin-right: 15px;
+}
