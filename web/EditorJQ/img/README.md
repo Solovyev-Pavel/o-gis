@@ -12,4 +12,5 @@ This folder should contain 16x16 png icons:
 - save.png → icon for "Save Composition" button
 - saveas.png → icon for "Save Composition as" button
 - star.png → icon for "Add Composition to Favorites" button
+
 You can pick whatever icons you like.
