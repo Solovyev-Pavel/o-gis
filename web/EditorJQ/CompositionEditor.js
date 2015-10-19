@@ -1,0 +1,293 @@
+/* ************************************************************************** *
+ *   Copyright © 2015       Pavel Solovyev (solovyev.p.a@gmail.com)           *
+ *                          Sergey Sevryukov (sevrukovs@gmail.com)            *
+ *                          Alexander Afonin (acer737@yandex.ru)              *
+ *                                                                            *
+ *   Licensed under the Apache License, Version 2.0 (the "License");          *
+ *   you may not use this file except in compliance with the License.         *
+ *   You may obtain a copy of the License at                                  *
+ *               http://www.apache.org/licenses/LICENSE-2.0                   *
+ *                                                                            *
+ *   Unless required by applicable law or agreed to in writing, software      *
+ *   distributed under the License is distributed on an "AS IS" BASIS,        *
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. *
+ *   See the License for the specific language governing permissions and      *
+ *   limitations under the License.                                           *
+ * ************************************************************************** */
+
+/* ************************************************************************** *
+ *         This is the 'home' object of the O-GIS composition editor          *
+ * ************************************************************************** */
+
+function CompositionEditor(){
+    this.map = null;                // OpenLayers map entity
+    this.composition = null;        // defined in CompositionObject.js
+    this.cmpBackUp = null;          // backup of the composition in works
+    this.AddLayers = null;          // defined in AddLayer.js
+    this.Authorize = null;          // defined in Authorize.js
+    this.CompositionSave = null;    // defined in CompositionSave.js
+    this.LayerStyler = null;        // defined in Styler.js
+//    this.WMSFeatureInfo = null;     // defined in WMSInfo.js
+    
+    // list of params the Composition Editor starts with:
+    this.params = {
+        thisVar: '',                // name of this variable; necessary, unfortunately
+        mapDOM: '',                 // DOM element where the map will be displayed
+        layerListDOM: '',           // DOM containing the list of the layers
+        addLayerWindow: '',         // DOM of a window in which the list of available layers is displayed
+        addCmpWindow: '',           // DOM of a window used during adding of a composition
+        authWindow: '',             // DOM of a window used for user authentification
+        saveCmpWindow: '',          // DOM of a window used during saving the composition
+        stylerWindow: '',           // DOM of a window used for styling layers
+        selectPaletteWindow: ''     // DOM of a window used for selecting a raster palette
+    };
+    
+    // Object with the data about the current user
+    this.user = null;
+
+// -------------------------------------------------------------------------- //
+
+    // Sets the variable name of the ComposirionEditor class object
+    this.setVariable = function(variable){ this.params.thisVar = variable; };
+    
+    // Sets the id of the DOM element, in which the map will be displayer
+    this.setMapDOM = function(id){ this.params.mapDOM = id; };
+    
+    // Sets the id of the DOM element in which the list of the layers is displayed
+    this.setLayerListDOM = function(id){ this.params.layerListDOM = id; };
+    
+    // Sets the id of the DOM used for displaying "Add Layer" window
+    this.setAddLayerWindow = function(id){ this.params.addLayerWindow = id; };
+    
+    // Sets the id of the DOM used for displaying "Add Composition" window
+    this.setAddCompositionWindow = function(id){ this.params.addCmpWindow = id; };
+    
+    // Sets the id of the DOM of a window used for user authentification
+    this.setAuthentificationWindow = function(id){ this.params.authWindow = id; };
+    
+    // Sets the id of the DOM of a window used during saving the composition
+    this.setSaveCompositionWindow = function(id){ this.params.saveCmpWindow = id; };
+    
+    // Sets the id of the DOM of a window used for styling layers
+    this.setStylerWindow = function(id){ this.params.stylerWindow = id; };
+    
+    // Sets the id of the DOM of a window used for selecting a raster palette
+    this.setPaletteSelectWindow = function(id){ this.params.selectPaletteWindow = id; };
+    
+    // Set current user
+    this.setUser = function(id, name){
+        this.user = { id: id, name: name, favRoot: "/o-gis/web/app.php/catalog/user/" + id };
+    };
+    
+    // Get the information about the current user
+    this.getUser = function(){ return this.user; };
+    
+// -------------------------------------------------------------------------- //
+    
+    // Load the initial layer / composition into the Composition Editor
+    this.initializeCompositionEditor = function (type, id){
+        var c_editor = this;
+        var url = (type === 'layer') ? getLayerData : getCompositionData;
+        $.ajax({url: url.replace(/ID/g, id), method: 'GET'})
+            .done(function(msg){
+                if (!msg.success){
+                    $( "#messagewindow" ).empty();
+                    var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                msg.msg + '</td></tr></table>';
+                    $( "#messagewindow" ).append(html);
+                    $( "#messagewindow" ).dialog("open");
+                    return;
+                }
+                c_editor.initializeComposition(msg.data);
+                c_editor.initializeMap();
+                c_editor.initializeSubClasses();
+            })
+            .fail(function(){
+                $( "#messagewindow" ).empty();
+                var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                            'Error while loading data!</td></tr></table>';
+                $( "#messagewindow" ).append(html);
+                $( "#messagewindow" ).dialog("open");
+                return;
+            });
+    };
+
+    // Initialize the composition object
+    this.initializeComposition = function(data){
+        this.composition = new Composition();
+        this.composition.layers = data.layers;
+        this.composition.extent = data.extent;
+        this.composition.id = data.id;
+        this.composition.name = data.name;
+        this.composition.projection = data.projection;
+    };
+
+    // Initialize the Composition Editor sub classes
+    this.initializeSubClasses = function(){
+//        this.WMSFeatureInfo = new CompositionEditorWMSFeatureInfo();
+//        this.WMSFeatureInfo.setParent(this);
+        this.AddLayers = new CompositionEditorAddLayers();
+        this.AddLayers.setParent(this);
+        this.Authorize = new CompositionEditorAuthenticate();
+        this.Authorize.setParent(this);
+        this.CompositionSave = new CompositionEditorCompositionSave();
+        this.CompositionSave.setParent(this);
+        this.LayerStyler = new CompositionEditorLayerStyler();
+        this.LayerStyler.setParent(this);
+    };
+
+    // Initialize the map
+    this.initializeMap = function(){
+        // back up the composition
+        this.cmpBackUp = this.composition;
+        // base settings of the OL2 map
+        this.map = new OpenLayers.Map(this.params.mapDOM, { projection: new OpenLayers.Projection(this.composition.projection) });
+        this.map.addControl(new OpenLayers.Control.Navigation());
+        this.map.maxExtent = new OpenLayers.Bounds(this.composition.extent.minX, this.composition.extent.minY,
+                                                   this.composition.extent.maxX, this.composition.extent.maxY);
+        this.map.maxResolution = (this.composition.extent.maxX - this.composition.extent.minX) / 256;
+        // add the WMS Feature Info button to the map
+//        var c_editor = this;
+//        var activateWMSInfoFeature = function(){ c_editor.WMSFeatureInfo.WMSFeatureInfoSwitcher(); };
+//        var infoButton = new OpenLayers.Control.Button({ title: "Feature Info",
+//                                                         displayClass: "olfibutton",
+//                                                         trigger: activateWMSInfoFeature });
+//        var panel = new OpenLayers.Control.Panel({ defaultControl: infoButton });
+//        panel.addControls([infoButton]);
+//        this.map.addControl(panel);
+        // start adding layers - empty base layer first
+        var baseLayer = new OpenLayers.Layer("Empty base layer", {isBaseLayer: true, displayInLayerSwitcher: false});
+        this.map.addLayers([baseLayer]);
+        // start adding layers - composition layers
+        for (var i = 0; i < this.composition.layers.length; i++){
+            var target = new OpenLayers.Layer.WMS(
+                    this.composition.layers[i].name,
+                    "/o-gis/web/app.php/wms", {
+                        LAYERS: this.composition.layers[i].workspace + ':' + this.composition.layers[i].cs,
+                        format: 'image/png',
+                        transparent: true
+                    }, {
+                        projection: this.composition.projection,
+                        wrapDateLine: false,
+                        displayOutsideMaxExtent: false
+                    }, {
+                        singleTile: false,
+                        ratio: 1,
+                        isBaseLayer: false,
+                        displayInLayerSwitcher: true
+                    });
+            if (target.params.SRS === undefined){ target.params.SRS = this.composition.projection; }
+            target.setOpacity(this.composition.layers[i].transp);
+            target.setVisibility(this.composition.layers[i].vis);
+            if (this.composition.layers[i].style.type === 'sld'){
+                delete target.params.STYLES;
+                target.mergeNewParams({sld_body: this.composition.layers[i].style.value});
+            }
+            else { target.mergeNewParams({styles: this.composition.layers[i].style.value}); }
+            this.map.addLayers([target]);
+            this.addLayerToTheList(this.composition.layers[i].name, target.id, this.composition.layers[i].vis);
+        }
+        if (this.composition.extent.type === 'bb'){
+            this.map.zoomToExtent(new OpenLayers.Bounds(this.composition.extent.minX,
+                                                        this.composition.extent.minY,
+                                                        this.composition.extent.maxX,
+                                                        this.composition.extent.maxY), false);
+        }
+        else {
+            this.map.setCenter(new OpenLayers.LonLat(this.composition.extent.centerx,
+                                                     this.composition.extent.centery),
+                               this.composition.extent.zoomlevel, false, false);
+        }
+    };
+    
+    // Adds a layer to the user-visible list
+    this.addLayerToTheList = function(name, id, visibility){
+        var c_editor = this;
+        var li_text =   '<li id="menu-' + id + '" class="ui-state-default sortableelement"><span class="sortableelementinner">' +
+                        '<input type="checkbox" onclick="' + this.params.thisVar + '.toggleLayerVisibility(\'' + id + 
+                        '\', this.checked)"';
+        li_text += (visibility) ? 'checked />' : '/>';
+        li_text +=  '</span><div id="wmsinfo-' + id + '" onclick="' + this.params.thisVar +
+                    '.WMSFeatureInfo.toggleWMSInfoLayer(this.id);" class="notwmsselectedlayer">' + name + '</div></li>';
+
+        $('#' + this.params.layerListDOM).prepend(li_text);
+        $.contextMenu({
+            selector: '#menu-' + id,
+            items: {
+                "style":    {   name: "Change Style",
+                                icon: "edit",
+                                callback: function(key, opt){ c_editor.LayerStyler.styleLayer(opt.selector); } },
+                "addtofav": {   name: "Add to Favourites",
+                                icon: "cut",
+                                callback: function(){ 
+                                    var fullcs = c_editor.map.getLayer(id).params.LAYERS;
+                                    c_editor.getLayersInternalId(fullcs); } },
+                "remove":   {   name: "Remove from Composition",
+                                icon: "delete",
+                                callback: function(key, opt){ c_editor.removeLayerFromComposition(opt.selector); } }
+            }
+        });
+    };
+    
+    // Updates the layer order
+    this.updateLayerOrder = function(){
+        var nodes = $('#' + this.params.layerListDOM).children();
+        for (var i = 0; i < nodes.length; i++){
+            var layer_id = nodes[i].getAttribute('id').substring(5);
+            this.map.getLayer(layer_id).setZIndex(nodes.length - i);
+        }
+    };
+    
+    // Gets a layer's internal id
+    this.getLayersInternalId = function(cs){
+        var justcs = cs.substring(cs.indexOf(':') + 1);
+        $.ajax({
+            url: getLayerId.replace('ID', justcs)
+        }).done(function(msg){
+            showTargetCatalogTree(msg.id, 'layer');
+        });
+    };
+    
+    // Toggles the visibility of a layer
+    this.toggleLayerVisibility = function(id, visible){ this.map.getLayer(id).setVisibility(visible); };
+    
+    // Removes a layer from the list and from the map
+    this.removeLayerFromComposition = function(entity){
+        var layer_id = entity.substring(6);
+        this.map.removeLayer(this.map.getLayer(layer_id));
+        $(entity).remove();
+    };
+    
+    // Leave the editor
+    this.goToEntity = function(type, id){ window.location.href = "/o-gis/web/app.php/" + type + "/" + id; };
+    
+    // Hide / show the list of the layers
+    this.toggleLayerListVisibility = function(){
+        var stateOpen = ($('#layerlistpanel').css('display') !== 'none') ? true : false;
+        if (stateOpen){
+            $('#layerlistpanel').css('display', 'none');
+            $('#mappanelmain').css('width', 'calc(100% - 15px)');
+            $('#listvisibilitytoggler').prop('title', 'Show the Layer List');
+        }
+        else{
+            $('#layerlistpanel').css('display', 'block');
+            $('#mappanelmain').css('width', 'calc(100% - 255px)');
+            $('#listvisibilitytoggler').prop('title', 'Hide the Layer List');
+        }
+        this.map.updateSize();
+    };
+    
+    // Update map size on window resizing
+    this.adjustMapSize = function(){
+        var stateOpen = ($('#layerlistpanel').css('display') !== 'none') ? true : false;
+        if (stateOpen){
+            $('#mappanelmain').css('width', 'calc(100% - 15px)');
+            $('#mappanelmain').css('height', '100%');
+        }
+        else{
+            $('#mappanelmain').css('width', 'calc(100% - 255px)');
+            $('#mappanelmain').css('height', '100%');
+        }
+        this.map.updateSize();
+    };
+}
