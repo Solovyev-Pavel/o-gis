@@ -181,7 +181,7 @@ function CompositionEditor(){
             target.setVisibility(this.composition.layers[i].vis);
             if (this.composition.layers[i].style.type === 'sld'){
                 delete target.params.STYLES;
-                target.mergeNewParams({sld_body: this.composition.layers[i].style.value});
+                target.mergeNewParams({sld_body: this.composition.layers[i].style.value.replace(/\\"/gi, '"')});
             }
             else { target.mergeNewParams({styles: this.composition.layers[i].style.value}); }
             this.map.addLayers([target]);
