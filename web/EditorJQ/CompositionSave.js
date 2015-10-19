@@ -231,7 +231,7 @@ function CompositionEditorCompositionSave(){
             target.setVisibility(layer.vis);
             if (layer.style.type === "sld"){
                 delete target.params.STYLES;
-                target.mergeNewParams({sld_body: layer.style.value}); }
+                target.mergeNewParams({sld_body: layer.style.value.replace(/\\"/gi, '"')}); }
             else { target.mergeNewParams({styles: layer.style.value}); }
             this.parent.map.addLayers([target]);
 
