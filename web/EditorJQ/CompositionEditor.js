@@ -17,6 +17,14 @@
 
 /* ************************************************************************** *
  *         This is the 'home' object of the O-GIS composition editor          *
+ *                                                                            *
+ * Dependencies:                                                              *
+ *  - HTML5 and CSS3                                                          *
+ *  - OpenLayers 2.* by OpenGeo                                               *
+ *  - jQuery 2.0+                                                             *
+ *  - jQuery UI                                                               *
+ *  - jQuery-minicolors by Cory LaViska                                       *
+ *  - jQuery-contextMenu by B. Brala, R. Rehm, C. Baartse, A. Osmani          *
  * ************************************************************************** */
 
 function CompositionEditor(){
@@ -27,6 +35,7 @@ function CompositionEditor(){
     this.Authorize = null;          // defined in Authorize.js
     this.CompositionSave = null;    // defined in CompositionSave.js
     this.LayerStyler = null;        // defined in Styler.js
+    this.RasterAnalysis = null;     // defined in RasterAnalysis.js
 //    this.WMSFeatureInfo = null;     // defined in WMSInfo.js
     
     // list of params the Composition Editor starts with:
@@ -39,7 +48,9 @@ function CompositionEditor(){
         authWindow: '',             // DOM of a window used for user authentification
         saveCmpWindow: '',          // DOM of a window used during saving the composition
         stylerWindow: '',           // DOM of a window used for styling layers
-        selectPaletteWindow: ''     // DOM of a window used for selecting a raster palette
+        selectPaletteWindow: '',    // DOM of a window used for selecting a raster palette
+        rasterOpWindow: '',         // DOM of a window used for Raster Analysis interface
+        selectRasterWindow: ''      // DOM of a window used for selecting a raster layer
     };
     
     // Object with the data about the current user
@@ -73,6 +84,12 @@ function CompositionEditor(){
     
     // Sets the id of the DOM of a window used for selecting a raster palette
     this.setPaletteSelectWindow = function(id){ this.params.selectPaletteWindow = id; };
+    
+    // Sets the id of the DOM of a window used for Raster Analysis interface
+    this.setRasterOpWindow = function(id){ this.params.rasterOpWindow = id; };
+    
+    // Sets the id of the DOM of a window used for selecting a raster layer
+    this.setSelectRasterWindow = function(id){ this.params.selectRasterWindow = id; };
     
     // Set current user
     this.setUser = function(id, name){
@@ -124,8 +141,6 @@ function CompositionEditor(){
 
     // Initialize the Composition Editor sub classes
     this.initializeSubClasses = function(){
-//        this.WMSFeatureInfo = new CompositionEditorWMSFeatureInfo();
-//        this.WMSFeatureInfo.setParent(this);
         this.AddLayers = new CompositionEditorAddLayers();
         this.AddLayers.setParent(this);
         this.Authorize = new CompositionEditorAuthenticate();
@@ -134,6 +149,10 @@ function CompositionEditor(){
         this.CompositionSave.setParent(this);
         this.LayerStyler = new CompositionEditorLayerStyler();
         this.LayerStyler.setParent(this);
+        this.RasterAnalysis = new CompositionEditorRasterAnalysis();
+        this.RasterAnalysis.setParent(this);
+//        this.WMSFeatureInfo = new CompositionEditorWMSFeatureInfo();
+//        this.WMSFeatureInfo.setParent(this);
     };
 
     // Initialize the map
