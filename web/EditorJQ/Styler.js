@@ -18,8 +18,6 @@
 /* ************************************************************************** *
  *   This object implements the methods for styling layers displayer in the   *
  *                             composition editor                             *
- *                                                                            *
- *   Dependencies in current realization: SVG, jquery.minicolors.min.js       *
  * ************************************************************************** */
 
 function CompositionEditorLayerStyler(){
