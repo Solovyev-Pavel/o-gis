@@ -23,7 +23,7 @@
  * - jstree by Ivan Bozhanov                                                  *
  * ************************************************************************** */
  
- / Supplementary variable that holds the last added node's id
+// Supplementary variable that holds the last added node's id
 var lastCreatedNode = null;
 var oldName = null;
 var buffer = null;
