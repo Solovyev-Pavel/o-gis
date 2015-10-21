@@ -1,0 +1,64 @@
+.bodycontent{
+	height: 100%;
+	width: 100%;
+	position: absolute;
+	top: -8px;
+	left: -8px;
+}
+
+.filesheader{
+	border-bottom: 1px solid #ccc;
+	font-size: 17px;
+	text-align: center;
+	height: 30px;
+	color: #555;
+}
+
+.filesarea{
+	height: 100%;
+	width: 100%;
+	top: 8px;
+	overflow-y: hidden;
+}
+
+.foldertree{
+	height: calc(100% - 35px);
+	border-right: 1px solid #d8d8d8;
+	width: 40%;
+	float: left;
+	overflow-x: none;
+	overflow-y: auto;
+}
+
+.foldercontents{
+	height: calc(100% - 35px);
+	width: 59%;
+	float: right;
+	overflow-x: none;
+	overflow-y: auto;
+	padding-top: 4px;
+}
+
+.objectlink{
+	text-decoration: none;
+	cursor: hand;
+	cursor: pointer;
+}
+
+.objectlink:hover{
+	background: #e8e8e8;
+}
+
+.linkbox{
+	padding-top: 5px;
+	padding-bottom: 5px;
+	color: #999;
+	height: 100%;
+	font-size: 17px;
+	text-align: center;
+	border-right: 1px solid #ccc;
+}
+
+.selected{
+	background: #f4f4f4;
+}
