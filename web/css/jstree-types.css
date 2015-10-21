@@ -1,0 +1,27 @@
+.glyphicon-catalog{
+    background: url('/o-gis/web/img/icons/catalog.png');
+}
+
+.glyphicon-layer{
+    background: url('/o-gis/web/img/icons/layer.png');
+}
+
+.glyphicon-composition{
+    background: url('/o-gis/web/img/icons/composition.png');
+}
+
+.glyphicon-style{
+    background: url('/o-gis/web/img/icons/style.png');
+}
+
+.glyphicon-palette{
+    background: url('/o-gis/web/img/icons/palette.png');
+}
+
+.glyphicon-user{
+    background: url('/o-gis/web/img/icons/user.png');
+}
+
+.glyphicon-external{
+    background: url('/o-gis/web/img/icons/external.png');
+}
