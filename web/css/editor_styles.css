@@ -1,0 +1,227 @@
+/* *************************** General Styling *************************** */
+
+a { color: #4040af; }
+
+.bodyfullpage{
+	width: 100%;
+	position: absolute;
+	top: -8px;
+	left: -8px;
+	height: 100%;
+        overflow: hidden;
+}
+
+/* ************************** Editor page classes ************************* */
+
+.editorcontentbody{
+	width: 100%;
+	height: 100%;
+	position: absolute;
+}
+
+.editorwestpanel{
+	clear: both;
+	height: 100%;
+	float: left;
+}
+
+.editorwestpaneltoolbar{
+	height: 24px;
+	width: 100%;
+	background: #f0f0f0;
+	border-bottom: 1px solid #999999;
+}
+
+.listvisibilitytoggler{
+        width: 15px;
+        height: 100%;
+        float: right;
+        background: #ccc;
+}
+
+.listvisibilitytogglerbutton{
+        position: relative;
+        top: calc(50% - 20px);
+        height: 40px;
+        cursor: pointer;
+        background: #eee;
+        vertical-align: middle;
+}
+
+.controlicon{
+	height: 24px;
+	width: 24px;
+	padding-top: 6px;
+}
+
+.controlicon > img {
+	padding-left: 4px;
+	padding-right: 4px;
+	padding-top: 4px;
+}
+
+.controlicon:hover{
+	background: #c0c0c0;
+	cursor: hand;
+	cursor: pointer;
+}
+
+.dragsortlistcontainer{
+	height: calc(100% - 30px);
+	width: 100%;
+	padding-top: 5px;
+	overflow-y: scroll;
+}
+
+.editormain{
+	height: 100%;
+	width: calc(100% - 255px);
+	float:right;
+}
+
+.editormapsection{
+	height: 100%;
+	width: calc(100% - 250px);
+	float:right;
+}
+
+.olfibuttonItemActive{
+	background-color: rgba(0, 60, 136, 0.5);
+	border-radius: 4px;
+	color: #ffffff;
+	cursor: pointer;
+	cursor: hand;
+	display: block;
+	height: 18px;
+	line-height: 19px;
+	margin: 1px;
+	text-align: center;
+	width: 18px;
+        padding: 2px;
+}
+
+.olfibuttonItemActive:after{
+	content: "i";
+	font-weight: bold;
+}
+
+.olfibuttonItemActive:hover{
+	background-color: rgba(0, 60, 136, 0.7);
+}
+
+.olControlPanel {
+	width: 25px;
+	height: 25px;
+	position: relative;
+	top: 60px;
+	left: 10px;
+}
+
+.addCmpListItem{
+    width: calc(100% - 16px);
+    padding-top: 8px;
+    height: 32px;
+    border: 1px solid #d3d3d3;
+    margin-bottom: 2px;
+    background: #e6e6e6 url("/o-gis/web/js/jquery-ui/images/ui-bg_glass_75_e6e6e6_1x400.png") 50% 50%;
+}
+
+/* ********************** Raster calculator buttons *********************** */
+
+.smallRCbutton{
+    width: 35px;
+    height: 25px;
+    margin-bottom: 2px;
+}
+
+.mediumRCbutton{
+    width: 74px;
+    height: 25px;
+    margin-bottom: 2px;
+}
+
+.bigRCbutton{
+    width: 152px;
+    height: 25px;
+    margin-bottom: 2px;
+}
+
+/* ******************************* OL buttons ***************************** */
+
+.wmsinfo-button {
+  top: 65px;
+  left: .5em;
+}
+
+.ol-touch .wmsinfo-button {
+  top: 80px;
+}
+
+.ol-control-custom button{
+    display: block;
+    margin: 1px;
+    padding: 0;
+    color: #fff;
+    font-size: 1.14em;
+    font-weight: 700;
+    text-decoration: none;
+    text-align: center;
+    height: 1.375em;
+    width: 1.375em;
+    line-height: .4em;
+    background-color: rgba(0,45,96,.5);
+    border: none;
+    border-radius: 2px;
+}
+
+.ol-control-custom button:focus, .ol-control-custom button:hover{
+    text-decoration: none;
+    background-color: rgba(0,45,96,.7);
+}
+
+/* ******************** Editor page classes sort list ********************* */
+
+.sortable {
+	list-style-type: none;
+	margin: 0;
+	padding: 0;
+}
+
+.sortableelement{
+	border: 1px solid #d6d6d6;
+	list-style-type: none;
+	margin: 0 3px 3px 3px;
+	padding: 0.4em;
+	padding-left: 1.5em;
+}
+
+.sortableelementselected{
+	border: 2px solid #999;
+	list-style-type: none;
+	margin: 0 3px 3px 3px;
+	padding: 0.4em;
+	padding-left: 1.5em;
+}
+
+.sortableelementinner{
+	position: absolute;
+	margin-left: -1.3em;
+}
+
+.notwmsselectedlayer{
+    font-weight: normal;
+    color: #000000;
+    font-size: 14px;
+    text-decoration: none;
+    cursor: hand;
+    cursor: pointer;
+}
+
+.wmsselectedlayer{
+    font-weight: bold;
+    color: #000090;
+    font-size: 14px;
+    text-decoration: underline;
+    cursor: hand;
+    cursor: pointer;
+}
