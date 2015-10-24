@@ -47,4 +47,5 @@ class EditorController extends Controller{
  		}
     	return $this->render('OGISIndexBundle:Editor:compositioneditor.html.twig', array('composition' => $composition, 'layer' => $layer));
 	}
+	
 }
