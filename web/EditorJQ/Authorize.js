@@ -40,7 +40,8 @@ function CompositionEditorAuthenticate(){
     // Sending authentivation request
     this.sendAuthenticationRequest = function(){
         var username = $('#usernamefield').val();
-        var password = $('#passwordfield').val();
+        // encode password... hopefully not as insecure as plaintext
+        var password = btoa($('#passwordfield').val());
         if (username === '' || username.match(/^\s+/g)){
             alert("You did not enter your login!");
             return;
