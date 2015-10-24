@@ -283,7 +283,7 @@ class CatalogController extends Controller{
     // creates or update a catalog based on the command send from profile page
     public function modifyCatalogAction(){
         if($this->getUser() == null){ 
-            $i = '{"success":false, "message":"You don't have the permissions necessary to perform this action!"}';
+            $i = '{"success":false, "message":"You don\'t have the permissions necessary to perform this action!"}';
             $response = new Response($i);
             $response->headers->set('Content-Type', 'application/json');
             $response->setCharset('UTF-8');
@@ -298,7 +298,7 @@ class CatalogController extends Controller{
             // we're modifying existing catalog
             $catalog = $em->getRepository('OGIS\IndexBundle\Entity\Catalog')->find($id);
             if (!$authorizationChecker->isGranted('EDIT', $catalog) && !$authorizationChecker->isGranted('ROLE_ADMIN')){
-                $i = '{"success":false, "message":"You don't have the permissions necessary to perform this action!"}';
+                $i = '{"success":false, "message":"You don\'t have the permissions necessary to perform this action!"}';
                 $response = new Response($i);
                 $response->headers->set('Content-Type', 'application/json');
                 $response->setCharset('UTF-8');
@@ -466,7 +466,7 @@ class CatalogController extends Controller{
     // delete a catalog
     public function deleteCatalogAction($id){
         if ($this->getUser() == null){
-            $i = '{"success":false, "message":"You don't have the permissions necessary to perform this action!"}';
+            $i = '{"success":false, "message":"You don\'t have the permissions necessary to perform this action!"}';
             $response = new Response($i);
             $response->headers->set('Content-Type', 'application/json');
             $response->setCharset('UTF-8');
@@ -485,7 +485,7 @@ class CatalogController extends Controller{
             $authorizationChecker = $this->get('security.context');
             $catalog = $em->getRepository('OGIS\IndexBundle\Entity\Catalog')->find($id);
             if (!$authorizationChecker->isGranted('DELETE', $catalog) && !$authorizationChecker->isGranted('ROLE_ADMIN')){
-                $i = '{"success":false, "message":"You don't have the permissions necessary to perform this action!"}';
+                $i = '{"success":false, "message":"You don\'t have the permissions necessary to perform this action!"}';
                 $response = new Response($i);
                 $response->headers->set('Content-Type', 'application/json');
                 $response->setCharset('UTF-8');
@@ -603,7 +603,7 @@ class CatalogController extends Controller{
                 $acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_OWNER);
                 $aclProvider->updateAcl($acl);
             }
-        $output = '{"success": true, "message": "Добавлено в избранное", "id":' . $link->getId() . '}';
+        $output = '{"success": true, "message": "Added to favorites", "id":' . $link->getId() . '}';
         $response = new Response($output);
         $response->headers->set('Content-Type', 'application/json');
         $response->setCharset('UTF-8');
@@ -613,7 +613,7 @@ class CatalogController extends Controller{
     // renames existing link
     public function modifyLinkAction(){
         if ($this->getUser() == null){ 
-            $i = '{"success":false, "message":"You do not have permissions necessary to perform this action!"}';
+            $i = '{"success":false, "message":"You don\'t have permissions necessary to perform this action!"}';
             $response = new Response($i);
             $response->headers->set('Content-Type', 'application/json');
             $response->setCharset('UTF-8');
@@ -625,7 +625,7 @@ class CatalogController extends Controller{
         $link = $em->getRepository('OGIS\IndexBundle\Entity\Link')->find($id);
         $authorizationChecker = $this->get('security.context');
         if(!$authorizationChecker->isGranted('EDIT', $link) && !$authorizationChecker->isGranted('ROLE_ADMIN')){ 
-            $i = '{"success":false, "message":"You do not have permissions necessary to perform this action!"}';
+            $i = '{"success":false, "message":"You don\'t have permissions necessary to perform this action!"}';
             $response = new Response($i);
             $response->headers->set('Content-Type', 'application/json');
             $response->setCharset('UTF-8');
@@ -644,7 +644,7 @@ class CatalogController extends Controller{
     // change entity's parent
     public function changeParentAction(){
         if ($this->getUser() == null){
-                $i = '{"success":false, "message":"You do not have permissions necessary to perform this action!"}';
+                $i = '{"success":false, "message":"You don\'t have permissions necessary to perform this action!"}';
                 $response = new Response($i);
                 $response->headers->set('Content-Type', 'application/json');
                 $response->setCharset('UTF-8');
@@ -696,7 +696,7 @@ class CatalogController extends Controller{
     // remove something from favorites
     public function removeFavoriteAction($id){
             if ($this->getUser() == null){ 
-                $i = '{"success":false, "message":"You do not have permissions necessary to perform this action!"}';
+                $i = '{"success":false, "message":"You don\'t have permissions necessary to perform this action!"}';
                 $response = new Response($i);
                 $response->headers->set('Content-Type', 'application/json');
                 $response->setCharset('UTF-8');
@@ -706,7 +706,7 @@ class CatalogController extends Controller{
             $link = $em->getRepository('OGIS\IndexBundle\Entity\Link')->find($id);
             $authorizationChecker = $this->get('security.context');
             if (!$authorizationChecker->isGranted('DELETE', $link) && !$authorizationChecker->isGranted('ROLE_ADMIN')){
-                $i = '{"success":false, "message":"You do not have permissions necessary to perform this action!"}';
+                $i = '{"success":false, "message":"You don\'t have permissions necessary to perform this action!"}';
                 $response = new Response($i);
                 $response->headers->set('Content-Type', 'application/json');
                 $response->setCharset('UTF-8');
@@ -734,7 +734,7 @@ class CatalogController extends Controller{
         $authorizationChecker = $this->get('security.context');
         $catalog = $em->getRepository('OGIS\IndexBundle\Entity\Catalog')->find($id);
         if (!$authorizationChecker->isGranted('EDIT', $catalog)){
-            $msg = "{'success': false, 'message': \"You do not have permissions necessary to perform this action!\"}";
+            $msg = "{'success': false, 'message': \"You don't have permissions necessary to perform this action!\"}";
         }
         else{
             $useridentity = $_REQUEST['_user'];
