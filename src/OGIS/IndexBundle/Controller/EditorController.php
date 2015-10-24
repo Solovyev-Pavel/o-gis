@@ -23,28 +23,28 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 
 class EditorController extends Controller{
 
-	  public function showEditorAction($datasource, $id){
-		    $em = $this->getDoctrine()->getManager();
-		    $composition = null;
-	    	$layer = null;
-		    if ($datasource == "composition"){
-			      $composition = $em->getRepository('OGIS\IndexBundle\Entity\Composition')->find($id);
-			      if(!$composition){
-		  	      	return $this->render('OGISIndexBundle:Error:entitynotfound.html.twig', array(
-			  		        'caption' => "Error while reading data!",
-				  	        'message' => "The composition you're looking for doesn't exist in the database."
-				        ));
-			      }
-		    }
-		    if ($datasource == "layer"){
-			      $layer = $em->getRepository('OGIS\IndexBundle\Entity\Layer')->find($id);
-  			    if(!$layer){
-	  		      	return $this->render('OGISIndexBundle:Error:entitynotfound.html.twig', array(
-          					'caption' => "Error while reading data!",
-			  	        	'message' => "The layer you're looking for doesn't exist in the database."
-				        ));
-  			    }
-    		}
-		    return $this->render('OGISIndexBundle:Editor:compositioneditor.html.twig', array('composition' => $composition, 'layer' => $layer));
-	  }
+	public function showEditorAction($datasource, $id){
+	    $em = $this->getDoctrine()->getManager();
+    	$composition = null;
+	   	$layer = null;
+    	if ($datasource == "composition"){
+		    $composition = $em->getRepository('OGIS\IndexBundle\Entity\Composition')->find($id);
+	    	if(!$composition){
+		 		return $this->render('OGISIndexBundle:Error:entitynotfound.html.twig', array(
+		  			'caption' => "Error while reading data!",
+		  	    	'message' => "The composition you're looking for doesn't exist in the database."
+		  		));
+	    	}
+		}
+		if ($datasource == "layer"){
+		    $layer = $em->getRepository('OGIS\IndexBundle\Entity\Layer')->find($id);
+	  		if(!$layer){
+	  			return $this->render('OGISIndexBundle:Error:entitynotfound.html.twig', array(
+    	      		'caption' => "Error while reading data!",
+				  	'message' => "The layer you're looking for doesn't exist in the database."
+	    	    ));
+ 		    }
+ 		}
+    	return $this->render('OGISIndexBundle:Editor:compositioneditor.html.twig', array('composition' => $composition, 'layer' => $layer));
+	}
 }
