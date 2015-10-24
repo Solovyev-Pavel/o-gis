@@ -70,11 +70,11 @@ class UserExtraFieldAssignmentListener implements EventSubscriberInterface {
 		// ACL
 		$objectIdentity = ObjectIdentity::fromDomainObject($catalog);
 		try{
-                    $acl = $this->aclProvider->findAcl($objectIdentity);
-                }catch (\Symfony\Component\Security\Acl\Exception\AclNotFoundException $e) {
-                    $acl = $this->aclProvider->createAcl($objectIdentity);
-                }
-                $securityIdentity = UserSecurityIdentity::fromAccount($user);
+			$acl = $this->aclProvider->findAcl($objectIdentity);
+        }catch (\Symfony\Component\Security\Acl\Exception\AclNotFoundException $e) {
+			$acl = $this->aclProvider->createAcl($objectIdentity);
+		}
+		$securityIdentity = UserSecurityIdentity::fromAccount($user);
 		$acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_OWNER);
 		$this->aclProvider->updateAcl($acl);
 
