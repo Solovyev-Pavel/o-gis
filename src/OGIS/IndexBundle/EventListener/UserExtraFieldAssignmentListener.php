@@ -76,6 +76,6 @@ class UserExtraFieldAssignmentListener implements EventSubscriberInterface {
 				}
 				$securityIdentity = UserSecurityIdentity::fromAccount($user);
 				$acl->insertObjectAce($securityIdentity, MaskBuilder::MASK_OWNER);
-			$this->aclProvider->updateAcl($acl);
-			}
+				$this->aclProvider->updateAcl($acl);
+		}
 }
