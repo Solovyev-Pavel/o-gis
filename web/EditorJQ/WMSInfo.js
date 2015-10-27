@@ -65,18 +65,17 @@ function CompositionEditorWMSFeatureInfo(){
     
     // Processes the click event on the map
     this.WMSFeatureInfoGet = function(evt){
-        // for whatever reason this function doesn't run in the editor.WMSFeatureInfo scope...
-        // can't think of any elegant solution...
-        var target = (editor.WMSFeatureInfo.SelectedLayer !== null) ? editor.WMSFeatureInfo.SelectedLayer : editor.WMSFeatureInfo.getTopVisibleLayer();
+        var target = (this.parent.WMSFeatureInfo.SelectedLayer !== null) ? this.parent.WMSFeatureInfo.SelectedLayer : this.parent.WMSFeatureInfo.getTopVisibleLayer();
         if (!target){ return; }
-        var layer = editor.map.getLayer(target);
+        var layer = this.getLayer(target);
         // request url
         var url =   '/o-gis/web/app.php/geoserver/wms?SERVICE=WMS&REQUEST=GetFeatureInfo&EXCEPTIONS=application/vnd.ogc.se_xml&' +
-                    'INFO_FORMAT=application/json&BBOX=' + editor.map.getExtent().toBBOX() + '&QUERY_LAYERS=' + 
+                    'INFO_FORMAT=application/json&BBOX=' + this.getExtent().toBBOX() + '&QUERY_LAYERS=' + 
                     layer.params.LAYERS + '&STYLES=&SRS=' + layer.params.SRS + '&LAYERS=' + layer.params.LAYERS +
-                    '&FEATURE_COUNT=10&WIDTH=' + editor.map.size.w + '&HEIGHT=' + editor.map.size.h;
+                    '&FEATURE_COUNT=10&WIDTH=' + this.size.w + '&HEIGHT=' + this.size.h;
         if (layer.params.VERSION === '1.3.0'){ url += '&VERSION=1.3.0&j=' + parseInt(evt.xy.x) + '&i=' + parseInt(evt.xy.y); }
         else { url += '&VERSION=1.1.1&x=' + parseInt(evt.xy.x) + '&y=' + parseInt(evt.xy.y); }
+        var c_map = this;
         OpenLayers.Event.stop(evt);
             $.ajax({ url: url, method: 'GET' })
                 .done(function(data){
@@ -88,22 +87,18 @@ function CompositionEditorWMSFeatureInfo(){
                         var id = info[0].id.substring(info[0].id.indexOf('.') + 1);
                         var text = type + ': ' + id;
                         var width = text.length * 8 + 10;
-                        var the_popup = new OpenLayers.Popup('popup',
-                                                              editor.map.getLonLatFromPixel(evt.xy),
-                                                              new OpenLayers.Size(width, 20), text, true);
+                        var the_popup = new OpenLayers.Popup('popup', c_map.getLonLatFromPixel(evt.xy), new OpenLayers.Size(width, 20), text, true);
                         the_popup.setBorder('1px solid #157fcc');
-                        if (editor.map.popups.length > 0){ editor.map.popups[0].destroy(); }
-                        editor.map.addPopup(the_popup);
+                        if (c_map.popups.length > 0){ c_map.popups[0].destroy(); }
+                        c_map.addPopup(the_popup);
                     }
                     else{						// raster
                         var text = info[0].properties[Object.keys(info[0].properties)[0]].toString();
                         var width = text.length * 8 + 10;
-                        var the_popup = new OpenLayers.Popup('popup', 
-                                                              editor.map.getLonLatFromPixel(evt.xy), 
-                                                              new OpenLayers.Size(width, 20), text, true);
+                        var the_popup = new OpenLayers.Popup('popup', c_map.getLonLatFromPixel(evt.xy), new OpenLayers.Size(width, 20), text, true);
                         the_popup.setBorder('1px solid #157fcc');
-                        if (editor.map.popups.length > 0){ editor.map.popups[0].destroy(); }
-                        editor.map.addPopup(the_popup);
+                        if (c_map.popups.length > 0){ c_map.popups[0].destroy(); }
+                        c_map.addPopup(the_popup);
                     }
             });
     };
