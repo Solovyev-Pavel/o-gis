@@ -36,7 +36,7 @@ function CompositionEditor(){
     this.CompositionSave = null;    // defined in CompositionSave.js
     this.LayerStyler = null;        // defined in Styler.js
     this.RasterAnalysis = null;     // defined in RasterAnalysis.js
-//    this.WMSFeatureInfo = null;     // defined in WMSInfo.js
+    this.WMSFeatureInfo = null;     // defined in WMSInfo.js
     
     // list of params the Composition Editor starts with:
     this.params = {
@@ -151,8 +151,8 @@ function CompositionEditor(){
         this.LayerStyler.setParent(this);
         this.RasterAnalysis = new CompositionEditorRasterAnalysis();
         this.RasterAnalysis.setParent(this);
-//        this.WMSFeatureInfo = new CompositionEditorWMSFeatureInfo();
-//        this.WMSFeatureInfo.setParent(this);
+        this.WMSFeatureInfo = new CompositionEditorWMSFeatureInfo();
+        this.WMSFeatureInfo.setParent(this);
     };
 
     // Initialize the map
@@ -161,19 +161,20 @@ function CompositionEditor(){
         this.cmpBackUp = this.composition;
         // base settings of the OL2 map
         this.map = new OpenLayers.Map(this.params.mapDOM, { projection: new OpenLayers.Projection(this.composition.projection) });
+        this.map.parent = this;
         this.map.addControl(new OpenLayers.Control.Navigation());
         this.map.maxExtent = new OpenLayers.Bounds(this.composition.extent.minX, this.composition.extent.minY,
                                                    this.composition.extent.maxX, this.composition.extent.maxY);
         this.map.maxResolution = (this.composition.extent.maxX - this.composition.extent.minX) / 256;
         // add the WMS Feature Info button to the map
-//        var c_editor = this;
-//        var activateWMSInfoFeature = function(){ c_editor.WMSFeatureInfo.WMSFeatureInfoSwitcher(); };
-//        var infoButton = new OpenLayers.Control.Button({ title: "Feature Info",
-//                                                         displayClass: "olfibutton",
-//                                                         trigger: activateWMSInfoFeature });
-//        var panel = new OpenLayers.Control.Panel({ defaultControl: infoButton });
-//        panel.addControls([infoButton]);
-//        this.map.addControl(panel);
+        var c_editor = this;
+        var activateWMSInfoFeature = function(){ c_editor.WMSFeatureInfo.WMSFeatureInfoSwitcher(); };
+        var infoButton = new OpenLayers.Control.Button({ title: "Feature Info",
+                                                         displayClass: "olfibutton",
+                                                         trigger: activateWMSInfoFeature });
+        var panel = new OpenLayers.Control.Panel({ defaultControl: infoButton });
+        panel.addControls([infoButton]);
+        this.map.addControl(panel);
         // start adding layers - empty base layer first
         var baseLayer = new OpenLayers.Layer("Empty base layer", {isBaseLayer: true, displayInLayerSwitcher: false});
         this.map.addLayers([baseLayer]);
