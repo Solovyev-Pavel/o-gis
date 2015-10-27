@@ -1,0 +1,68 @@
+ # ########################################################################## #
+ #   Copyright © 2015       Pavel Solovyev (solovyev.p.a@gmail.com)           #
+ #                          Sergey Sevryukov (sevrukovs@gmail.com)            #
+ #                          Alexander Afonin (acer737@yandex.ru)              #
+ #                                                                            #
+ #   Licensed under the Apache License, Version 2.0 (the "License");          #
+ #   you may not use this file except in compliance with the License.         #
+ #   You may obtain a copy of the License at                                  #
+ #               http://www.apache.org/licenses/LICENSE-2.0                   #
+ #                                                                            #
+ #   Unless required by applicable law or agreed to in writing, software      #
+ #   distributed under the License is distributed on an "AS IS" BASIS,        #
+ #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. #
+ #   See the License for the specific language governing permissions and      #
+ #   limitations under the License.                                           #
+ # ########################################################################## #
+ 
+ security: 
+  acl:
+    connection: default
+
+  access_control: 
+    - 
+      path: ^/login$
+      role: IS_AUTHENTICATED_ANONYMOUSLY
+    - 
+      path: ^/register
+      role: IS_AUTHENTICATED_ANONYMOUSLY
+    - 
+      path: ^/resetting
+      role: IS_AUTHENTICATED_ANONYMOUSLY
+    - 
+      path: ^/admin/
+      role: ROLE_USER
+    -
+      path: ^/logout
+      role: IS_AUTHENTICATED_REMEMBERED
+
+  encoders: 
+    FOS\UserBundle\Model\UserInterface: sha512
+
+  firewalls: 
+    dev: 
+      pattern: ^/(_(profiler|wdt)|css|images|js)/
+      security: false
+    main:
+      pattern: ^/ 
+      anonymous: true
+      form_login: 
+        csrf_provider: form.csrf_provider
+        provider: fos_userbundle
+        login_path: fos_user_security_login
+        check_path: fos_user_security_check
+#        use_referer: true
+#        default_target_path: /
+      logout:
+        path: fos_user_security_logout
+        target: homepage
+
+  providers: 
+    fos_userbundle: 
+      id: fos_user.user_provider.username
+
+  role_hierarchy: 
+    ROLE_PRIV_USER: ROLE_USER
+    ROLE_ADMIN: ROLE_PRIV_USER
+    ROLE_SUPER_ADMIN: ROLE_ADMIN
+    ROLE_SYSTEM: ROLE_SUPER_ADMIN
