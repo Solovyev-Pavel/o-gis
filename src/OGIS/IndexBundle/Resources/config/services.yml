@@ -1,4 +1,4 @@
- ##############################################################################
+ # ########################################################################## #
  #   Copyright © 2015       Pavel Solovyev (solovyev.p.a@gmail.com)           #
  #                          Sergey Sevryukov (sevrukovs@gmail.com)            #
  #                          Alexander Afonin (acer737@yandex.ru)              #
@@ -13,7 +13,7 @@
  #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. #
  #   See the License for the specific language governing permissions and      #
  #   limitations under the License.                                           #
- ##############################################################################
+ # ########################################################################## #
 
 parameters:
 #    ogis_index.example.class: OGIS\IndexBundle\Example
