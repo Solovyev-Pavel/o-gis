@@ -1,0 +1,468 @@
+ # ########################################################################## #
+ #   Copyright © 2015       Pavel Solovyev (solovyev.p.a@gmail.com)           #
+ #                          Sergey Sevryukov (sevrukovs@gmail.com)            #
+ #                          Alexander Afonin (acer737@yandex.ru)              #
+ #                                                                            #
+ #   Licensed under the Apache License, Version 2.0 (the "License");          #
+ #   you may not use this file except in compliance with the License.         #
+ #   You may obtain a copy of the License at                                  #
+ #               http://www.apache.org/licenses/LICENSE-2.0                   #
+ #                                                                            #
+ #   Unless required by applicable law or agreed to in writing, software      #
+ #   distributed under the License is distributed on an "AS IS" BASIS,        #
+ #   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. #
+ #   See the License for the specific language governing permissions and      #
+ #   limitations under the License.                                           #
+ # ########################################################################## #
+ 
+ # ########################################################################## #
+ #                                  basic pages                               #
+ # ########################################################################## #
+
+homepage:
+    pattern: /
+    defaults: { _controller: OGISIndexBundle:Default:homePage }
+
+login:
+    pattern: /auth/login
+    defaults: { _controller: OGISIndexBundle:AuthManager:loginFromSite }
+
+validatelogin:
+    pattern: /auth/login_validate
+    defaults: { _controller: OGISIndexBundle:AuthManager:credentialsCheckForLogin }
+    methods: [POST]
+
+ # ########################################################################## #
+ #                             user profile pages                             #
+ # ########################################################################## #
+
+showuser:
+    pattern: /user/{id}
+    defaults: { _controller: OGISIndexBundle:User:showUser }
+    
+userlist:
+    pattern: /users
+    defaults: { _controller: OGISIndexBundle:User:userList }
+    
+userlistitems:
+    pattern: /list/users
+    defaults: { _controller: OGISIndexBundle:User:userListItems }
+
+ # ########################################################################## #
+ #                               catalog tree pages                           #
+ # ########################################################################## #
+
+loadusercatalogs:
+    pattern: /catalog/user/{holderid}
+    defaults: { _controller: OGISIndexBundle:Catalog:loadUserCatalogs }
+
+loaduserandglobalcatalogs:
+    pattern: /catalog/globaltree
+    defaults: { _controller: OGISIndexBundle:Catalog:loadGlobalCatalogs }
+
+loadprojectcatalogs:
+    pattern: /catalog/project/{catid}
+    defaults: { _controller: OGISIndexBundle:Catalog:loadProjectCatalog }
+
+loadcatalogdata:
+    pattern: /catalog/data/{catid}
+    defaults: { _controller: OGISIndexBundle:Catalog:loadCatalogData }
+    
+loadcatalogdataeditor:
+    pattern: /catalog/layers/{catid}
+    defaults: { _controller: OGISIndexBundle:Catalog:loadCatalogDataEditor }
+    
+loadsubcatalogs:
+    pattern: /catalog/children/{catid}
+    defaults: { _contorller: OGISIndexBundle:Catalog:loadCatalogChildren }
+
+savecatalog:
+    pattern: /catalog/save
+    defaults: { _controller: OGISIndexBundle:Catalog:modifyCatalog }
+    methods: [POST]
+    
+updatelink:
+    pattern: /link/save
+    defaults: { _controller: OGISIndexBundle:Catalog:modifyLink }
+    methods: [POST]
+
+deletecatalog:
+    pattern: /catalog/delete/{id}
+    defaults: { _controller: OGISIndexBundle:Catalog:deleteCatalog }
+    methods: [POST]
+    
+editcatalog:
+    pattern: /edit/catalog/{id}
+    defaults: { _controller: OGISIndexBundle:Catalog:editCatalog }
+    
+editcatalog_save:
+    pattern: /edit/catalog/save/{id}
+    defaults: { _controller: OGISIndexBundle:Catalog:updateCatalog }
+    methods: [POST]
+    
+updatecatalogacl:
+    pattern: /edit/acl/catalog/{id}
+    defaults: { _controller: OGISIndexBundle:Catalog:updateAcl }
+    methods: [POST]
+    
+movecatalogentity:
+    pattern: /move/catalog
+    defaults: { _controller: OGISIndexBundle:Catalog:changeParent }
+    methods: [POST]
+
+ # ########################################################################## #
+ #                                layer entity pages                          #
+ # ########################################################################## #
+
+layerlist:
+    pattern: /layers/{sortby}/{page}
+    defaults: { _controller: OGISIndexBundle:Layer:showList, sortby: modified, page: 1 }
+
+showlayerlist:
+    pattern: /list/layers/{group}
+    defaults: { _controller: OGISIndexBundle:Layer:layerListForAddFunction, group: user }
+    
+showrasterlist:
+    pattern: /list/rasters
+    defaults: { _controller: OGISIndexBundle:Layer:rasterListFunction }
+    
+showrasterlisteditor:
+    pattern: /list/rasters_editor
+    defaults: { _controller: OGISIndexBundle:Layer:rasterListEditorFunction }    
+
+showlayer:
+    pattern: /layer/{id}
+    defaults: { _controller: OGISIndexBundle:Layer:showLayer }
+
+createlayer:
+    pattern: /create/layer
+    defaults: { _controller: OGISIndexBundle:Layer:createLayer }
+
+layer_upload:
+    pattern: /upload/layer
+    defaults: { _controller: OGISIndexBundle:Layer:uploadLayer }
+    methods: [POST]
+
+upload_successful:
+    pattern: /upload/complete/{layername}
+    defaults: { _controller: OGISIndexBundle:Layer:uploadComplete }
+
+upload_failed:
+    pattern: /upload/failed
+    defaults: { _controller: OGISIndexBundle:Layer:uploadFailed }
+
+layerdlcounter:
+    pattern: /dllayer/{id}
+    defaults: { _controller: OGISIndexBundle:Layer:updateDLCounter }
+    methods: [POST]
+
+edit_layer_properties:
+    pattern: /edit/layer/{id}
+    defaults: { _controller: OGISIndexBundle:Layer:editLayerProperties }
+    
+get_layer_id:
+    pattern: /find/layer/{cs}
+    defaults: { _controller: OGISIndexBundle:Layer:findLayerByConString }
+
+edit_layer_properties_save:
+    pattern: /edit/layer/save/{id}
+    defaults: { _controller: OGISIndexBundle:Layer:saveLayerProperties }
+    methods: [POST]
+
+deletelayerconfirm:
+    pattern: /deleteconfirm/layer/{id}
+    defaults: { _controller: OGISIndexBundle:Layer:deleteLayerConfirm }
+
+deletelayer:
+    pattern: /deletelayer/{id}
+    defaults: { _controller: OGISIndexBundle:Layer:deleteLayer }
+
+deletelayersuccess:
+    pattern: /deletelayer/success/{layername}
+    defaults: { _controller: OGISIndexBundle:Layer:deleteLayerSuccess }
+    
+layerstylingoptions:
+    pattern: /list/styling
+    defaults: { _controller: OGISIndexBundle:Catalog:stylingOptionsPage }
+    
+getLayerData:
+    pattern: /get/layer/{id}
+    defaults: { _controller: OGISIndexBundle:Layer:getLayerData }
+
+ # ########################################################################## #
+ #                          composition entity pages                          #
+ # ########################################################################## #
+
+showcomposition:
+    pattern: /composition/{id}
+    defaults: { _controller: OGISIndexBundle:Composition:showComposition }
+
+getCompositionData:
+    pattern: /get/composition/{id}
+    defaults: { _controller: OGISIndexBundle:Composition:getCompositionData }
+
+saveComposition:
+    pattern: /savecomposition/{id}
+    defaults: { _controller: OGISIndexBundle:Composition:saveComposition, id: null }
+
+edit_composition_properties:
+    pattern: /edit/composition/{id}
+    defaults: { _controller: OGISIndexBundle:Composition:editCompositionProperties }
+
+edit_composition_properties_save:
+    pattern: /edit/composition/save/{id}
+    defaults: { _controller: OGISIndexBundle:Composition:saveCompositionProperties }
+    methods: [POST]
+
+deletecompositionconfirm:
+    pattern: /deleteconfirm/composition/{id}
+    defaults: { _controller: OGISIndexBundle:Composition:deleteCompositionConfirm }
+
+deletecomposition:
+    pattern: /deletecomposition/{id}
+    defaults: { _controller: OGISIndexBundle:Composition:deleteComposition }
+
+deletecompositionsuccess:
+    pattern: /deletecomposition/success/{name}
+    defaults: { _controller: OGISIndexBundle:Composition:deleteCompositionSuccess }
+
+ # ########################################################################## #
+ #                              project entity pages                          #
+ # ########################################################################## #
+
+showproject:
+    pattern: /project/{id}
+    defaults: { _controller: OGISIndexBundle:Project:showProject }
+
+createproject:
+    pattern: /create/project
+    defaults: { _controller: OGISIndexBundle:Project:createProject }
+
+generate_project:
+    pattern: /generate/project/
+    defaults: { _controller: OGISIndexBundle:Project:generateProject }
+    methods: [POST]
+
+generate_success:
+    pattern: /generate/success/{projectid}
+    defaults: { _controller: OGISIndexBundle:Project:generateProjectComplete }
+
+edit_project_properties:
+    pattern: /edit/project/properties/{id}
+    defaults: { _controller: OGISIndexBundle:Project:editProjectProperties }
+
+edit_project_properties_save:
+    pattern: /project/properties/save/{id}
+    defaults: { _controller: OGISIndexBundle:Project:saveProjectProperties }
+    methods: [POST]
+
+edit_project_members:
+    pattern: /edit/project/members/{id}
+    defaults: { _controller: OGISIndexBundle:Project:editProjectMembers }
+
+add_project_member:
+    pattern: /project/members/add
+    defaults: { _controller: OGISIndexBundle:Project:addProjectMembers }
+    methods: [POST]
+
+remove_project_member:
+    pattern: /project/members/remove
+    defaults: { _controller: OGISIndexBundle:Project:removeProjectMembers }
+    methods: [POST]
+
+change_member_rank:
+    pattern: /project/members/changerank
+    defaults: { _controller: OGISIndexBundle:Project:changeProjectMembersRank }
+    methods: [POST]
+
+deleteprojectconfirmation:
+    pattern: /deleteconfirm/project/{id}
+    defaults: { _controller: OGISIndexBundle:Project:deleteProjectConfirm }
+
+deleteproject:
+    pattern: /deleteproject/{id}
+    defaults: { _controller: OGISIndexBundle:Project:deleteProject }
+
+deleteprojectdone:
+    pattern: /deleteproject/success/{projectname}
+    defaults: { _controller: OGISIndexBundle:Project:deleteProjectSuccess }   
+
+ # ########################################################################## #
+ #                          proxying for editor & viewer                      #
+ # ########################################################################## #
+
+wmsproxy:
+    pattern: /wms
+    defaults: { _controller: OGISIndexBundle:Proxy:wmsProxy }
+
+geoserverFunctionsProxy:
+    pattern: /geoserver/{something}/{other}
+    defaults: { _controller: OGISIndexBundle:Proxy:geoserverFunctionsProxy, other: null }
+
+geoserverIdentifyForwarder:
+    pattern: /proxy
+    defaults: { _controller: OGISIndexBundle:Proxy:geoserverIdentifyForwarder }
+
+corsProxyAny:
+    pattern: /anyproxy
+    defaults: { _controller: OGISIndexBundle:Proxy:corsProxyAny }
+
+ # ########################################################################## #
+ #                             style entity pages                             #
+ # ########################################################################## #
+
+showstyle:
+    pattern: /style/{id}
+    defaults: { _controller: OGISIndexBundle:Style:showStyle }
+
+stylelistpage:
+    pattern: /list/styles
+    defaults: { _controller: OGISIndexBundle:Style:listStyles }
+
+createstyle:
+    pattern: /create/style
+    defaults: { _controller: OGISIndexBundle:Style:createStyle }
+    
+createstyleraster:
+    pattern: /create/style/raster
+    defaults: { _controller: OGISIndexBundle:Style:createRasterStyle }
+
+uploadstyle:
+    pattern: /upload/style
+    defaults: { _controller: OGISIndexBundle:Style:uploadStyle }
+    methods: [POST]
+
+getstylelist:
+    pattern: /get/styles
+    defaults: { _controller: OGISIndexBundle:Style:getStyleList }
+
+applystyle:
+    pattern: /apply/style
+    defaults: { _controller: OGISIndexBundle:Style:applyStyle }
+    
+applycustomvectorstyle:
+    pattern: /apply/cstyle
+    defaults: { _controller: OGISIndexBundle:Style:applyCustomStyle }
+
+deletestyle:
+    pattern: /deletestyle
+    defaults: { _controller: OGISIndexBundle:Style:deleteStyle }
+
+ # ########################################################################## #
+ #                               palette entity pages                         #
+ # ########################################################################## #
+
+getpalettelist:
+    pattern: /list/palettes
+    defaults: { _controller: OGISIndexBundle:Palette:listPalettes }
+
+showpalettelist:
+    pattern: /palettes/list
+    defaults: { _controller: OGISIndexBundle:Palette:listPalettesEditor }
+    
+showpalettelisteditor:
+    pattern: /palettes/editorlist
+    defaults: { _controller: OGISIndexBundle:Palette:listPalettesMainEditor }
+
+getpalette:
+    pattern: /palette/get/{id}
+    defaults: { _controller: OGISIndexBundle:Palette:getPalette }
+
+getpalettecompressed:
+    pattern: /palette/cget/{id}
+    defaults: { _controller: OGISIndexBundle:Palette:getPaletteCompressed }
+
+savepalette:
+    pattern: /palette/save/{id}
+    defaults: { _controller: OGISIndexBundle:Palette:savePalette, id: null }
+    methods: [POST]
+
+#delete_palette:
+#    pattern: /palette/delete/{id}
+#    defaults: { _controller: OGISIndexBundle:Palette:listDeletePalette, id: null }
+#    methods: [POST]
+    
+showpalette:
+    pattern: /palette/{id}
+    defaults: { _controller: OGISIndexBundle:Palette:showPalette }
+    
+paletteeditor:
+    pattern: /paletteeditor/{id}
+    defaults: { _controller: OGISIndexBundle:Palette:paletteEditor, id: null }
+    
+deletepaletteconfirm:
+    pattern: /deleteconfirm/palette/{id}
+    defaults: { _controller: OGISIndexBundle:Palette:deletePaletteConfirm }
+    
+deletepalette:
+    pattern: /deletepalette/{id}
+    defaults: { _controller: OGISIndexBundle:Palette:deletePalette }
+    
+deletepalettesuccess:
+    pattern: /deletepalette/success/{name}
+    defaults: { _controller: OGISIndexBundle:Palette:deletePaletteSuccess }
+    
+updatepalettestyle:
+    pattern: /apply/palette
+    defaults: { _controller: OGISIndexBundle:Palette:applyPalette }
+    methods: [POST]
+
+ # ########################################################################## #
+ #                               composition editor                           #
+ # ########################################################################## #
+
+geoexpl:
+    pattern: /editor/{datasource}/{id}
+    defaults: { _controller: OGISIndexBundle:Editor:showEditor }   
+
+getlayertype:
+    pattern: /gettype/layer/{cs}
+    defaults: { _controller: OGISIndexBundle:Layer:getLayerType }
+
+editorlogin:
+    pattern: /auth/editor
+    defaults: { _controller: OGISIndexBundle:AuthManager:loginFromEditor }
+    methods: [POST]
+
+ # ########################################################################## #
+ #                                 user's favorites                           #
+ # ########################################################################## #
+
+addtofavorites:
+    pattern: /favorites/add
+    defaults: { _controller: OGISIndexBundle:Catalog:addToFavorite }
+    methods: [POST]
+
+removefromfavorites:
+    pattern: /favorites/remove/{id}
+    defaults: { _controller: OGISIndexBundle:Catalog:removeFavorite }
+    methods: [POST]
+
+ # ########################################################################## #
+ #                                administrative                              #
+ # ########################################################################## #
+
+migrateSystem:
+    pattern: /system/restore
+    defaults: { _controller: OGISIndexBundle:Migrate:RestoreOGIS }
+
+createMany:
+    pattern: /createentity/{type}/{number}
+    defaults: { _controller: OGISIndexBundle:Setup:createRoles }
+    
+showuserrole:
+    pattern: /userrole/{id}
+    defaults: { _controller: OGISIndexBundle:User:showUserRole }
+
+rasteropeations:
+    pattern: /rasterop
+    defaults: { _controller: OGISIndexBundle:RasterOperations:rasterOperation }
+    methods: [POST]
+
+testrasteralgebra:
+    pattern: /test/algebra
+    defaults: { _controller: OGISIndexBundle:RasterOperations:testRasterAlgera }
+
+testalgebra:
+    pattern: /operation/algebra
+    defaults: { _controller: OGISIndexBundle:RasterOperations:testAlgebra }
