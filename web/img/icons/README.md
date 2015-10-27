@@ -1,3 +1,5 @@
+# O-GIS / web / img / icons
+
 This folder should contain the following images (16x16 png) of your choice:
 
 - add.png → used as "add entity" action icon
