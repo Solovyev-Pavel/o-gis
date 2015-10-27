@@ -29,7 +29,7 @@ use OGIS\IndexBundle\Entity\Role;
 
 class CreateEntityController extends Controller{
 
-    public function createMultipleAction(){
+    public function createRolesAction(){
   		$classType = 'Role';
 	  	$em = $this->getDoctrine()->getManager();
 	  	$dql = "SELECT COUNT(u.id) FROM OGIS\IndexBundle\Entity\\$classType u";
