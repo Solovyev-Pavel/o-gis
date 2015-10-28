@@ -1,0 +1,200 @@
+{% set is_admin = false %}
+{% set is_member = false %}
+{% set is_founder = false %}
+{% if app.user != null %}
+    {% if is_granted('ROLE_ADMIN') %}
+        {% set is_admin = true %}
+    {% else %}
+        {% for user in project.participants %}
+            {% if user.user.id == app.user.id %}
+                {% set is_member = true %}
+                {% if user.rank == 'Administrator' %}
+                    {% set is_admin = true %}
+                {% elseif user.rank == 'Founder' %}
+                    {% set is_founder = true %}
+                    {% set is_admin = true %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endif %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <title>{{ project.name }} :: project O-GIS</title>
+        <link rel="stylesheet" href="{{ asset('./css/project_styles.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./css/jstree-types.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery/themes/default/style.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery-ui/jquery-ui.css') }}" />
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery/jstree.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/catalogTree.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/treeContextMenu.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/addtofavorites.js') }}"></script>
+        <script type="text/javascript">
+
+            var homepage = "{{ path('homepage') }}" + "/";
+            var catalogData = "{{ path('loadcatalogdata', {'catid': 'PATH' }) }}";
+            var rootNodes = "{{ path('loadprojectcatalogs', {'catid': project.catalog}) }}";
+            {% if app.user != null %}
+                var rootFavNodes = "{{ path('loadusercatalogs', {'holderid': app.user.id}) }}";
+                var editCatalogRoute = "{{ path('editcatalog', {'id': 'ID'}) }}";
+            {% endif %}
+            var saveCatalogRoute = "{{ path('savecatalog') }}";
+            var deleteCatalogRoute = "{{ path('deletecatalog', {'id': 'ID'}) }}";
+            var modifyLinkRoute = "{{ path('updatelink') }}";
+            var deleteLinkRoute = "{{ path('removefromfavorites', {'id' : 'ID'}) }}";
+            var addToFavRoute = "{{ path('addtofavorites') }}";
+                        
+                    
+            {% if is_admin == true %}
+                function redirectToEditProperties(){
+                    window.location.href = "{{ path('edit_project_properties', {'id': project.id}) }}";
+                }
+
+                function redirectToEditMembership(){
+                    window.location.href = "{{ path('edit_project_members', {'id': project.id}) }}";
+                }
+            {% endif %}                    
+            {% if is_founder == false and app.user != null %}
+                function leaveProject(){
+                    var url = '{{ path('remove_project_member') }}' + '?project=' + {{ project.id }} + '&user=' + {{ app.user.id }};
+                    $.ajax({
+                        url: url,
+                        method: 'POST'
+                    }).done(function(){
+                        window.location.reload(true);
+                    });
+                }
+            {% endif %}
+            {% if is_member == false and project.publicjoinable == true and app.user != null %}
+                function joinProject(){
+                    var url = '{{ path('add_project_member') }}' + '?project=' + {{ project.id }} + '&user=' + {{ app.user.id }};
+                    $.ajax({
+                        url: url,
+                        method: 'POST'
+                    }).done(function(){
+                        window.location.reload(true);
+                    });
+                }
+            {% endif %}
+        </script>
+    </head>
+
+    <body class="bodyfullpage" {% if project.publicviewable %}onload="loadProjectCatalogs();"{% endif %}>
+
+        {% use 'OGISIndexBundle:Default:header.html.twig' %}
+        {% block header %}
+                {{ parent() }}
+        {% endblock %}
+
+        {% block pagecontent %}
+            <div class="contentbody">
+                <div class="projectpageleftside">
+                    <div class="projectavatar">
+                        <center><img src="{{ asset('./img/project.png') }}" height="200px" width="200px"></img></center>
+                    </div>
+                    <div class="projectleftpanel">
+                        {% if app.user != null and is_member == false and project.publicjoinable == true %}
+                            <div class="projectlinkbox objectlink" onclick="joinProject()">Join the project</div>
+                        {% endif %}
+                        {% if is_member == true and is_founder == false %}
+                            <div class="projectlinkbox objectlink" onclick="leaveProject()">Leave the project</div>
+                        {% endif %}
+                        {% if is_admin == true %}
+                            <div class="projectlinkbox objectlink" onclick="redirectToEditProperties()">Edit project properties</div>
+                            <div class="projectlinkbox objectlink" onclick="redirectToEditMembership()">Edit project members</div>
+                        {% endif %}
+                        <div style="margin-top:12px;padding-left:2px;">
+                            <b>Project members</b>
+                            <div style="margin-top:10px;">
+                            {% for user in project.participants %}
+                                <a href="{{ path('showuser', {'id': user.user.id}) }}">{{ user.user.displayname }}</a> - {{ user.rank }}<br/>
+                            {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="projectpagerightside">
+                    <div class="projectnamebox">{{ project.name }}</div>
+                    <div class="projectdescriptionbox"><i>{{ project.description }}</i></div>
+                    <div class="projectfilesarea">
+                        <div class="projectfilesheader">Project resources</div>
+                        {% if project.publicviewable %}
+                            <div class="foldertree" id="foldertree"></div>
+                        {% else %}
+                            <div> You can't view this project's resources </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div id="messagewindow" title="Adding to favorites"></div>
+            <div id="errormessagewinow" title="Error!"></div>
+            <div id="targetcatalogselector" title="Choose a catalog">
+                <div id="targettree" style="width:100%;height:300px;"></div>
+                <div id="targetnodeid" style="display:none"></div>
+                <div id="targetnodetype" style="display:none"></div>
+                <div id="selectednodeid" style="display:none"></div>
+                <div id="selectednode" style="height:20px;width:100%;float:bottom;padding-top:5px;border-top:1px solid #ccc"></div>
+            </div>
+            <script type="text/javascript">
+                $( "#messagewindow" ).dialog({
+                        autoOpen: false,
+                        resizable: false,
+                        zIndex: 9999,
+                        height: 'auto',
+                        width: 400,
+                        modal: false,
+                        buttons: { OK : function(){ $(this).dialog("close"); }
+                    }});
+                $( "#errormessagewinow" ).dialog({
+                        autoOpen: false,
+                        resizable: false,
+                        zIndex: 9999,
+                        height: 'auto',
+                        width: 400,
+                        modal: false,
+                        buttons: { OK : function(){ $(this).dialog("close"); }
+                    }});
+                $( "#targetcatalogselector" ).dialog({
+                        autoOpen: false,
+                        resizable: false,
+                        zIndex: 9999,
+                        height: 'auto',
+                        width: 550,
+                        modal: false,
+                        buttons: [
+                            { text: "OK", click: function(){ sendAddToFavoritesRequest(null); $(this).dialog("close"); } },
+                            { text: "Cancel", click: function(){ buffer = null; $(this).dialog("close"); } }]
+                    });
+            </script>
+        {% endblock %}
+
+        {% block footer %}
+                {{ parent() }}
+        {% endblock %}
+    </body>
+</html>
