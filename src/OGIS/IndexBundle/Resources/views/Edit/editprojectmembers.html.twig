@@ -1,0 +1,220 @@
+{% set is_admin = false %}
+{% set is_member = false %}
+{% set is_founder = false %}
+{% if app.user != null %}
+    {% if is_granted('ROLE_ADMIN') %}
+        {% set is_admin = true %}
+    {% else %}
+        {% for user in project.participants %}
+            {% if user.user.id == app.user.id %}
+                {% set is_member = true %}
+                {% if user.rank == 'Administrator' %}
+                    {% set is_admin = true %}
+                {% elseif user.rank == 'Founder' %}
+                    {% set is_founder = true %}
+                    {% set is_admin = true %}
+                {% endif %}
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+{% endif %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <title>Editing members of project "{{ project.name }}"</title>
+        <link rel="stylesheet" href="{{ asset('./css/ogis_styles.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery/themes/default/style.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery-ui/jquery-ui.css') }}" />
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
+        <script type="text/javascript">
+            var rows = {{ project.participants|length }};
+            
+            function addProjectMember(){
+                var useridentity = $('#usertoadd').prop('value');
+                $('#usertoadd').prop('value', '');
+                var url = '{{ path('add_project_member') }}' + '?project=' + {{ project.id }} + '&user=' + useridentity;
+                $.ajax({
+                    url: url,
+                    method: 'POST'
+                }).done(function(msg){
+                    if(msg.success){
+                        rows++;
+                        var html = '<tr id="row-' + rows + '"><td width="200px"><a href="{{ path('showuser', {'id': ''}) }}' + msg.id +
+                                    '" target="_blank">' + msg.name + '</a></td><td width="150px"><i>Project member</i></td>' +
+                                    '<td style="text-align:right;"><a href="#" onclick="promote(' + msg.id +
+                                    ',' + rows + ', true)">Promote</a> - <a href="#" onclick="removeFromProject(' + msg.id + ',' + rows +
+                                    ')">Remove from project</a></td></tr>'
+                        $('#userlist').append(html);
+                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        $('#messagewindow').empty().append(html);
+                        $('#messagewindow').dialog('open');
+                        }
+                    else{
+                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        $('#messagewindow').empty().append(html);
+                        $('#messagewindow').dialog('open');
+                    }
+                });
+            }
+            
+            function removeFromProject(user, row){
+                var url = '{{ path('remove_project_member') }}' + '?project=' + {{ project.id }} + '&user=' + user;
+                $.ajax({
+                    url: url,
+                    method: 'POST'
+                }).done(function(msg){
+                    if(msg.success){
+                        $('#row-' + row).remove();
+                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        $('#messagewindow').empty().append(html);
+                        $('#messagewindow').dialog('open');
+                        }
+                    else{
+                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        $('#messagewindow').empty().append(html);
+                        $('#messagewindow').dialog('open');
+                    }
+                });
+            }
+            
+            function promote(user, row, up){
+                var url = '{{ path('change_member_rank') }}' + '?project=' + {{ project.id }} + '&user=' + user;
+                if (up){
+                    url += '&action=promote';
+                }
+                else{
+                    url += '$action=demote';
+                }
+                $.ajax({
+                    url: url,
+                    method: 'POST'
+                }).done(function(msg){
+                    if(msg.success){                        
+                        if (up){
+                            var html =  '<td width="200px"><a href="{{ path('showuser', {'id': ''}) }}' + msg.id +
+                                '" target="_blank">' + msg.name + '</a></td><td width="150px"><i>Administrator</i></td>' +
+                                '<td style="text-align:right;"><a href="#" onclick="promote(' + msg.id +
+                                ',' + rows + ', false)">Demote</a> - <a href="#" onclick="removeFromProject(' + msg.id + ',' + rows +
+                                ')">Remove from project</a></td>';
+                        }
+                        else{
+                            var html =  '<td width="200px"><a href="{{ path('showuser', {'id': ''}) }}' + msg.id +
+                                '" target="_blank">' + msg.name + '</a></td><td width="150px"><i>Project member</i></td>' +
+                                '<td style="text-align:right;"><a href="#" onclick="promote(' + msg.id +
+                                ',' + rows + ', true)">Promote</a> - <a href="#" onclick="removeFromProject(' + msg.id + ',' + rows +
+                                ')">Remove from project</a></td>';
+                        }
+                        $('#row-' + row).empty().append(html);
+                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        $('#messagewindow').empty().append(html);
+                        $('#messagewindow').dialog('open');
+                        }
+                    else{
+                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        $('#messagewindow').empty().append(html);
+                        $('#messagewindow').dialog('open');
+                    }
+                });
+            }
+        </script>
+    </head>
+
+    <body class="bodyfullpage">
+
+		{% use 'OGISIndexBundle:Default:header.html.twig' %}
+		{% block header %}
+			{{ parent() }}
+		{% endblock %}
+
+		{% block pagecontent %}
+                    
+                    <div class="contentbody">
+                <div class="userlist">
+                    <div class="userlistheader">
+                        <b>Project members</b>
+                    </div>
+                    <div class="userlistbody">
+                        <table width="100%" id="userlist">
+                            {% for user in project.participants %}
+                                <tr id="row-{{ loop.index }}">
+                                    <td width="200px">
+                                        <a href="{{ path('showuser', {'id' : user.user.id }) }}" target="_blank">{{ user.user.displayname }}</a>
+                                    </td>
+                                    <td width="150px">
+                                        <i>{{ user.rank }}</i>
+                                    </td>
+                                    <td style="text-align:right;">
+                                        {% if user.rank == 'Administrator' and user.user.id != app.user.id %}
+                                            <a href="#" onclick="promote({{ user.user.id }}, {{ loop.index }}, false)">Demote</a> - 
+                                        {% elseif user.rank == 'Project member' %}
+                                            <a href="#" onclick="promote({{ user.user.id }}, {{ loop.index }}, true)">Promote</a> - 
+                                        {% endif %}
+                                        {% if user.rank != 'Founder' %}
+                                            <a href="#" onclick="removeFromProject({{ user.user.id }}, {{ loop.index }})">Remove from project</a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                            
+                        </table>
+                    </div>
+                </div>
+
+                <div class="addusertoviewers">
+                    <div class="userlistheader">
+                        <b>Add project member</b>
+                    </div>
+                    <div style="padding:8px;">
+                        <input type="text" value="" id="usertoadd" style="width:calc( 100% - 100px )"/>
+                        <button onclick="addProjectMember();">Add</button>
+                        <br/><br/>
+                        You can use user's ID, username or e-mail to add him or her as a member of this project
+                    </div>
+                </div>
+                <div style="width:39%;float:right;">
+                    <center><a class="buttonlink" href="{{ path('showproject', {id: project.id}) }}">Return to project</a></center>
+                </div>
+            </div>
+                
+            <div id="messagewindow" title="Project membership"></div>
+            <script type="text/javascript">
+                $('#messagewindow').dialog({
+                                autoOpen: false,
+                                resizable: false,
+                                zIndex: 9999,
+                                height: 'auto',
+                                width: 400,
+                                modal: false,
+                                buttons: { OK : function(){ $(this).dialog("close"); }
+                            }});
+            </script>
+        {% endblock %}
+
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+        
+    </body>
+</html>
