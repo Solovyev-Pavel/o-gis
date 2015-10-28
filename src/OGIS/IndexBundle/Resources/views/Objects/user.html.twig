@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <title>{{ user.username }} :: project O-GIS</title>
+        <link rel="stylesheet" href="{{ asset('./css/ogis_styles.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./css/jstree-types.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery/themes/default/style.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery-ui/jquery-ui.css') }}" />
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery/jstree.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/catalogTree.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/treeContextMenu.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/addtofavorites.js') }}"></script>
+
+        <script type="text/javascript">
+            function redirectToLayerUpload(){ window.location.href = "{{ path('createlayer') }}"; }
+
+            function redirectToStyleCreation(){ window.location.href = "{{ path('createstyle') }}"; }
+
+            function redirectToCreateProject(){ window.location.href = "{{ path('createproject') }}"; }
+
+            function redirectToPaletteCreation(){ window.location.href = "{{ path('paletteeditor', {'id': null}) }}"; }
+
+            var homepage = "{{ path('homepage') }}";
+            var catalogData = "{{ path('loadcatalogdata', {'catid': 'PATH' }) }}";
+            var rootNodes = "{{ path('loadusercatalogs', {'holderid': user.id}) }}";
+            {% if app.user != null %}
+                var rootFavNodes = "{{ path('loadusercatalogs', {'holderid': app.user.id}) }}";
+                var editCatalogRoute = "{{ path('editcatalog', {'id': 'ID'}) }}";
+                var cutPasteRoute = "{{ path('movecatalogentity') }}";
+            {% endif %}
+            var saveCatalogRoute = "{{ path('savecatalog') }}";
+            var deleteCatalogRoute = "{{ path('deletecatalog', {'id': 'ID'}) }}";
+            var modifyLinkRoute = "{{ path('updatelink') }}";
+            var deleteLinkRoute = "{{ path('removefromfavorites', {'id' : 'ID'}) }}";
+            var addToFavRoute = "{{ path('addtofavorites') }}";            
+        </script>
+    </head>
+    <body class="bodyfullpage" onload="loadUserCatalogs();">
+
+        {% use 'OGISIndexBundle:Default:header.html.twig' %}
+        {% block header %}
+            {{ parent() }}
+        {% endblock %}
+
+        {% block pagecontent %}
+            <div class="contentbody">
+                <div class="userpageleftside">
+                    <div class="useravatar">
+                        <center><img src="{{ asset('./img/user.png') }}" height="200px" width="200px"></img></center>
+                    </div>
+                <div>
+                {% if app.user != null %}
+                    {% if app.user.id == user.id %}
+                        {% set layersleft = user.limits.layers - user.layers|length %}
+                        {% set stylesleft = user.limits.styles - user.styles|length %}
+                        {% set palettesleft = user.limits.palettes - user.palettes|length %}
+                        <div class="userprofilelinkbox objectlink">Profile settings</div>
+                        <div class="userprofilelinkbox objectlink" onclick="redirectToCreateProject();">Found a project</div>
+                        {% if layersleft > 0 %}
+                            <div class="userprofilelinkbox objectlink" onclick="redirectToLayerUpload();">Upload a layer ({{ layersleft }})</div>
+                        {% elseif user.limits.layers == null %} {# user with rights to load unlimited number of layers #}
+                            <div class="userprofilelinkbox objectlink" onclick="redirectToLayerUpload();">Upload a layer</div>
+                        {% elseif layersleft == 0 %}
+                            <div class="userprofileunlinkbox inaccessiblelink">
+                                <span style="text-decoration:line-through;">Upload a layer</span><br/>
+                                <span class="inaccessiblelinkmessage">You've reached the limit of layers</span>
+                            </div>
+                        {% endif %}
+                        {% if stylesleft > 0 %}
+                            <div class="userprofilelinkbox objectlink" onclick="redirectToStyleCreation()">Create style ({{ stylesleft }})</div>
+                        {% elseif user.limits.styles == null %} {# user with rights to load unlimited number of styles #}
+                            <div class="userprofilelinkbox objectlink" onclick="redirectToStyleCreation()">Create style</div>
+                        {% elseif stylesleft == 0 %}
+                            <div class="userprofileunlinkbox inaccessiblelink">
+                                <span style="text-decoration:line-through;">Create style</span><br/>
+                                <span class="inaccessiblelinkmessage">You've reached the limit of styles</span>
+                            </div>
+                        {% endif %}
+                        {% if palettesleft > 0 %}
+                            <div class="userprofilelinkbox objectlink" onclick="redirectToPaletteCreation()">Create palette ({{ palettesleft }})</div>
+                        {% elseif user.limits.palettes == null %} {# user with rights to load unlimited number of styles #}
+                            <div class="userprofilelinkbox objectlink" onclick="redirectToPaletteCreation()">Create palette</div>
+                        {% elseif palettesleft == 0 %}
+                            <div class="userprofileunlinkbox inaccessiblelink">
+                                <span style="text-decoration:line-through;">Create palette</span><br/>
+                                <span class="inaccessiblelinkmessage">You've reached the limit of palettes</span>
+                            </div>
+                        {% endif %}
+
+                    {% else %}
+                        <div class="userprofilelinkbox objectlink" onclick="showTargetCatalogTree({{ user.id }}, 'user');">Add to favorites</div>
+                        {% if is_granted('ROLE_ADMIN') %}
+                          {#  <div class="userprofilelinkbox objectlink">Edit profile</div> #}
+                        {% endif %}
+                    {% endif %}
+                {% else %}
+                {# display nothing #}
+                {% endif %}
+                
+                <div style="margin-top:12px;padding-left:2px;">
+                    <b>Participation in projects:</b>
+                    <div style="margin-top:10px;">
+                        {% if user.projects|length == 0 %}
+                            {% if app.user != null %}
+                                {% if app.user.id == user.id %}You don't pariticipate in any projects.
+                                {% else %}This user doesn't participate in any projects.
+                                {% endif %}
+                            {% else %}This user doesn't participate in any projects.
+                            {% endif %}
+                        {% endif %}
+                        {% for project in user.projects %}
+                            <a href="{{ path('showproject', {'id': project.project.id}) }}">{{ project.project.name }}</a> - {{ project.rank }}<br/>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="userpagerightside">
+            <div class="usernamebox">
+                <span class="username">{{ user.displayname }}</span><br/>
+                {% if user.limits.role == "ROLE_SUPER_ADMIN" %}
+                    <i class="userroleadmin">Project O-GIS administrator</i>
+                {% elseif user.limits.role == "ROLE_SYSTEM" %}
+                    <i class="userroleadmin">Project O-GIS system user</i>
+                {% elseif user.limits.role == "ROLE_ADMIN" %}
+                    <i class="userrolemod">Project O-GIS moderator</i>
+                {% else %}
+                    <i class="userrolebase">Project O-GIS user</i>
+                {% endif %}
+            </div>
+            <div class="userfilesarea">
+                <div class="userfilesheader">User's resources</div>
+                <div class="foldertree" id="foldertree"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="messagewindow" title="Adding to favorites"></div>
+    <div id="errormessagewinow" title="Error!"></div>
+    <div id="targetcatalogselector" title="Choose a catalog">
+        <div id="targettree" style="width:100%;height:300px;"></div>
+        <div id="targetnodeid" style="display:none"></div>
+        <div id="targetnodetype" style="display:none"></div>
+        <div id="selectednodeid" style="display:none"></div>
+        <div id="selectednode" style="height:20px;width:100%;float:bottom;padding-top:5px;border-top:1px solid #ccc"></div>
+    </div>
+    <script type="text/javascript">
+        $( "#messagewindow" ).dialog({
+            autoOpen: false,
+            resizable: false,
+            zIndex: 9999,
+            height: 'auto',
+            width: 400,
+            modal: false,
+            buttons: { OK : function(){ $(this).dialog("close"); }
+        }});
+        $( "#errormessagewinow" ).dialog({
+            autoOpen: false,
+            resizable: false,
+            zIndex: 9999,
+            height: 'auto',
+            width: 400,
+            modal: false,
+            buttons: { OK : function(){ $(this).dialog("close"); }
+        }});
+        $( "#targetcatalogselector" ).dialog({
+            autoOpen: false,
+            resizable: false,
+            zIndex: 9999,
+            height: 'auto',
+            width: 550,
+            modal: false,
+            buttons: [
+                { text: "OK", click: function(){ sendAddToFavoritesRequest(null); $(this).dialog("close"); } },
+                { text: "Cancel", click: function(){ buffer = null; $(this).dialog("close"); } }]
+            });
+        </script>
+
+        {% endblock %}
+            
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+    </body>
+</html>
