@@ -1,0 +1,24 @@
+<html>
+    <head>
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript">
+
+		function SubmitTest(){
+			var json = document.getElementById('input').value;
+			$.ajax({url: "/o-gis/web/app.php/operation/algebra", method: "POST", data: json})
+		       	.done(function(msg){
+					$('#output').empty().append(msg);
+				});
+		}
+
+        </script>
+    </head>
+    <body style="width:100%;height:100%;">
+        <div style="width:48%;height:100%;float:left;border:1px solid #ccc;">
+            <textarea id="input" style="resize:none;width:100%;" rows="25"></textarea>
+            <button id="button" onclick="SubmitTest();">Submit!</button>
+        </div>
+        <div style="width:48%;height:100%;float:right;border:1px solid #ccc;" id="output">
+        </div>
+    </body>
+</html>
