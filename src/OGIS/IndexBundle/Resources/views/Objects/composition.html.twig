@@ -1,0 +1,257 @@
+﻿<!DOCTYPE html>
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <link rel="stylesheet" href="{{ asset('./css/ogis_styles.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./css/jstree-types.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery/themes/default/style.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery-ui/jquery-ui.css') }}" />
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery/jstree.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/addtofavorites.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/CompositionObject_JSON.js') }}"></script>
+        <style>
+            .ui-dialog{ z-index: 9999 !important; }
+            .ui-front{ z-index: 9998 !important; }
+        </style>
+        <title>{{ composition.name }} :: composition O-GIS</title>
+        {% if viewable %}
+            <script type="text/javascript" src="{{ asset('./js/OpenLayers.light.js') }}"></script>
+        {% endif %}
+        <script type="text/javascript">
+
+            {% if app.user != null %}
+                var rootFavNodes = "{{ path('loadusercatalogs', {'holderid': app.user.id}) }}";
+                var catalogData = "{{ path('loadcatalogdata', {'catid': 'PATH' }) }}";
+                var addToFavRoute = "{{ path('addtofavorites') }}";
+            {% endif %}
+
+            function showInfoWindow(){
+                $( "#infowindow" ).dialog("open");
+            }
+
+            function addToFavorites(){
+                var id = {{ composition.id }};
+                showTargetCatalogTree(id, 'composition');
+            }
+
+            function openInEditor(){
+                window.location.href = "{{ path('geoexpl', {'datasource': 'composition', 'id': composition.id}) }}";
+            }
+
+            function redirectToLayerEdit(){
+                window.location.href = "{{ path('edit_composition_properties', {'id': composition.id}) }}";
+            }
+
+            function redirectToDeleteConfirm(){
+                window.location.href = "{{ path('deletecompositionconfirm', {'id': composition.id}) }}";
+            }
+        </script>
+        <script type="text/javascript">
+                var compositionData = "{{ composition.data }}";
+                var cmp = new Composition();
+                cmp.SetId( {{ composition.id }} );
+                cmp.SetName( "{{ composition.name }}" );
+                cmp.SetProjection( "{{ composition.projection }}" );
+                cmp.SetDescription( "{{ composition.description }}" );
+                cmp.FillFromJSON(compositionData);
+        </script>
+    </head>
+    <body class="bodyfullpage">
+
+        {% use 'OGISIndexBundle:Default:header.html.twig' %}
+        {% block header %}
+                {{ parent() }}
+        {% endblock %}
+
+        {% block pagecontent %}
+            <div class="contentbody">
+                <div class="entitytitleblock">
+                    <span class="entitytitle">{{ composition.name }}</span><br/>
+                    Author: <a href="{{ path('showuser', {'id': composition.author.id}) }}">{{ composition.author.displayname }}</a>
+                </div>
+                <div class="entityinterractionblock">
+                    <div class="entitylinkbox objectlink" onclick="showInfoWindow()">
+                        About composition
+                    </div>
+                    <div class="entitylinkbox objectlink" onclick="openInEditor()">
+                        Open in editor
+                    </div>
+
+                {% if app.user != null %}
+                    <div class="entitylinkboxsmall objectlink" onclick="addToFavorites()">
+                        Add to Favorites
+                    </div>
+                    {% if app.user.id == composition.author.id or is_granted('ROLE_ADMIN') == true or is_granted('EDIT', composition) %}
+                        <div class="entitylinkboxsmall objectlink" onclick="redirectToLayerEdit()">
+                            Edit
+                        </div>
+                        <div class="entitylinkboxsmall objectlink" onclick="redirectToDeleteConfirm()">
+                            Delete
+                        </div>
+                    {% endif %}
+                {% endif %}
+            </div>
+
+            <div class="layerpreviewbox">
+                {% if viewable %}
+                    <div class="layerpreviewboxinner" id="map_container"></div>
+                    <script type="text/javascript">
+                        var map = new OpenLayers.Map("map_container", { projection: new OpenLayers.Projection(cmp.projection) });
+                        map.addControl(new OpenLayers.Control.Navigation());
+                        //map.maxExtent = new OpenLayers.Bounds(cmp.extent.minx, cmp.extent.miny, cmp.extent.maxx, cmp.extent.maxy);
+                        map.maxExtent = new OpenLayers.Bounds({{ composition.boundingBoxMinX }}, {{ composition.boundingBoxMinY }}, {{ composition.boundingBoxMaxX }}, {{ composition.boundingBoxMaxY }});
+                        // add blank base layer
+                        var baseLayer = new OpenLayers.Layer("Empty base layer", {isBaseLayer: true, displayInLayerSwitcher: false});
+                        map.addLayers([baseLayer]);
+                        // now, add real layers
+                        for (var i = 0; i < cmp.layers.length; i++){
+                            // add layer
+                            var target =  new OpenLayers.Layer.WMS(
+                                cmp.layers[i].name,
+                                "/o-gis/web/app.php/wms", {
+                                    LAYERS: cmp.layers[i].workspace + ':' + cmp.layers[i].cs,
+                                    format: 'image/png',
+                                    transparent: true
+                                }, {
+                                    projection: cmp.projection
+                                }, {
+                                    singleTile: false,
+                                    ratio: 1,
+                                    isBaseLayer: false,
+                                    displayInLayerSwitcher: true
+                            });
+                            if (target.params.SRS === undefined){ target.params.SRS = cmp.projection; }
+                            target.setOpacity(cmp.layers[i].transp);
+                            target.setVisibility(cmp.layers[i].vis);
+                            if (cmp.layers[i].style.type === "sld"){
+                                delete target.params.STYLES;
+                                target.mergeNewParams({sld_body: cmp.layers[i].style.value}); }
+                            else { target.mergeNewParams({styles: cmp.layers[i].style.value}); }
+                            map.addLayers([target]);
+                        }
+                        if (cmp.extent.type === "bb"){
+                            map.zoomToExtent(new OpenLayers.Bounds(cmp.extent.minX, cmp.extent.minY, cmp.extent.maxX, cmp.extent.maxY), false);
+                        }
+                        else{
+                            map.setCenter(new OpenLayers.LonLat(cmp.extent.centerx, cmp.extent.centery), cmp.extent.zoomlevel, false, false);
+                        }
+                    </script>
+
+                    {% else %}
+                        <table class="infobox_error">
+                            <tr>
+                                <td width="96px" valign="middle">
+                                    <center>
+                                            <img src="{{ asset('./img/stop.png') }}"/>
+                                    </center>
+                                </td>
+                                <td>
+                                    <center>You're not allowed to view this composition!</center>
+                                </td>
+                                <td width="96px" valign="middle">
+                                    <center>
+                                        <img src="{{ asset('./img/stop.png') }}"/>
+                                    </center>
+                                </td>
+                            </tr>
+                        </table>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div id="infowindow" title="Information about composition ''{{ composition.name }}''">
+                <div id="accordion">
+                    <h3>Basic information</h3>
+                    <div style="height:300px">
+                        <table width="100%">
+                            <tr>
+                                <td width="120px"><b>Author</b>:&nbsp;</td>
+                                <td><a href="{{ path('showuser', {id: composition.author.id}) }}">{{ composition.author.displayname }}</a></td>
+                            </tr>
+                            <tr>
+                                <td><b>Viewed</b>:&nbsp;</td>
+                                <td>{{ composition.views }} times</td>
+                            </tr>
+                            <tr>
+                                <td><b>Last modified</b>:&nbsp;</td>
+                                <td>{{ composition.modified|date('d.m.Y') }}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Projection</b>:&nbsp;</td>
+                                <td>{{ composition.projection }}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Bounding box</b>:&nbsp;</td>
+                                <td>{ {{ composition.boundingBoxMinX }}, {{ composition.boundingBoxMinY }}, {{ composition.boundingBoxMaxX }}, {{ composition.boundingBoxMaxY }} }</td>
+                            </tr>
+                            <tr>
+                                <td valign="top"><b>Description</b>:&nbsp;</td>
+                                <td>"<i>{{ composition.description|replace({"\\n" : "<br/>"})|raw }}</i>"</td>
+                            </tr>
+                        </table>
+                    </div>
+                        <h3>Layers used</h3>
+                        <div style="height:300px">
+                                {% if composition.layers|length != 0 %}
+                                        {% for layer in composition.layers|sort %}
+                                                <img src="/o-gis/web/img/icons/layer.png"/>&nbsp;
+                                                <a href="{{ path('showlayer', {'id': layer.id }) }}" target="_blank">{{ layer.name }}</a><br/>
+                                        {% endfor %}
+                                {% endif %}
+                        </div>
+                </div>
+            </div>
+            <div id="messagewindow" title="Adding to favorites"></div>
+            <div id="targetcatalogselector" title="Select a catalog">
+                <div id="targettree" style="width:100%;height:300px;"></div>
+                <div id="targetnodeid" style="display:none"></div>
+                <div id="targetnodetype" style="display:none"></div>
+                <div id="selectednodeid" style="display:none"></div>
+                <div id="selectednode" style="height:20px;width:100%;float:bottom;padding-top:5px;border-top:1px solid #ccc"></div>
+            </div>
+            <script type="text/javascript">
+                $( "#infowindow" ).dialog({ autoOpen: false, resizable: false, zIndex: 9999, height: 500, width: 600, modal: false, buttons: { OK : function(){ $(this).dialog("close"); } }});
+                $( "#accordion" ).accordion({ heightStyle: "content" });
+                $( "#messagewindow" ).dialog({ autoOpen: false, resizable: false, zIndex: 9999, height: 'auto', width: 400, modal: false, buttons: { OK : function(){ $(this).dialog("close"); } }});
+                $( "#targetcatalogselector" ).dialog({
+                    autoOpen: false,
+                    resizable: false,
+                    zIndex: 9999,
+                    height: 'auto',
+                    width: 550,
+                    modal: false,
+                    buttons: [
+                        { text: "OK", click: function(){ sendAddToFavoritesRequest(null); $(this).dialog("close"); } },
+                        { text: "Cancel", click: function(){ buffer = null; $(this).dialog("close"); } }]
+                    });
+            </script>
+
+        {% endblock %}
+
+        {% block footer %}
+                {{ parent() }}
+        {% endblock %}
+    </body>
+</html>
