@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+		<link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+		<title>Styling options list</title>
+		<link rel="stylesheet" href="{{ asset('./css/editor_list.css') }}" />
+		<link rel="stylesheet" href="{{ asset('./js/jquery/themes/default/style.css') }}" />
+		<script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+		<script type="text/javascript" src="{{ asset('./js/jquery/jstree.min.js') }}"></script>
+
+		<style>
+			a { color: #4040af; }
+		</style>
+
+		<script type="text/javascript">
+        var rootNodes = "{{ path('loaduserandglobalcatalogs') }}";
+        var catalogData = "{{ path('loadcatalogdata', {'catid': 'PATH'}) }}";
+
+        function loadCatalogContents(node){
+            if (node.loaded !== undefined){ return; }
+            if (!node.type.match(/^catalog/g)){
+                parent.pickStylingOption(node.text, node.data, node.type, node.original.extra);
+            }
+
+            if (node.type !== 'catalog'){ return; }
+            node.loaded = true;
+            var url = catalogData.replace('PATH', node.id);
+            $.ajax(url)
+                .done(function(msg){
+                    var tree = $('#foldertree').jstree(true);
+                    for (var i = 0; i < msg.catalogs.length; i++){
+                        var newNode = msg.catalogs[i];
+                        tree.create_node(newNode.parent, newNode);
+                    }
+                    for (var i = 0; i < msg.links.length; i++){
+                        if (msg.links[i].type !== 'palette' && msg.links[i].type !== 'style'){ continue; }
+                        var newNode = msg.links[i];
+                        tree.create_node(newNode.parent, newNode);
+                    }
+                    tree.open_node(node.id);
+                })
+                .fail(function(){
+                    console.log("Error while retrieving data!");
+                    delete node.loaded;
+                });
+            }
+
+			function loadUserCatalogs(){
+          $.ajax(rootNodes)
+              .done(function(msg){
+                  $('#foldertree').jstree({
+                      'core' : {
+                          'multiple' : false,
+                          'data' : msg.catalogs,
+                          'check_callback': true
+                      },
+                      'types':{
+                          "catalog": {icon: "/o-gis/web/img/icons/catalog.png"},
+                          "layer": {icon: "/o-gis/web/img/icons/layer.png"},
+                          "raster": {icon: "/o-gis/web/img/icons/raster.png"},
+                          "line": {icon: "/o-gis/web/img/icons/line.png"},
+                          "point": {icon: "/o-gis/web/img/icons/point.png"},
+                          "polygon": {icon: "/o-gis/web/img/icons/polygon.png"},
+                          "palette": {icon: "/o-gis/web/img/icons/palette.png"},
+                          "composition": {icon: "/o-gis/web/img/icons/composition.png"},
+                          "style": {icon: "/o-gis/web/img/icons/style.png"},
+                          "external": {icon: "/o-gis/web/img/icons/external.png"}
+                      },
+                      'plugins': [ "sort", "types" ],
+                      'sort': function (a, b) {   return this.get_text(a) > this.get_text(b) ? 1 : -1; }
+                  }).on('select_node.jstree', function(e, data){
+                      loadCatalogContents(data.node);
+              });
+          })
+          .fail(function(){
+              $('#foldertree').append('<div class="loaderrormsg"><b>Error while retrieving data!</b></div>');
+          });
+      }
+		</script>
+
+	</head>
+
+	<body onload="loadUserCatalogs();">
+		{% block bodycontent %}
+
+			<div  id="foldertree"></div>
+
+		{% endblock %}
+	</body>
+</html>
