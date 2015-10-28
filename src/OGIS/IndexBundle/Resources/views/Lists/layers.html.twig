@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+		<link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+		<title>Layers :: project O-GIS</title>
+		<style type="text/css">
+			.listrow{
+				background: #fff;
+				width: 100%;
+				padding: 2px;
+				border: 1px solid #aaa;
+				margin-bottom: 4px;
+			}
+		</style>
+	</head>
+	<body style="width:100%; position:absolute; top:-8px; left:-8px;">
+
+		{% use 'OGISIndexBundle:Default:header.html.twig' %}
+		{% block header %}
+			{{ parent() }}
+		{% endblock %}
+
+		{% block pagecontent %}
+			<div style="width:80%;margin-left:auto;margin-right:auto;margin-top:8px;">
+				<center>
+					<b>Order layers by</b>:&nbsp;
+					<a href="{{ path('layerlist', {sortby: 'bymodified', page: 1}) }}">Modify date</a>,&nbsp;
+					<a href="{{ path('layerlist', {sortby: 'bycreated', page: 1}) }}">Create date</a>,&nbsp;
+					<a href="{{ path('layerlist', {sortby: 'byname', page: 1}) }}">Title</a>,&nbsp;
+					<a href="{{ path('layerlist', {sortby: 'byauthor', page: 1}) }}">Author</a>.
+				</center>
+			</div>
+			<div style="width:80%;margin-left:auto;margin-right:auto;margin-bottom:8px;padding:8px;">
+				{% if layers|length > 0 %}
+					
+					<center style="font-color:#444;margin-bottom:8px;">
+						{% set pages = total / 10 + 1 %}
+						Страница {{ cpage }} из {{ pages|number_format(0, '.', ',') }}.
+						{% if pages|number_format(0, '.', ',') > 1 %}
+							{% set nextpage = cpage + 1 %}
+							{% set prevpage = cpage - 1 %}
+							{% if cpage == 1 %}
+								&nbsp;<a href="{{ path('layerlist', {sortby: filter, page: nextpage}) }}">Next&nbsp;>&nbsp;</a>
+							{% elseif cpage == pages|number_format(0, '.', ',') %}
+								&nbsp;<a href="{{ path('layerlist', {sortby: filter, page: prevpage}) }}">&nbsp;<&nbsp;Previous</a>
+							{% else %}
+								&nbsp;<a href="{{ path('layerlist', {sortby: filter, page: prevpage}) }}">&nbsp;<&nbsp;Previous</a>
+								&nbsp;<a href="{{ path('layerlist', {sortby: filter, page: nextpage}) }}">Next&nbsp;>&nbsp;</a>
+							{% endif %}
+						{% endif %}
+					</center>
+
+					{% for layer in layers %}
+						<table class="listrow">
+							<tr>
+								<td rowspan="3" width="100px" style="border:1px solid #aaa;background:#fff;" valign="middle">
+									<a href="{{ path('showlayer', {id: layer.id}) }}">
+										<img src="{{ asset(layer.preview) }}" width="144px"/>
+									</a>
+								</td>
+								<td valign="top" height="20px" colspan="3" style="font-size:18px;padding-left:16px;">
+									<a href="{{ path('showlayer', {id: layer.id}) }}">
+									<b>{{ layer.name }}</b></a>
+									<span style="display:inline;font-size:14px;padding-left:16px">
+										<b>Author<b>: <a href="{{ path('showuser', {id: layer.author.id}) }}">
+										<b>{{ layer.author.username }}</b></a>
+									</span>
+								</td>
+							</tr>
+							<tr>
+								<td valign="top" height="24px" width="200px" style="font-size:14px;padding-left:16px;">
+									<b>Last modified</b>:&nbsp;{{ layer.modified|date('d.m.Y') }}
+								</td>
+								<td valign="top" height="24px" width="150px" style="font-size:14px;">
+									<b>Viewed</b>:&nbsp; {{ layer.views }}
+								</td>
+								<td valign="top" height="24px" style="font-size:14px;">
+									<b>Downloaded</b>:&nbsp; {{ layer.downloads }}
+								</td>
+							</tr>
+							<tr>
+								<td valign="top" colspan="3" style="font-size:14px;padding-left:16px;">
+									<i>"{{ layer.description }}"</i>
+								</td>
+							</tr>
+						</table>
+					{% endfor %}
+				{% else %}
+					<center>No layers have been found.</center>
+				{% endif %}
+			</div>
+		{% endblock %}
+
+		{% block footer %}
+			{{ parent() }}
+		{% endblock %}
+</html>
