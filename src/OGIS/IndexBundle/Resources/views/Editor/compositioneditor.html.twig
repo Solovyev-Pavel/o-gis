@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        {% if composition != null %}
+            <title>{{ composition.name }} :: Composition Editor :: O-GIS project</title>
+        {% else %}
+            <title>Composition Editor :: O-GIS project</title>
+        {% endif %}
+
+        <!-- styling and jquery -->
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
+        <script type="text/javascript" src="http://openlayers.org/api/OpenLayers.js"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery-context/jquery.contextMenu.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery-context/jquery.ui.position.js') }}"></script>
+<!--        <script type="text/javascript" src="{{ asset('./js/imagepicker/image-picker.min.js') }}"></script> -->
+        <script type="text/javascript" src="{{ asset('./js/addtofavorites.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery/jstree.min.js') }}"></script>
+        
+        <link rel="stylesheet" href="{{ asset('./js/imagepicker/image-picker.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery-context/jquery.contextMenu.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery-ui/jquery-ui.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./css/editor_styles.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery/themes/default/style.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./css/jstree-types.css') }}" />
+
+        <script type="text/javascript" src="{{ asset('./EditorJQ_1/AddLayer.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./EditorJQ_1/Authorize.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./EditorJQ_1/CompositionEditor.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./EditorJQ_1/CompositionObject.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./EditorJQ_1/CompositionSave.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./EditorJQ_1/RasterAnalysis.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./EditorJQ_1/Styler.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./EditorJQ_1/WMSInfo.js') }}"></script>
+
+        <link rel="stylesheet" href="{{ asset('./EditorJQ/styler-previews.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/colors/jquery.minicolors.css') }}" />
+        <script type="text/javascript" src="{{ asset('./js/colors/jquery.minicolors.min.js') }}"></script>
+        
+        <style>
+            .ui-dialog{ z-index: 9999 !important; }
+            .ui-widget-overlay{ z-index: 6666 !important; }
+        </style>
+
+        <script type="text/javascript">
+            var editor = null;
+            var catalogData = "{{ path('loadcatalogdata', {'catid': 'PATH' }) }}";
+            var addToFavRoute = "{{ path('addtofavorites') }}";
+            var getLayerId = "{{ path('get_layer_id', {'cs': 'ID'}) }}";
+            var paletteListRoute = "{{ path('showpalettelisteditor') }}";
+            var getPaletteRoute = "{{ path('getpalettecompressed', {'id': 'ID'}) }}";
+            var getCompositionData = "{{ path('getCompositionData', {'id': 'ID'}) }}";
+            var getLayerData = "{{ path('getLayerData', {'id': 'ID'}) }}";
+
+            {% if app.user != null %}
+                function addToFavorites(id, type){
+                    if (type === 'composition' && editor.composition.id === null){
+                        var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td>' +
+                                    '<td valign="middle">This composition isn\'t saved yet and can\'t be added to favorites!' +
+                                    '</td></tr></table>';
+                        $( "#messagewindow" ).dialog('option', 'title', 'Adding to Favorites');
+                        $( "#messagewindow" ).empty().append(html);
+                        $( "#messagewindow" ).dialog('open');
+                        return;
+                    }
+                    showTargetCatalogTree(id, type);
+                }
+            {% endif %}
+
+            function initializeEditor(){
+                editor = new CompositionEditor();
+                editor.setVariable('editor');
+                editor.setMapDOM('map_container');
+                editor.setLayerListDOM('layerlist');
+                editor.setAddLayerWindow('addlayerwindow');
+                editor.setAddCompositionWindow('addcompositionwindow');
+                editor.setAuthentificationWindow('authwindow');
+                editor.setSaveCompositionWindow('newcompositionwindow');
+                editor.setStylerWindow('stylelayerwindow');
+                editor.setPaletteSelectWindow('selectpalettewindow');
+                editor.setRasterOpWindow('rasteropeationswindow');
+                editor.setSelectRasterWindow('selectrasterwindow');
+                {% if composition != null %}
+                    editor.initializeCompositionEditor('composition', {{ composition.id }});
+                {% elseif layer != null %}
+                    editor.initializeCompositionEditor('layer', {{layer.id}});
+                {% endif %}
+                {% if app.user != null %}
+                    editor.setUser({{ app.user.id }}, "{{ app.user.username }}");
+                {% endif %}
+            }
+        </script>
+    </head>
+    
+    <body class="bodyfullpage" onload="initializeEditor();">
+
+        {% block pagecontent %}
+            <div class="editorcontentbody">
+                <div class="editorwestpanel">
+                    <div id="layerlistpanel" style="width:240px;height:100%;float:left;">
+                        <div class="editorwestpaneltoolbar">
+                            <span class="controlicon" onclick="editor.AddLayers.showAvaliableLayers();" title="Add into Composition Editor...">
+                                <img src="/o-gis/web/./EditorJQ/img/add.png" />
+                            </span>
+                            <span class="controlicon" onclick="editor.RasterAnalysis.beginRasterOperations();" title="Raster Opertaions...">
+                                <img src="/o-gis/web/./EditorJQ/img/mathops.png" />
+                            </span>
+                            <span class="controlicon" onclick="editor.CompositionSave.reloadComposition();" title="Revert the Composition">
+                                <img src="/o-gis/web/./EditorJQ/img/refresh.png" />
+                            </span>
+                            <span class="controlicon" onclick="editor.CompositionSave.saveTheComposition(false);" title="Save this Composition">
+                                <img src="/o-gis/web/./EditorJQ/img/save.png" />
+                            </span>
+                            <span class="controlicon" onclick="editor.CompositionSave.saveTheComposition(true);" title="Save this Composition as...">
+                                <img src="/o-gis/web/./EditorJQ/img/saveas.png" />
+                            </span>
+                            <span class="controlicon" onclick="addToFavorites(null, 'composition');" title="Add this Composition to Favorites">
+                                <img src="/o-gis/web/./EditorJQ/img/star.png" />
+                            </span>
+                            {% if composition != null %}
+                            <span class="controlicon" onclick="editor.goToEntity('composition', {{ composition.id }});" title="Leave the Editor">
+                            {% elseif layer != null %}
+                            <span class="controlicon" onclick="editor.goToEntity('layer', {{ layer.id }});" title="Leave the Editor">
+                            {% endif %}
+                                <img src="/o-gis/web/./EditorJQ/img/door.png" />
+                            </span>
+                        </div>
+                        <div class="dragsortlistcontainer">
+                            <ul id="layerlist" class="sortable"></ul>
+                            <script type="text/javascript">
+                                $( "#layerlist" ).sortable({
+                                    stop: function(event, ui){ editor.updateLayerOrder(); }
+                                });
+                                $( document ).tooltip();
+                            </script>
+                        </div>
+                    </div>
+                    <div class="listvisibilitytoggler">
+                        <div id="listvisibilitytoggler" title="Hide the Layer List" class="listvisibilitytogglerbutton" onclick="editor.toggleLayerListVisibility();">
+                            <p style="padding-top:11px;font-weight:bold;">►</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="mappanelmain" class="editormain">
+                <div style="width:100%;height:100%" id="map_container"></div>
+                
+            </div>
+
+            <div id="addlayerwindow" title="Add a layer or a composition"></div>
+            <div id="addcompositionwindow" title="Adding a composition">
+                <p>Select the layers you wish to add:<br/></p>
+                <div id="innercmpaddwindow" style="height:275px;overflow-x:hidden;overflow-y:scroll"></div>
+            </div>
+            <div id="stylelayerwindow" title="Styling options"></div>
+            <div id="newcompositionwindow" title="Saving a composition"></div>
+            <div id="messagewindow" title=""></div>
+            <div id="messagewindow2" title="Saving a composition"></div>
+            <div id="authwindow" title="Logging in"></div>
+            <div id="targetcatalogselector" title="Select a catalog">
+                <div id="targettree" style="width:100%;height:300px;"></div>
+                <div id="targetnodeid" style="display:none"></div>
+                <div id="targetnodetype" style="display:none"></div>
+                <div id="selectednodeid" style="display:none"></div>
+                <div id="selectednode" style="height:20px;width:100%;float:bottom;padding-top:5px;border-top:1px solid #ccc"></div>
+            </div>
+            <div id="rasteropeationswindow" title=""></div>
+            <div id="selectrasterwindow" title="Select a raster layer"></div>
+            <div id="selectpalettewindow" title="Select a palette"></div>
+            <script type="text/javascript">
+                $( "#addlayerwindow" ).dialog({ autoOpen: false,
+                                                resizable: false,
+                                                zIndex: 9999,
+                                                height: 500,
+                                                width: 600,
+                                                modal: false,
+                                                buttons: { "Close" : function(){ $(this).dialog("close"); } }
+                });
+                $( "#addcompositionwindow" ).dialog({ autoOpen: false,
+                                                resizable: false,
+                                                zIndex: 9999,
+                                                height: 400,
+                                                width: 350,
+                                                modal: false,
+                                                buttons: [  { text: "Add layers", click: function(){ editor.AddLayers.addCompositionLayers(); } },
+                                                            { text: "Close", click: function(){ editor.AddLayers.cancelCompositionAddition(); } }]
+                });
+                $( "#stylelayerwindow" ).dialog({   autoOpen: false,
+                                                    resizable: false,
+                                                    zIndex: 9980,
+                                                    height: 'auto',
+                                                    width: 550,
+                                                    modal: true,
+                                                    buttons: [  { text: "Apply", id: "applyButton", title: "Apply the selected stylization", click: function(){ editor.LayerStyler.applyLayerStyling(); } },
+                                                                { text: "Close", click: function(){ $(this).dialog("close"); } }]
+                });
+                $( "#newcompositionwindow" ).dialog({   autoOpen: false,
+                                                        resizable: false,
+                                                        zIndex: 9999,
+                                                        height: 'auto',
+                                                        width: 500,
+                                                        modal: true,
+                                                        buttons: [  { text: "Save", click: function(){ editor.CompositionSave.applyCompositionData(true); } },
+                                                                    { text: "Close", click: function(){ $(this).dialog("close"); } }]
+                });
+                $( "#messagewindow" ).dialog({  autoOpen: false,
+                                                resizable: false,
+                                                zIndex: 9999,
+                                                height: 'auto',
+                                                width: 400,
+                                                modal: true,
+                                                buttons: { OK : function(){ $(this).dialog("close"); } }
+                });
+                $( "#messagewindow2" ).dialog({ autoOpen: false,
+                                                resizable: false,
+                                                zIndex: 9999,
+                                                height: 'auto',
+                                                width: 400,
+                                                modal: true,
+                                                buttons:[   { text: "Log in", click: function(){ $(this).dialog("close"); editor.Authorize.beginAuthentication(); } },
+                                                            { text: "Cancel", click: function(){ $(this).dialog("close"); } }]
+                });
+                $( "#authwindow" ).dialog({ autoOpen: false,
+                                            resizable: false,
+                                            zIndex: 9999,
+                                            height: 'auto',
+                                            width: 400,
+                                            modal: true,
+                                            buttons: [  { text: "Log In", click: function(){ editor.Authorize.sendAuthenticationRequest(); } },
+                                                        { text: "Cancel", click: function(){ $(this).dialog("close"); } }]
+                });
+                $( "#targetcatalogselector" ).dialog({  autoOpen: false,
+                                                        resizable: false,
+                                                        zIndex: 9999,
+                                                        height: 'auto',
+                                                        width: 550,
+                                                        modal: false,
+                                                        buttons: [  { text: "OK", click: function(){ sendAddToFavoritesRequest(null); $(this).dialog("close"); } },
+                                                                    { text: "Cancel", click: function(){ buffer = null; $(this).dialog("close"); } }]
+                });
+                $( "#rasteropeationswindow" ).dialog({  autoOpen: false,
+                                                        resizable: false,
+                                                        zIndex: 9998,
+                                                        height: 'auto',
+                                                        width: 450,
+                                                        modal: false,
+                                                        buttons: { "Cancel" : function(){ $(this).dialog("close"); } }
+                });
+                $( "#selectrasterwindow" ).dialog({ autoOpen: false,
+                                                    resizable: false,
+                                                    zIndex: 9999,
+                                                    height: 'auto',
+                                                    width: 400,
+                                                    modal: true,
+                                                    buttons: { "Cancel" : function(){ $(this).dialog("close"); } }
+
+                });
+                $( "#selectpalettewindow" ).dialog({    autoOpen: false,
+                                                        resizable: false,
+                                                        zIndex: 9985,
+                                                        height: 300,
+                                                        width: 400,
+                                                        modal: true,
+                                                        buttons: { "Cancel" : function(){ $(this).dialog("close"); } }
+
+                });
+            </script>
+        {% endblock %}
+
+    </body>
+</html>
