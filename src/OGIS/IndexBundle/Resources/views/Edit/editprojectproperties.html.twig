@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+		<link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+		<title>Editing properties of project "{{ project.name }}"</title>
+		<style>
+			.greentext{ color: #006f00; }
+			.redtext{ color: #8f0000; }
+		</style>
+		<script type="text/javascript">
+			function resetValues(){
+				document.getElementById("projectname").value = "{{ project.name }}";
+				document.getElementById("projectdescription").value = "{{ project.description }}";
+				{% if project.publicviewable %}
+					document.getElementById("view1").checked = true;
+					document.getElementById("view2").checked = false;
+				{% else %}
+					document.getElementById("view1").checked = false;
+					document.getElementById("view2").checked = true;
+				{% endif %}
+				{% if project.publicjoinable %}
+					document.getElementById("join1").checked = true;
+					document.getElementById("join2").checked = false;
+				{% else %}
+					document.getElementById("join1").checked = false;
+					document.getElementById("join2").checked = true;
+				{% endif %}
+			}
+
+			function goBackToProject(){
+				window.location.href = "{{ path('showproject', {id: project.id}) }}";
+			}
+		</script>
+	</head>
+
+	<body style="width:100%; position:absolute; top:-8px; left:-8px;">
+
+		{% use 'OGISIndexBundle:Default:header.html.twig' %}
+		{% block header %}
+			{{ parent() }}
+		{% endblock %}
+
+		{% block bodycontent %}
+			<form method="post" action="{{ path('edit_project_properties_save', {id: project.id}) }}" id="projectpropertiesform">
+			<div style="width:80%;margin-left:auto;margin-right:auto;margin-top:16px;margin-bottom:8px;padding:4px;">
+				<table style="width:100%;border:1px solid #ccc;margin-bottom:8px;">
+					<tr>
+						<td width="200px">
+							<b>Project's title:</b>
+						</td>
+						<td colspan="2">
+							<input type="text" style="width:calc(100% - 20px)" id="projectname" name="_projectname" value="{{ project.name }}" required="required" />
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<b>Project's description:</b>
+						</td>
+						<td colspan="2">
+							<textarea style="width:calc(100% - 20px);resize:none;" rows="5" id="projectdescription" name="_projectdescription" form="projectpropertiesform">{{ project.description }}</textarea>
+						</td>
+					</tr>
+					<tr>
+						<td rowspan="2">
+							<b>View permissions:</b>
+						</td>
+						<td valign="top">
+							<input type="radio" id="view1" name="_publicviewable" value="true" {% if project.publicviewable %}checked{% endif %}>
+						</td>
+						<td>
+							<label class="greentext" for="view1">Anyone can view this projects or its files.</label>
+						<td>
+					</tr>
+					<tr>
+						<td valign="top">
+							<input type="radio" id="view2" name="_publicviewable" value="false" {% if project.publicviewable == false %}checked{% endif %}>
+						</td>
+						<td>
+							<label class="redtext" for="view2">Only project members and site administration can view files of this project.</label>
+						</td>
+					</tr>
+					<tr>
+						<td rowspan="2"><b>Project membership:</b></td>
+						<td valign="top">
+							<input type="radio" id="join1" name="_publicjoinable" value="true" {% if project.publicjoinable %}checked{% endif %}>
+						</td>
+						<td>
+							<label class="greentext" for="join1">Anyone can join the project.</label>
+						<td>
+					</tr>
+					<tr>
+						<td valign="top">
+							<input type="radio" id="join2" name="_publicjoinable" value="false" {% if project.publicjoinable == false %}checked{% endif %}>
+						</td>
+						<td>
+							<label class="redtext" for="join2">Only project administration can add new members to the project.</label>
+						</td>
+					</tr>
+			</table>
+				<input type="submit" value="Apply changes"/>&nbsp;
+			</form>
+				<button onclick="resetValues()">Revert</button>&nbsp;
+				<button form="wrongform" onclick="goBackToProject()">Return to project</button>
+			</div>
+		{% endblock %}
+
+		{% block footer %}
+			{{ parent() }}
+		{% endblock %}
+	</body>
+</html>
