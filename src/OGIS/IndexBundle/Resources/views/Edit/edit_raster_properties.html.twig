@@ -82,7 +82,7 @@
                 if (name === "" || name.match(/^\s+$/g)){
                     $( '#messagewindow' ).dialog('option', 'title', 'Error!');
                     var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
-                                'Layer's title must include meaningful symbols!</td></tr></table>';
+                                'Layer\'s title must include meaningful symbols!</td></tr></table>';
                     $( "#messagewindow" ).empty().append(html);
                     $( "#messagewindow" ).dialog("open");
                     return;
