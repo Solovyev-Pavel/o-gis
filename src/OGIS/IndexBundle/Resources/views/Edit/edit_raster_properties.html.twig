@@ -1,0 +1,466 @@
+{% if layer.palette != null %}
+    {% set styling = 'palette' %}
+{% else %}
+    {% if layer.style != null and layer.style != '' %}
+        {% set styling = 'style' %}
+    {% else %}
+        {% set styling = 'default' %}
+    {% endif %}
+{% endif %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <title>Editing properties of layer "{{ layer.name }}"</title>
+        <link rel="stylesheet" href="{{ asset('./css/ogis_styles.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery-ui/jquery-ui.css') }}" />
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery/jstree.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
+
+        <style>
+            .greentext{ color: #006f00; }
+            .redtext{ color: #8f0000; }
+            .bordertable{
+                width: 100%;
+                border: 1px solid #ccc;
+                margin-bottom: 8px;
+            }
+        </style>
+        <script type="text/javascript">
+            {% if styling == 'default' %}
+                var stylename = 'Base raster style';
+                var selected_styling = { type: "Style", internal_name: "{{ layer.type }}", name: stylename };
+            {% elseif styling == 'style' %}
+                var stylename = "{{ layer.style.name }}";
+                var selected_styling = { type: "Style", internal_name: "{{ layer.style.internalname }}", name: stylename };
+            {% elseif styling == 'palette' %}
+                var styling_raw = "{{ layer.palette }}";
+                var selected_styling = JSON.parse(styling_raw.replace(/\&quot;/gi, '"'));
+                var stylename = selected_styling.name;
+            {% endif %}
+            
+            var new_styling = null;
+            var current_palette = null;
+            var new_palette = null;
+            var sld = '';
+            
+            // sends the user back to the layer's page
+            function goBackToLayer(){
+                window.location.href = "{{ path('showlayer', {id: layer.id}) }}";
+            }
+
+            // restores layer's name and description to the values set at the last save
+            function resetValues(){
+                document.getElementById("layername").value = "{{ layer.name }}";
+                document.getElementById("layerdescription").value = "{{ layer.description|trim|replace({ ('\r\n') : ' ', ('\r') : ' ', ('\n') : ' ' }) }}";
+            }
+
+            // saves the new values for layer's name and description into the database
+            function submitFormAction(){
+                var name = document.getElementById("layername").value;
+                if (name === "" || name.match(/^\s+$/g)){
+                    $( '#messagewindow' ).dialog('option', 'title', 'Error!');
+                    var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                'Layer's title must include meaningful symbols!</td></tr></table>';
+                    $( "#messagewindow" ).empty().append(html);
+                    $( "#messagewindow" ).dialog("open");
+                    return;
+                }
+                document.getElementById("layerpropertiesform").submit();
+            }
+
+            // display the name of the currently-used style for the layer
+            function applyCurrentStyleName(){
+                var text = selected_styling.type + ": " + selected_styling.name;
+                $('#layerstyle').append(text);
+                if (selected_styling.type == "Palette"){
+                    var url = "{{ path('getpalette', {'id' : 'ID'}) }}";
+                    $.ajax(url.replace('ID', selected_styling.id))
+                        .done(function(msg){
+                            if (!msg.success){
+                                $( '#messagewindow' ).dialog('option', 'title', 'Error!');
+                                var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                            'Error while loading palette: ' + msg.message + '</td></tr></table>';
+                                $( "#messagewindow" ).empty().append(html);
+                                $( "#messagewindow" ).dialog("open");
+                                return;
+                            }
+                            current_palette = {
+                                colors: msg.colors,
+                                keycolors: msg.keyValues
+                            };
+                        })
+                        .fail(function(){
+                            $( '#messagewindow' ).dialog('option', 'title', 'Error!');
+                            var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                        'Error while loading palette.</td></tr></table>';
+                            $( "#messagewindow" ).empty().append(html);
+                            $( "#messagewindow" ).dialog("open");
+                        });
+                }
+            }
+            
+            // display the pick-new-style window
+            function showChangeLayerStyleWindow(){
+                if ($('#stylepicktree').children().length === 0){
+                    $('#stylepicktree').append('<iframe style="width:95%;height:95%;" src="{{ path('layerstylingoptions') }}" />');
+                }
+                $('#selectstylingwindow').dialog('open');
+            }
+            
+            // display options block - palette/style picked
+            function pickStylingOption(name, id, type, intname){
+                if (type === 'style'){
+                    $('#palettecontrols').css('display', 'none');
+                    $('#stylecontrols').css('display', 'block');
+                    $('#applybuttonbox').css('display', 'block');
+                    $('#stylename').empty().text(name);
+                    new_styling = { type: "Style", name: name, internal_name: intname };
+                }
+                else{
+                    $('#palettecontrols').css('display', 'block');
+                    $('#stylecontrols').css('display', 'none');
+                    {% if layer.type == 'raster' %}
+                        $('#applybuttonbox').css('display', 'block');
+                    {% else %}
+                        $('#applybuttonbox').css('display', 'none');
+                    {% endif %}
+                    $('#palettename').empty().text(name);
+                    $('#palettenameused').empty().text(name);
+                    var url = "{{ path('getpalette', {'id' : 'ID'}) }}";
+                    new_styling = { type: "Palette", name: name, id: id };
+                    $.ajax(url.replace('ID', id))
+                        .done(function(msg){
+                            if (!msg.success){
+                                $( '#messagewindow' ).dialog('option', 'title', 'Error!');
+                                var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                            'Error while loading palette: ' + msg.message + '</td></tr></table>';
+                                $( "#messagewindow" ).empty().append(html);
+                                $( "#messagewindow" ).dialog("open");
+                                return;
+                            }
+                            new_palette = {
+                                colors: msg.colors,
+                                keycolors: msg.keyValues
+                            };
+                        })
+                        .fail(function(){
+                            $( '#messagewindow' ).dialog('option', 'title', 'Error!');
+                            var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                        'Error while loading palette.</td></tr></table>';
+                            $( "#messagewindow" ).empty().append(html);
+                            $( "#messagewindow" ).dialog("open");
+                        });
+                }
+            }
+            
+            // apply server default style to layer preview
+            function useServerDefaultStyle(){
+                var style = "{{ layer.type }}";
+                var stylename = 'Base raster style';
+                new_styling = { type: "Style", name: stylename, internal_name: style };
+                var text = new_styling.type + ": " + new_styling.name;
+                $('#layerstyle').empty().append(text);
+                $('#previewImage').prop('src', '{{ path('geoserverFunctionsProxy', {'something': 'wms'}) }}/reflect?LAYERS={{layer.workspace}}:{{layer.constring}}&STYLES=' + style);
+            }
+
+            // apply selected styling to layer preview
+            function applySelectedStyling(rollback){
+                if (new_styling.type === 'Style'){
+                    var text = new_styling.type + ": " + new_styling.name;
+                    $('#layerstyle').empty().append(text);
+                    $('#previewImage').prop('src', '{{ path('geoserverFunctionsProxy', {'something': 'wms'}) }}/reflect?LAYERS={{layer.workspace}}:{{layer.constring}}&STYLES=' + new_styling.internal_name);
+                    $('#selectstylingwindow').dialog('close');
+                }
+                else{
+                    if (!rollback){
+                        var min = parseFloat(document.getElementById('stretch-lowedge').value);
+                        var max = parseFloat(document.getElementById('stretch-highedge').value);
+                        var interpolation = document.getElementById("interpolation").value;
+                        var inverted_order = $('#invertorder').prop('checked');
+                        var visible_nodata = $('#nodatausage').prop('checked');
+
+                        new_styling.min = min;
+                        new_styling.max = max;
+                        new_styling.interpolation = interpolation;
+                        new_styling.inverted = inverted_order;
+                        new_styling.visible_nodata = visible_nodata;
+                    }
+                    
+                    sld = generateSldStyle();
+                    var text = new_styling.type + ": " + new_styling.name;
+                    $('#layerstyle').empty().append(text);
+                    $('#previewImage').prop('src', '{{ path('geoserverFunctionsProxy', {'something': 'wms'}) }}/reflect?LAYERS={{layer.workspace}}:{{layer.constring}}&SLD_BODY=' + sld);
+                    $('#selectstylingwindow').dialog('close');
+                }
+            }
+
+            // apply selected styling
+            function applyStyleToLayer(){
+                var styling = (new_styling === null) ? selected_styling : new_styling;
+                if (styling.type === 'Style'){
+                    $('#layernewstylename').prop('value', styling.internal_name);
+                    document.getElementById("layerstyleform").submit();
+                }
+                else{
+                    if (sld === null || sld === ''){
+                        new_styling = selected_styling;
+                        new_palette = current_palette;
+                        sld = generateSldStyle();
+                    }
+                    $('#palettestylevalue').prop('value', sld);
+                    $('#newpaletteoutbox').prop('value', JSON.stringify(new_styling));
+                    document.getElementById('layerpaletteform').submit();
+                }
+            }
+            
+            // generate style from palette
+            function generateSldStyle(){
+                var ndt = {{ layer.nodataValue }};
+                
+                var colors = new_palette.colors;
+                var keycolorindexes = new_palette.keycolors;
+                var keycolors = new Array();
+                for (var i = 0; i < keycolorindexes.length; i++){
+                    var j = parseInt(keycolorindexes[i]);
+                    var rgba = {
+                        rgb:     '0x' + colors.substring((j - 1) * 8, j * 8 - 2),
+                        opacity: parseInt('0x' + colors.substring((j - 1) * 8 + 6, j * 8)) / 255
+                    };
+                    keycolors.push(rgba);
+                }
+                if (new_styling.inverted){ keycolors.reverse(); }
+                
+                var tmp =   '<StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld" xmlns:ogc="http://www.opengis.net/ogc">' +
+                            '<NamedLayer><Name>{{ layer.workspace }}:{{ layer.constring }}</Name><UserStyle><FeatureTypeStyle><Rule><Abstract>' +
+                            'Autogenerated raster style</Abstract><RasterSymbolizer><ColorMap type="' + new_styling.interpolation +
+                            '" extended="true">';
+                if (new_styling.interpolation === 'values'){
+                    tmp += '<ColorMapEntry color="0x000000" quantity="-0.1" opacity="0"/>';
+                }
+                else{
+                    if (!new_styling.visible_nodata){
+                        tmp += '<ColorMapEntry color="0x000000" quantity="' + ndt + '" opacity="0"/>';
+                        if (new_styling.interpolation === 'intervals'){
+                            tmp += '<ColorMapEntry color="0x000000" quantity="' + (ndt + 0.000001)  + '" opacity="0"/>';
+                        }
+                    }
+                    else{
+                        tmp += '<ColorMapEntry color="' + keycolors[0].rgb + '" quantity="' + ndt + '" opacity="' + keycolors[0].opacity + '"/>';
+                    }
+                }
+                var j = 0;
+                for (var i = 0; i < keycolorindexes.length; i++){
+                    if (new_styling.interpolation === 'values'){
+                        tmp += '<ColorMapEntry color="' + keycolors[i].rgb + '" quantity="' + (keycolorindexes[i] - 1) + '" opacity="' + keycolors[j].opacity + '"/>';
+                    }
+                    else{
+                        var pos = new_styling.min + (new_styling.max - new_styling.min) * ((keycolorindexes[i] - 1) / 255);
+                        tmp += '<ColorMapEntry color="' + keycolors[i].rgb + '" quantity="' + pos.toFixed(5) + '" opacity="' + keycolors[j].opacity + '"/>';
+                    }
+                }                
+                tmp += '</ColorMap></RasterSymbolizer></Rule></FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>';
+                return tmp;
+            }
+            
+            // validate stretching input
+            function validateStretchRange(input, value){
+                var min = {{ layer.minValue }};
+                var max = {{ layer.maxValue }};
+                switch (input){
+                    case 1: if (isNaN(value) || value < min){ value = min; }
+                            if (value > $('#stretch-slider').slider('values', 1)){ value = $('#stretch-slider').slider('values', 1) - $('#stretch-slider').slider('option', 'step'); }
+                            $('#stretch-lowedge').prop('value', value);
+                            $('#stretch-slider').slider('values', 0, value);
+                            break;
+                    case 2: if (isNaN(value) || value > max){ value = max; }
+                            if (value < $('#stretch-slider').slider('values', 0)){ value = $('#stretch-slider').slider('values', 0) + $('#stretch-slider').slider('option', 'step'); }
+                            $('#stretch-highedge').prop('value', value);
+                            $('#stretch-slider').slider('values', 1, value);
+                            break;
+                    case 3: $('#stretch-lowedge').prop('value', value[0]);
+                            $('#stretch-highedge').prop('value', value[1]);
+                            break;
+                }
+            }
+            
+            // restore current saved styling
+            function rollbackToDefaultStyle(){
+                new_styling = selected_styling;
+                if (selected_styling.type === 'Палитра'){
+                    new_palette = current_palette;
+                }
+                applySelectedStyling(true);
+            }
+        </script>
+    </head>
+
+    <body class="bodyfullpage" onload="applyCurrentStyleName();">
+
+        {% use 'OGISIndexBundle:Default:header.html.twig' %}
+        {% block header %}
+            {{ parent() }}
+        {% endblock %}
+
+        {% block pagecontent %}
+            <div class="contentbody">
+                <form method="post" action="{{ path('edit_layer_properties_save', {id: layer.id}) }}" id="layerpropertiesform">
+                    <div style="margin-top:16px;padding:4px;">
+                        <table class="bordertable">
+                            <tr>
+                                <td width="200px"><b>Layer's title:</b></td>
+                                <td>
+                                    <input type="text" style="width:calc(100% - 20px)" id="layername" name="_layername" value="{{ layer.name }}" required="required" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><b>Layer's description:</b></td>
+                                <td>
+                                    <textarea style="width:calc(100% - 20px);resize:none;" rows="5" id="layerdescription" name="_layerdescription" form="layerpropertiesform">{{ layer.description }}</textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td  colspan="2" style="padding-top:16px;">
+                                    <button type="button" form="wrongform" onclick="submitFormAction();">Apply changes</button>&nbsp;
+                                    <button type="button" form="wrongform" onclick="resetValues();">Revert</button>&nbsp;
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </form>
+                <div style="margin-bottom:8px;padding:4px;">
+                    <table class="bordertable">
+                        <tr>
+                            <td width="200px">Styling used:</td>
+                            <td>
+                                <div id="layerstyle" style="font-weight:bold;"></div>
+                            </td>
+                            <td width="200px">
+                                <button type="button" form="wrongform" onclick="showChangeLayerStyleWindow();">Change</button>&nbsp;
+                                <button type="button" form="wrongform" onclick="useServerDefaultStyle();">Use default</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Preview:</td>
+                            <td colspan="2">
+                                <center>
+                                   <img id="previewImage" src="{{ path('geoserverFunctionsProxy', {'something' : 'wms'}) }}/reflect?LAYERS={{layer.workspace}}:{{layer.constring}}" />
+                                </center>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="padding-top:16px;">
+                                <button form="wrongform" onclick="applyStyleToLayer();">Apply changes</button>&nbsp;
+                                <button form="wrongform" onclick="rollbackToDefaultStyle();">Revert</button>&nbsp;
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <form method="post" action="{{ path('applystyle', {id: layer.id}) }}" id="layerstyleform">
+                    <input type="hidden" name="_layer" value="{{ layer.workspace }}:{{ layer.constring }}" />
+                    <input type="hidden" name="_style" id="layernewstylename" value="" />
+                </form>
+                <form method="post" action="{{ path('updatepalettestyle') }}" id="layerpaletteform">
+                    <input type="hidden" name="_layer" value="{{ layer.constring }}" />
+                    <input type="hidden" name="_style" value="" id="palettestylevalue" />
+                    <input type="hidden" name="_palette" value="" id="newpaletteoutbox" />
+                </form>
+                <button type="button" form="wrongform" onclick="goBackToLayer();">Go back to layer preivew</button>
+            </div>
+
+            <div id="messagewindow" title=""></div>
+            <div id="selectstylingwindow" title="Styling options">
+                <div style="width:360px;height:450px;float:left;" id="stylepicktree"></div>
+                <div style="width:360px;height:450px;float:right;" id="controlsbox">
+                    <div id="palettecontrols" style="width:340px;height:400px;border:1px solid #ccc;display:none;">
+                        <div style="width:100%;height:100%;padding:10px">
+                            <center style="font-size:14px">Palette settings <b id="palettenameused"></b></center>
+                            <br/>
+                            <table style="width:calc(100% - 20px)">
+                                <tr>
+                                    <td width="75px">
+                                        <input id="stretch-lowedge" style="width:55px" type="text" value="{{ layer.minValue }}" onchange="validateStretchRange(1, this.value);" />
+                                    </td>
+                                    <td><div id="stretch-slider"></div></td>
+                                    <td width="75px">
+                                        <p style="display:inline;width:20px;">&nbsp;</p>
+                                        <input id="stretch-highedge" style="width:55px" type="text" value="{{ layer.maxValue }}" onchange="validateStretchRange(2, this.value);" />
+                                    </td>
+                                </tr>
+                            </table>
+                            <table style="width:calc(100% - 20px)">
+                                <tr>
+                                    <td width="125px"><b>Interpolation</b>:</td>
+                                    <td>
+                                        <select id="interpolation" style="width:calc(100% - 8px)">
+                                            <option value="ramp" selected="selected">Gradient</option>
+                                            <option value="intervals">Intervals</option>
+                                            <option value="values">Palette values</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <label><input type="checkbox" id="nodatausage" /> render NODATA values ({{ layer.nodataValue }}) with visible color</label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <label><input type="checkbox" id="invertorder" /> invert color order</label>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    <div id="stylecontrols" style="width:340px;height:400px;border:1px solid #ccc;display:none;">
+                        <div style="width:100%;height:100%;padding:10px">
+                            <b id="stylename"></b> is a predefined style and can't be changed.
+                        </div>
+                    </div>
+                    <div style="width:360px;height:40px;float:right;margin-top:8px;display:none" id="applybuttonbox">
+                        <button type="button" form="wrongform" onclick="applySelectedStyling(false);">Choose this styling</button>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                $( "#messagewindow" ).dialog({ autoOpen: false, resizable: false, zIndex: 9999, height: 'auto', width: 420, modal: true, buttons: { OK : function(){ $(this).dialog("close"); } }});
+                $( "#selectstylingwindow" ).dialog({ autoOpen: false, resizable: false, zIndex: 9999, height: 'auto', width: 750, modal: true, buttons: { "Закрыть" : function(){ $(this).dialog("close"); } }});
+                $( "#stretch-slider" ).slider({ orientation: "horizontal",
+                                                range: true,
+                                                min: {{ layer.minValue }},
+                                                max: {{ layer.maxValue }},
+                                                step: ({{ layer.maxValue }} - {{ layer.minValue }})/100,
+                                                values: [{{ layer.minValue }}, {{ layer.maxValue }}],
+                                                slide: function(event, ui){ validateStretchRange(3, ui.values); }
+                                        });
+            </script>
+
+        {% endblock %}
+
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+        
+    </body>
+</html>
