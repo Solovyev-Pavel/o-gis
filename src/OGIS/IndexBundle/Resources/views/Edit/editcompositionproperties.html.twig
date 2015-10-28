@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+		<link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+		<title>Editing properties of composition "{{ composition.name }}"</title>
+		<link rel="stylesheet" href="{{ asset('./css/ogis_styles.css') }}" />
+
+		<style>
+			.greentext{ color: #006f00; }
+			.redtext{ color: #8f0000; }
+		</style>
+		<script type="text/javascript">
+			function goBackToLayer(){
+				window.location.href = "{{ path('showcomposition', {id: composition.id}) }}";
+			}
+
+			function resetValues(){
+				document.getElementById("compositionname").value = "{{ composition.name }}";
+				document.getElementById("compositiondescription").value = "{{ composition.description }}";
+			}
+			function submitFormAction(){
+				var name = document.getElementById("compositionname").value;
+				if (name === "" || name.match(/^\s+$/g)){
+					alert("Composition's title must contain meaningful names!");
+					return;
+				}
+				document.getElementById("compositionpropertiesform").submit();
+			}
+		</script>
+	</head>
+
+	<body class="bodyfullpage">
+
+		{% use 'OGISIndexBundle:Default:header.html.twig' %}
+		{% block header %}
+			{{ parent() }}
+		{% endblock %}
+
+		{% block pagecontent %}
+			<div class="contentbody">
+				<form method="post" action="{{ path('edit_composition_properties_save', {id: composition.id}) }}" id="compositionpropertiesform">
+				<div style="width:80%;margin-left:auto;margin-right:auto;margin-top:16px;margin-bottom:8px;padding:4px;">
+				<table style="width:100%;border:1px solid #ccc;margin-bottom:8px;">
+					<tr>
+						<td width="200px">
+							<b>Composition's title:</b>
+						</td>
+						<td colspan="2">
+							<input type="text" style="width:calc(100% - 20px)" id="compositionname" name="_compositionname" value="{{ composition.name }}" required="required" />
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<b>Composition's descritpion:</b>
+						</td>
+						<td colspan="2">
+							<textarea style="width:calc(100% - 20px);resize:none;" rows="5" id="compositiondescription" name="_compositiondescription" form="compositionpropertiesform">{{ composition.description }}</textarea>
+						</td>
+					</tr>
+			</table>
+			</form>
+				<button form="wrongform" onclick="submitFormAction();">Apply changes</button>&nbsp;
+				<button form="wrongform" onclick="resetValues();">Revert</button>&nbsp;
+				<button form="wrongform" onclick="goBackToLayer();">Leave without saving</button>
+			</div>
+		{% endblock %}
+
+		{% block footer %}
+			{{ parent() }}
+		{% endblock %}
+	</body>
+</html>
