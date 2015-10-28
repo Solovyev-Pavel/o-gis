@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <title>{% if palette != null %}{{ palette.name }} :: {% endif %}Palette editor :: project O-GIS</title>
+        
+        <link rel="stylesheet" href="{{ asset('./css/ogis_styles.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./css/jstree-types.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery/themes/default/style.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery-ui/jquery-ui.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/colors/jquery.minicolors.css') }}" />
+        
+        <style>
+            .ui-dialog{ z-index: 9999 !important; }
+            .ui-front{ z-index: 9998 !important; }
+        </style>
+        
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery/jstree.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/addtofavorites.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/colors/jquery.minicolors.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/paletteEditor.js') }}"></script>
+        
+        <script type="text/javascript">
+            {% if palette != null %}
+                var palette_colors = "{{ palette.colors }}";
+                var keyValues = "{{ palette.keyValues }}";
+                var new_palette = false;
+                var palette = {     id: {{ palette.id }},
+                                    name: "{{ palette.name }}",
+                                    desc: "{{ palette.description }}",
+                                    publ: {{ palette.public }}
+                              };
+            {% else %}
+                var palette = null;
+                var colors = null;
+                var new_palette = true;
+            {% endif %}
+            var catalogData = "{{ path('loadcatalogdata', {'catid': 'PATH' }) }}";
+            var rootFavNodes = "{{ path('loadusercatalogs', {'holderid': app.user.id}) }}";
+            
+            var keyColors = new Array();
+            var cellBeingEdited = null;
+            var paletteEditor = null;
+            
+            // Initialize the grid
+            function initiateEditor(){
+                paletteEditor = new PaletteEditor();
+                paletteEditor.setGridCellOnclickFunction('beginEditCellColor');
+                paletteEditor.generateGrid('palettebox', 'paletteelement');
+                {% if palette != null %}
+                    var r, g, b, a;
+                    for(var i = 0; i < 2048; i += 8){
+                        r = parseInt('0x' + palette_colors.substring(i, i + 2));
+                        g = parseInt('0x' + palette_colors.substring(i + 2, i + 4));
+                        b = parseInt('0x' + palette_colors.substring(i + 4, i + 6));
+                        a = parseInt('0x' + palette_colors.substring(i + 6, i + 8)) / 255;
+                        var rgba = 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+                        var id = parseInt(i / 8);
+                        paletteEditor.setGridCellColor(id, rgba);
+                    }
+                    var keyVals = keyValues.split(',');
+                    for (var i = 0; i < keyVals.length; i++){
+                        keyColors[parseInt(keyVals[i]) - 1] = 1;
+                    }
+                {% endif %}
+            }
+            
+            // Load the color of a grid cell into the colorpicker
+            function beginEditCellColor(cell_id){
+                cellBeingEdited = cell_id;
+                var color = paletteEditor.getGridCellColor(cell_id);
+                var color_components = color.substring(5, color.length - 1).split(',');
+                var hexColor = paletteEditor.convertToHex(color_components);
+                $('#colorpicker').minicolors('value', hexColor);
+                $('#colorpicker').minicolors('opacity', color_components[3]);
+                $('#msgbox').empty().append('Editing cell #' + cell_id + '<br/>Current color: ' + hexColor);
+            }
+            
+            // perform a gradient fill on the palette
+            function doGradientFill(){
+                var min = parseInt(document.getElementById('lowedgegr').value);
+                var max = parseInt(document.getElementById('highedgegr').value);
+                if (max < min){
+                    var tmp = min;
+                    min = max;
+                    max = tmp;
+                }
+                if (min < 0){ min = 0; }
+                if (max > 255){ max = 255; }
+                paletteEditor.applyGradientFill(min, max);
+            }
+            
+            // perform a flood fill on the palette
+            function doFloodFill(){
+                var min = parseInt(document.getElementById('lowedgecp').value);
+                var max = parseInt(document.getElementById('highedgecp').value);
+                var val = parseInt(document.getElementById('targetcp').value);
+                if (max < min){
+                    var tmp = min;
+                    min = max;
+                    max = tmp;
+                }
+                if (min < 0){ min = 0; }
+                if (val < 0){ val = 0; }
+                if (max > 255){ max = 255; }
+                if (val > 255){ val = 255; }
+                paletteEditor.applyFloodFill(min, max, val);
+                var tmp;
+                // move keyColors to the sides if possible
+                if (min !== 0){
+                    tmp = min - 1;
+                    var minColor = paletteEditor.getGridCellColor(min);
+                    var tmpColor = paletteEditor.getGridCellColor(tmp);
+                    while (tmp > 0 && tmpColor === minColor){ tmp--; }
+                    keyColors[min] = 0;
+                    keyColors[tmp] = 1;
+                }
+                if (max !== 255){
+                    tmp = max + 1;
+                    var maxColor = paletteEditor.getGridCellColor(max);
+                    var tmpColor = paletteEditor.getGridCellColor(tmp);
+                    while (tmp < 255 && tmpColor === maxColor){ tmp++; }
+                    keyColors[max] = 0;
+                    keyColors[tmp] = 1;
+                }
+            }
+            
+            // clear the palette
+            function clearPalette(){
+                if(!confirm('Сбросить палитру?')){ return; }
+                $('#msgbox').empty().append('Please choose a cell...<br/>&nbsp;');
+                paletteEditor.resetPaletteEditorGrid();
+                keyColors = new Array();
+            }
+
+            // start a new palette
+            function newPalette(){
+                if(!confirm('Begin editing new palette?')){ return; }
+                window.location.href = "{{ path('paletteeditor', {'id': null}) }}";
+            }
+            
+            // open a list of available palettes
+            function loadPalette(){
+                if ($('#loadpalettewindow').children().length === 0){
+                    $('#loadpalettewindow').append('<iframe style="width:95%;height:95%;" src="{{ path('showpalettelist') }}" />');
+                }
+                $('#loadpalettewindow').dialog('open');
+            }
+            
+            // saving the palette
+            function savePalette(overwrite){
+                // overwriting existing palette
+                if (!new_palette && overwrite){
+                    // we don't need to show this to the user
+                    document.getElementById('palette_name').value = palette.name;
+                    document.getElementById('palette_description').value = palette.desc;
+                    document.getElementById('palette_public').checked = palette.publ;
+                    $('#targetcatalagselector').css('display', 'none');
+                }
+                else{
+                    // fill the inputs with "default" values
+                    document.getElementById('palette_name').value = '';
+                    document.getElementById('palette_description').value = '';
+                    document.getElementById('palette_public').checked = true;
+                    $('#targetcatalagselector').removeAttr('style');
+                    $('#selectednodeid').text('');
+                }
+                if($('#targettree').is(':empty')){
+                    showTargetCatalogTree();
+                }
+                $('#savepalettewindow').dialog('open');
+            }
+            
+            // sending the save-palette request
+            function sendSavePaletteRequest(){
+                var tmp = document.getElementById('palette_name').value;
+                if (tmp.match(/^\s*$/g)){ 
+                    alert('Palette\'s title must contain meaningful symbols!');
+                    return;
+                }
+                palette.name = tmp;
+                palette.desc = document.getElementById('palette_description').value;
+                palette.publ = document.getElementById('palette_public').checked;
+                if (!document.getElementById('targetcatalagselector').hasAttribute('style')){
+                    tmp = $('#selectednodeid').text();
+                    if (tmp === ''){
+                        alert('You must pick a catalog to place the palette\'s link into!');
+                        return;
+                    }
+                }
+                else{ tmp = ''; }
+
+                $('#savepalettewindow').dialog("close");
+
+                var colors = "", rgba, vals;
+                var keyVals = "";
+                for (var i = 0; i < 256; i++){
+                    rgba = paletteEditor.getGridCellColor(i);
+                    vals = rgba.substring(5, rgba.length - 1).split(',');
+                    var red = parseInt(vals[0]).toString(16);
+                    if (red.length === 1){ red = '0' + red;}
+                    var green = parseInt(vals[1]).toString(16);
+                    if (green.length === 1){ green = '0' + green;}
+                    var blue = parseInt(vals[2]).toString(16);
+                    if (blue.length === 1){ blue = '0' + blue;}
+                    var alpha = parseInt((vals[3] * 255)).toString(16);
+                    if (alpha.length === 1){ alpha = '0' + alpha;}
+                    colors += red + green + blue + alpha;
+                    if(keyColors[i] === 1){
+                        if(keyVals !== ""){ keyVals += ','; }
+                        keyVals += (i + 1);
+                    }
+                }
+                var json =  '{"name":\"' + palette.name + '\",\"description\":\"' + palette.desc +
+                            '\","public":' + palette.publ + ',\"colors\":\"' + colors + '\",\"keyValues\":\"' +
+                            keyVals + '\",\"catalog\":\"' + tmp + '\"}';
+                
+                var url = "{{ path('savepalette') }}";
+                if (document.getElementById('targetcatalagselector').hasAttribute('style')){ url += '/' + palette.id; }
+                $.ajax({url: url, method: 'POST', data: json})
+                    .done(function(msg){
+                        console.log(msg);
+                        if (msg.success){
+                            palette.id = msg.id;
+                            document.getElementById('savepalettebutton').disabled = false;
+                            var pagetitle = palette.name +  " :: Palette editor :: project O-GIS";
+                            var pageurl = 'http://' + window.location.hostname + '/o-gis/web/app.php/paletteeditor/' + palette.id;
+                            window.history.pushState({}, pagetitle, pageurl);
+                            new_palette = false;
+                            $( '#messagewindow' ).dialog('option', 'title', 'Error!');
+                            $( '#messagewindow' ).empty();
+                            var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' +
+                                msg.msg + '</td></tr></table>';
+                            $( "#messagewindow" ).append(html);
+                            $( "#messagewindow" ).dialog("open");
+                        }
+                        else{
+                            $( '#messagewindow' ).dialog('option', 'title', 'Error!');
+                            $( '#messagewindow' ).empty();
+                            var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                msg.msg + '</td></tr></table>';
+                            $( "#messagewindow" ).append(html);
+                            $( "#messagewindow" ).dialog("open");
+                        }
+                    })
+                    .fail(function(){
+                        $( '#messagewindow' ).dialog('option', 'title', 'Ошибка!');
+                            $( '#messagewindow' ).empty();
+                            var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                'Error while saving palette.</td></tr></table>';
+                            $( "#messagewindow" ).append(html);
+                            $( "#messagewindow" ).dialog("open");
+                    });
+            }
+
+            // export palette to SMP
+            function exportPalette(){
+                if (!confirm('Export as IDRISI smp palette?\r\nThis functionality doesn't work in Internet Explorer.')){ return; }
+                paletteEditor.exportToIDRISIPalette();
+            }
+
+        </script>
+    </head>
+    
+    <body  class="bodyfullpage" onload="initiateEditor();">
+        
+        {% use 'OGISIndexBundle:Default:header.html.twig' %}
+        {% block header %}
+            {{ parent() }}
+        {% endblock %}
+        
+        {% block content %}
+            <div class="contentbody">
+                <div style="border:1px solid #ccc;padding:10px;font-size:20px;">
+                    <b>Palette editor</b>
+                </div>
+                
+                <div class="palettepreviewbox">
+                    <div id="palettebox" style="width:548px;height:552px;padding-top:4px;padding-left:4px;float:left;border:1px solid #ccc;"></div>
+                    <div style="height:548px;width:calc(100% - 580px);min-width:200px;padding:4px;float:right;border:1px solid #ccc;">
+                        <table width="100%">
+                            <tr>
+                                <td colspan="4" style="background:#ccc;font-size:18px;height:30px">
+                                    <center><b>Color settings</b></center>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" width="200px">
+                                    
+                                    <div id="colorpicker-container">
+                                        <input type="text" id="colorpicker" data-opacity="0" value="#000000" />
+                                    </div>
+                                    
+                                    <script type="text/javascript">
+                                        $(function(){
+                                            $('#colorpicker').minicolors({
+                                                control: 'hue',
+                                                defaultValue: '',
+                                                inline: true,
+                                                letterCase: 'lowercase',
+                                                opacity: true,
+                                                position: $(this).attr('data-position') || 'bottom left',
+                                                change: function(hex, opacity) {
+                                                    var rgba = $(this).minicolors('rgbaString');
+                                                    paletteEditor.setGridCellColor(cellBeingEdited, rgba);
+                                                    keyColors[cellBeingEdited] = 1;
+                                                    $('#msgbox').empty().append('Editing cell #' + cellBeingEdited + '<br/>Текущий цвет: ' + hex);
+                                                },
+                                                theme: 'bootstrap'
+                                            });
+                                        });
+                                    </script>
+                                </td>
+                                <td colspan="2" valign="middle">
+                                    <div id="blocktochangeid" style="display:none;"></div>
+                                    <p id="msgbox">Select a cell...<br/>&nbsp;</p>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="background:#ccc;font-size:18px;height:30px">
+                                    <center><b>Palette fill</b></center>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td width="15%">from:</td>
+                                <td width="35%"><input type="number" min="0" max="255" value="0" id="lowedgegr" style="width:85%" /></td>
+                                <td width="15%">from:</td>
+                                <td width="35%"><input type="number" min="0" max="255" value="0" id="lowedgecp" style="width:85%" /></td>
+                            </tr>
+                            <tr>
+                                <td>to:</td>
+                                <td><input type="number" min="0" max="255" value="255" id="highedgegr" style="width:85%" /></td>
+                                <td>to:</td>
+                                <td><input type="number" min="0" max="255" value="255" id="highedgecp" style="width:85%" /></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">&nbsp;</td>
+                                <td>with color of:</td>
+                                <td><input type="number" min="0" max="255" value="0" id="targetcp" style="width:85%" /></td>
+                            </tr>
+                            <tr>
+                                <td colspan="2" valign="top" style="padding-bottom:16px;">
+                                    <button type="button" onclick="doGradientFill();" style="width:95%">Gradient fill</button>
+                                </td>
+                                <td colspan="2" valign="top">
+                                    <button type="button" onclick="doFloodFill();" style="width:95%">Flood fill</button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" style="background:#ccc;font-size:18px;height:30px">
+                                    <center><b>Warning!</b></center>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="4" valign="middle">
+                                    Using more than 30 key colors in your palette will cause it to not work in composition editor due to URI length limit in browsers.
+                                    <br/><br/>
+                                    Key colors are:
+                                    <ul>
+                                        <li>Manuallt-colored cells</li>
+                                        <li>Edges of gradient-fill areas</li>
+                                        <li>Edges of flood-fill areas</li>
+                                    </ul>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                
+                    <div style="width:calc(100% - 22px);border:1px solid #ccc;padding:10px;font-size:20px;float:left; margin-top:8px;">
+                        <center>
+                            <button style="height:30px;width:150px;margin-left:5px;margin-right:5px" onclick="newPalette();">New Palette</button>
+                            <button style="height:30px;width:150px;margin-left:5px;margin-right:5px" onclick="loadPalette();">Load Palette</button>
+                            <button style="height:30px;width:150px;margin-left:5px;margin-right:5px" {% if overwrite == false %}disabled="disabled"{% endif %} id="savepalettebutton" onclick="savePalette(true);">Save</button>
+                            <button style="height:30px;width:150px;margin-left:5px;margin-right:5px" onclick="savePalette(false);">Save as...</button>
+                            <button style="height:30px;width:150px;margin-left:5px;margin-right:5px" onclick="clearPalette();">Clear</button>
+                            <button style="height:30px;width:150px;margin-left:5px;margin-right:5px" onclick="exportPalette();">Export</button>
+                        </center>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="messagewindow" title="something"></div>
+            <div id="loadpalettewindow" title="Loading palette"></div>
+            <div id="savepalettewindow" title="Saving palette">
+                <table width="100%">
+                    <tr>
+                        <td width="150px"><b>Palette's title</b>:&nbsp;</td>
+                        <td width="350px">
+                            <input type="text" name="_palettename" id="palette_name" form="styleform" style="width:100%" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>Palette's description</b>:&nbsp;</td>
+                        <td>
+                            <textarea id="palette_description" name="_palettedescription" form="styleform" style="width:100%;resize:none;" rows="6"></textarea>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td colspan="2"><label><input type="checkbox" id="palette_public" checked="checked"/> this palette is public</label></td>
+                    </tr>
+                    <tr id="targetcatalagselector">
+                        <td><b>Каталог</b>:&nbsp;</td>
+                        <td>
+                            <input type="hidden" name="_targetcatalog" id="targetnode" form="styleform" value=""/>
+                            <div style="display:none" id="selectednodeid"></div>
+                            <div id="targettree" style="height:160px;border:1px solid #ccc;"></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+            <script type="text/javascript">
+                $( "#messagewindow" ).dialog({
+                    autoOpen: false,
+                    resizable: false,
+                    zIndex: 9999,
+                    height: 'auto',
+                    width: 400,
+                    modal: false,
+                    buttons: { OK : function(){ $(this).dialog("close"); } }});
+                $( "#loadpalettewindow" ).dialog({
+                    autoOpen: false,
+                    resizable: false,
+                    zIndex: 9999,
+                    height: 550,
+                    width: 550,
+                    modal: false,
+                    buttons: [{ text: "Cancel", click: function(){$(this).dialog("close"); } }]
+                    });
+                $( "#savepalettewindow" ).dialog({
+                    autoOpen: false,
+                    resizable: false,
+                    zIndex: 9999,
+                    height: 'auto',
+                    width: 550,
+                    modal: false,
+                    buttons: [
+                        { text: "Save", click: function(){ sendSavePaletteRequest(); } },
+                        { text: "Cancel", click: function(){ $(this).dialog("close"); } }]
+                    });
+            </script>
+            
+        {% endblock %}
+        
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+    </body>
+</html>
