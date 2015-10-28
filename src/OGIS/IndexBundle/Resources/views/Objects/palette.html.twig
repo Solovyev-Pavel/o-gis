@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+        <title>{{ palette.name }} :: palette O-GIS</title>
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <link rel="stylesheet" href="{{ asset('./css/ogis_styles.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./css/jstree-types.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery/themes/default/style.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery-ui/jquery-ui.css') }}" />
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery/jstree.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/addtofavorites.js') }}"></script>
+        <style>
+            .paletteelement{
+                width: 28px;
+                height: 28px;
+                margin-left: 2px;
+                margin-right: 2px;
+                border: 1px solid #000;
+                border-radius: 4px 4px 4px 4px;
+                display: inline-block;
+            }
+            .ui-dialog{ z-index: 9999 !important; }
+            .ui-front{ z-index: 9998 !important; }
+        </style>
+        <script type="text/javascript">
+            var colors = "{{ palette.colors }}";
+            {% if app.user != null %}
+                var rootFavNodes = "{{ path('loadusercatalogs', {'holderid': app.user.id}) }}";
+                var catalogData = "{{ path('loadcatalogdata', {'catid': 'PATH' }) }}";
+                var addToFavRoute = "{{ path('addtofavorites') }}";
+            {% endif %}
+                
+            function addToFavorites(){
+                var id = {{ palette.id }};
+                showTargetCatalogTree(id, 'palette');
+            }
+            
+            function redirectToPaletteEdit(){
+                window.location.href = "{{ path('paletteeditor', {'id': palette.id}) }}";
+            }
+            
+            // onload function
+            function createPreview(){
+                // first, we need to generate grid
+                var id = 1;
+                var html1 = '<div class="paletteelement" color="rgba(255,255,255,1)" id="block-';
+                var html2 = '"></div>';
+                for (var i = 0; i < 16; i++){
+                    for (var j = 0; j < 16; j++){
+                        $('#palettebox').append(html1 + id + '" title="' + id + html2);
+                        id++;
+                    }
+                    $('#palettebox').append('<br/>');
+                }
+                // now we need to write the colors, RGBA-way
+                var r, g, b, a;
+                for(var i = 0; i < 2048; i += 8){
+                    r = parseInt('0x' + colors.substring(i, i + 2));
+                    g = parseInt('0x' + colors.substring(i + 2, i + 4));
+                    b = parseInt('0x' + colors.substring(i + 4, i + 6));
+                    a = parseInt('0x' + colors.substring(i + 6, i + 8)) / 255;
+                    var rgba = 'rgba(' + r + ',' + g + ',' + b + ',' + a + ')';
+                    var id = parseInt(i / 8) + 1;
+                    $('#block-' + id).css('background-color', rgba);
+                    document.getElementById('block-' + id).setAttribute('color', rgba);
+                }
+            }
+            
+            function redirectToDeleteConfirm(){
+                window.location.href = "{{ path('deletepaletteconfirm', {'id': palette.id}) }}";
+            }
+        </script>
+    </head>
+    
+    <body  class="bodyfullpage" onload="createPreview();">
+        
+        {% use 'OGISIndexBundle:Default:header.html.twig' %}
+        {% block header %}
+            {{ parent() }}
+        {% endblock %}
+        
+        {% block content %}
+            <div class="contentbody">
+                <div class="entitytitleblock">
+                    <span class="entitytitle">{{ palette.name }}</span><br/>
+                    Created by: <a href="{{ path('showuser', {'id': palette.author.id}) }}">{{ palette.author.displayname }}</a>
+                </div>
+                <div class="entityinterractionblock">
+
+                    {% if app.user != null %}
+                        <div class="entitylinkbox objectlink" onclick="addToFavorites();">
+                            Add to favorites
+                        </div>
+                        {% if app.user.id == palette.author.id or is_granted('ROLE_ADMIN') == true or is_granted('ROLE_SUPER_ADMIN') == true or is_granted('ROLE_SYSTEM') == true %}
+                            <div class="entitylinkbox objectlink" onclick="redirectToPaletteEdit();">
+                                Edit
+                            </div>
+                            <div class="entitylinkbox objectlink" onclick="redirectToDeleteConfirm();">
+                                Delete
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+                
+                {% if viewable %}
+                    <div class="palettepreviewbox">
+                        <div id="palettebox" style="width:548px;height:544px;padding-top:4px;padding-left:4px;float:left;border:1px solid #ccc;"></div>
+                        <div style="height:540px;width:calc(100% - 580px);min-width:200px;padding:4px;float:right;border:1px solid #ccc;">
+                            <p style="font-size:20px;font-weight:bold;text-align:center;">{{ palette.name }}</p>
+                            <p><i>{{ palette.description }}</i></p>
+                        </div>
+                    </div>
+                {% else %}
+                    <table style="position:absolute;top:45%;width:80%;margin-left:auto;margin-right:auto;background:#e9c9c9;border:solid 2px #a00000;color:#d00000;padding-top:10px;padding-bottom:10px;font-weight:bold;font-size:26px;min-height:128px;">
+                        <tr>
+                            <td width="96px" valign="middle">
+                                <center>
+                                    <img src="{{ asset('./img/stop.png') }}"/>
+                                </center>
+                            </td>
+                            <td>
+                                <center>You don't have the permission necessary to view this palette!</center>
+                            </td>
+                            <td width="96px" valign="middle">
+                                <center>
+                                    <img src="{{ asset('./img/stop.png') }}"/>
+                                </center>
+                            </td>
+                        </tr>
+                    </table>
+                {% endif %}
+                
+            </div>
+                    
+            <div id="messagewindow" title="Adding to favorites"></div>
+            <div id="targetcatalogselector" title="Choose a catalog">
+                <div id="targettree" style="width:100%;height:300px;"></div>
+                <div id="targetnodeid" style="display:none"></div>
+                <div id="targetnodetype" style="display:none"></div>
+                <div id="selectednodeid" style="display:none"></div>
+                <div id="selectednode" style="height:20px;width:100%;float:bottom;padding-top:5px;border-top:1px solid #ccc"></div>
+            </div>
+            <script type="text/javascript">
+                $( "#messagewindow" ).dialog({ autoOpen: false, resizable: false, zIndex: 9999, height: 'auto', width: 400, modal: false, buttons: { OK : function(){ $(this).dialog("close"); } }});
+                $( "#targetcatalogselector" ).dialog({
+                    autoOpen: false,
+                    resizable: false,
+                    zIndex: 9999,
+                    height: 'auto',
+                    width: 550,
+                    modal: false,
+                    buttons: [
+                        { text: "OK", click: function(){ sendAddToFavoritesRequest(null); $(this).dialog("close"); } },
+                        { text: "Cancel", click: function(){ buffer = null; $(this).dialog("close"); } }]
+                    });
+            </script>
+        {% endblock %}
+        
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+        
+    </body>
+</html>
