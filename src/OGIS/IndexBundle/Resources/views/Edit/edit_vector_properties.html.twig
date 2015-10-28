@@ -119,7 +119,7 @@
             function pickStylingOption(name, id, type, intname){
                 $('#selectstylingwindow').dialog('close');
                 new_styling = { type: 'Style', name: name, internal_name: intname };
-                $('#layerstyle').empty().append('Стиль: ' + new_styling.name);
+                $('#layerstyle').empty().append('Style: ' + new_styling.name);
                 $('#previewImage').prop('src', '{{ path('geoserverFunctionsProxy', {'something': 'wms'}) }}/reflect?LAYERS={{layer.workspace}}:{{layer.constring}}&STYLES=' + intname);
             }
             
