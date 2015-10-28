@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+		<link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+		<title>{{ catalog.title }} :: properties :: O-GIS catalog</title>
+		<link rel="stylesheet" href="{{ asset('./css/ogis_styles.css') }}" />
+		<link rel="stylesheet" href="{{ asset('./js/jquery/themes/default/style.css') }}" />
+		<link rel="stylesheet" href="{{ asset('./js/jquery-ui/jquery-ui.css') }}" />
+		<script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+		<script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
+
+		<script type="text/javascript">
+        function resetValues(){
+            document.getElementById("catalogtitle").value = "{{ catalog.title }}";
+            {% if catalog.public %}
+                document.getElementById("view1").checked = true;
+                document.getElementById("view2").checked = false;
+            {% else %}
+                document.getElementById("view1").checked = false;
+                document.getElementById("view2").checked = true;
+            {% endif %}
+        }
+
+        function submitPropertiesForm(){
+            document.getElementById("catalogpropertiesform").submit();
+        }
+                    
+        function addViewPrivelegy(){
+            var useridentity = $('#usertoadd').prop('value');
+            $('#usertoadd').prop('value', '');
+            var url = "{{ path('updatecatalogacl', {'id': catalog.id}) }}" + "?_action=add&_user=" + useridentity;
+            $.ajax({
+                url: url,
+                method: 'POST'
+            }).done(function(msg){
+                console.log(msg);
+                if(msg.success){
+                    if(msg.added){
+                        rows++;
+                        var html = '<tr id="row-' + rows + '"><td><a href="{{ path('showuser', {'id': ''}) }}"' + msg.id +
+                                  ' target="_blank">' + msg.name +'</a></td><td style="text-align:right;"><a href="#" onclick="removeViewPrivelegy(' + msg.id + ',' + rows +
+                                  ')">Revoke view permission</a></td></tr>';
+                        $('#userlist').append(html);
+                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        $('#messagewindow').empty().append(html);
+                        $('#messagewindow').dialog('open');
+                    }
+                }
+                else{
+                    html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                    $('#messagewindow').empty().append(html);
+                    $('#messagewindow').dialog('open');
+                }
+            });
+        }
+                    
+        function removeViewPrivelegy(id, pos){
+            var url = "{{ path('updatecatalogacl', {'id': catalog.id}) }}" + "?_action=remove&_user=" + id;
+            $.ajax({
+                url: url,
+                method: 'POST'
+            }).done(function(msg){
+                console.log(msg);
+                if(msg.success){
+                    if(!msg.added){
+                        $('#row-' + pos).remove();
+                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        $('#messagewindow').empty().append(html);
+                        $('#messagewindow').dialog('open');
+                    }
+                }
+                else{
+                    html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                    $('#messagewindow').empty().append(html);
+                    $('#messagewindow').dialog('open');
+                }
+            });
+        }
+
+        var rows = {{ users|length }};
+		</script>
+    <style>
+			.greentext{ color: #006f00; }
+			.redtext{ color: #8f0000; }
+		</style>
+	</head>
+	<body class="bodyfullpage">
+
+		{% use 'OGISIndexBundle:Default:header.html.twig' %}
+		{% block header %}
+			{{ parent() }}
+		{% endblock %}
+
+		{% block pagecontent %}
+  
+        <div class="contentbody">
+            <form method="post" action="{{ path('editcatalog_save', {id: catalog.id}) }}" id="catalogpropertiesform">
+            <div style="border:1px solid #ccc;">
+                <div class="userlistheader">Catalog properties</div>
+                <table style="width:100%;margin-bottom:8px;">
+                    <tr>
+                        <td width="200px"><b>Catalog's title:</b></td>
+                        <td colspan="2">
+                            <input type="text" style="width:calc(100% - 20px)" id="catalogtitle" name="_title" value="{{ catalog.title }}" />
+                        </td>
+                    </tr>
+                    <tr>
+                        <td rowspan="2"><b>Publicity:</b></td>
+                        <td valign="top" width="15px">
+                            <input type="radio" id="view1" name="_public" value="true" {% if catalog.public %}checked{% endif %}>
+                        </td>
+                        <td>
+                            <label class="greentext" for="view1">Anyone can view this catalog.</label>
+                        <td>
+                    </tr>
+                    <tr>
+                        <td valign="top">
+                            <input type="radio" id="view2" name="_public" value="false" {% if catalog.public == false %}checked{% endif %}>
+                        </td>
+                        <td>
+                            <label class="redtext" for="view2">This catalog is private, only those with permissions can view it.</label>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td valign="top"><b>Appurtenance:</b></td>
+                        <td colspan="2" style="padding-left:12px;">
+                            {% if catalog.project %}This is a project's catalog
+                            {% else %}This is a user's catalog
+                            {% endif %}
+                        <td>
+                    </tr>
+                    tr>
+                        <td colspan="3">
+                            <br/>
+                            <button form="wrongform" onclick="submitPropertiesForm();">Apply changes</button>&nbsp;
+                            <button form="wrongform" onclick="resetValues();">Revert</button>&nbsp;
+                            <button form="wrongform" onclick="window.close();">Leave without saving</button>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+            </div><br/>
+            
+            <div style="width:100%;">
+                <div class="userlist">
+                    <div class="userlistheader">Users who can view this catalog (if private):</div>
+                    <div class="userlistbody">
+                        <table width="100%" style="padding:10px" id="userlist">
+                        {% for user in users %}
+                            <tr id="row-{{ loop.index }}">
+                            <td>
+                                <a href="{{ path('showuser', {'id': user.id}) }}" target="_blank">{{ user.name }}</a>
+                            </td>
+                            <td style="text-align:right;">
+                                {% if user.id == app.user.id %}
+                                    You!
+                                {% else %}
+                                    <a href="#" onclick="removeViewPrivelegy({{ user.id }}, {{ loop.index }})">Remove privilege</a>
+                                {% endif %}
+                            </td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                </div>
+            </div>
+            
+            <div class="addusertoviewers">
+                <div class="userlistheader">Grant permission to view catalog</div>
+                <div style="padding:8px;">
+                    <input type="text" value="" id="usertoadd" style="width: calc( 100% - 100px )"/>
+                        <button onclick="addViewPrivelegy();">Add user</button><br/><br/>
+                       You can enter user's ID, username or e-mail.
+                </div>
+            </div>
+        </div>
+    </div>
+                                
+    <div id="messagewindow" title="Catalog permissions change"></div>
+    <script type="text/javascript">
+        $('#messagewindow').dialog({
+            autoOpen: false,
+            resizable: false,
+            zIndex: 9999,
+            height: 'auto',
+            width: 400,
+            modal: false,
+            buttons: { OK : function(){ $(this).dialog("close"); }
+        }});
+    </script>
+		{% endblock %}
+
+		{% block footer %}
+			{{ parent() }}
+		{% endblock %}
+	</body>
+</html>
