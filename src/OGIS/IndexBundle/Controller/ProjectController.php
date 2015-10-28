@@ -87,7 +87,7 @@ class ProjectController extends Controller {
         $participation = new ProjectParticipation();
         $participation->setUser($user);
         $participation->setProject($project);
-        $participation->setRank('Основатель');
+        $participation->setRank('Founder');
         $em->persist($participation);
         $em->flush();
 
