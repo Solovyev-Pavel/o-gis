@@ -29,7 +29,7 @@
 		<script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
 
 		<script type="text/javascript">
-        function resetValues(){
+				function resetValues(){
             document.getElementById("catalogtitle").value = "{{ catalog.title }}";
             {% if catalog.public %}
                 document.getElementById("view1").checked = true;
