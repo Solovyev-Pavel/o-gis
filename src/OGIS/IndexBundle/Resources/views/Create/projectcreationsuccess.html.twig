@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+		<link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+		<title>{{ caption }}</title>
+		<style type="text/css">
+			.infobox{
+				width: 80%;
+				background: #c9e9c9;
+				border: solid 2px #00a000;
+				color: #00a000;
+				padding-top: 10px;
+				padding-bottom: 10px;
+				font-weight: bold;
+				font-size: 28px;
+				margin-top: 15px;
+				margin-bottom: 15px;
+				min-height: 128px;
+			}
+			.tip{
+				color: #009000;
+				font-size: 18px;
+				padding-top: 5px;
+				padding-bottom: 5px;
+			}
+		</style>
+	</head>
+
+	<body style="width:100%; position:absolute; top:-8px; left:-8px;">
+
+		{% use 'OGISIndexBundle:Default:header.html.twig' %}
+		{% block header %}
+			{{ parent() }}
+		{% endblock %}
+
+		{% block bodycontent %}
+
+			<center>
+				<table class="infobox">
+					<tr>
+						<td width="96px" rowspan="2" valign="middle">
+							<center>
+								<img src="{{ asset('./img/ok.png') }}"/>
+							</center>
+						</td>
+						<td>
+							<center>{{ message }}</center>
+						</td>
+						<td width="96px" rowspan="2" valign="middle">
+							<center>
+								<img src="{{ asset('./img/ok.png') }}"/>
+							</center>
+						</td>
+					</tr>
+					<tr>
+						<td class="tip">
+							<center>
+								You can view your <a href="{{ path('showproject', {id: project}) }}">project</a> or return to the homepage of <a href="{{ path('homepage') }}">project O-GIS</a>.
+							</center>
+						</td>
+					</tr>
+				</table>
+			</center>
+		{% endblock %}
+
+		{% block footer %}
+			{{ parent() }}
+		{% endblock %}
+	</body>
+</html>
