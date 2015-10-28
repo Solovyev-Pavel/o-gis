@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <title>Style creation :: project O-GIS</title>
+        <link rel="stylesheet" href="{{ asset('./css/ogis_styles.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery/themes/default/style.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery-ui/jquery-ui.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./css/jstree-types.css') }}" />
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery/jstree.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery/jstree.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/addtofavorites.js') }}"></script>
+        <script type="text/javascript">
+            var tab = 2;
+            var catalogData = "{{ path('loadcatalogdata', {'catid': 'PATH' }) }}";
+            var rootFavNodes = "{{ path('loadusercatalogs', {'holderid': app.user.id}) }}"; 
+
+            function prepareTabs(){
+                $( "#tabs" ).tabs();
+                showTargetCatalogTree();
+            }
+
+            function switchToTab1(){
+                tab = 1;
+                $('#styletypeselector').css('display', 'block');
+            }
+
+            function switchToTab2(){
+                tab = 2;
+                $('#styletypeselector').css('display', 'none');
+            }
+
+            function switchToTab3(){
+                tab = 3;
+                $('#styletypeselector').css('display', 'none');
+            }
+
+            function submitStyle(){
+                var name = $('#stylename').val();
+                if (name === "" || name.match(/^\s+$/g)){
+                    var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                'You must enter style\'s title!<br/>Title can\'t consist of whitespace symbols.</td></tr></table>';
+                    $( "#messagewindow" ).empty().append(html);
+                    $( "#messagewindow" ).dialog("open");
+                    return;
+                }
+                var node = $('#selectednodeid').text();
+                    if (node === ""){
+                    var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                'You must choose a catalog into which the link to this style will be placed!</td></tr></table>';
+                    $( "#messagewindow" ).empty().append(html);
+                    $( "#messagewindow" ).dialog("open");
+                    return;
+                }
+                $('#targetnode').prop('value', node);
+                switch(tab){
+                    case 1: submitStyleFromGraphicEditor(); break;
+                    case 2: submitStyleFromPlaintextEditor(); break;
+                    case 3: submitStyleFromFileUpload(); break;
+                }
+            }
+
+            function submitStyleFromGraphicEditor(){}
+
+            function submitStyleFromPlaintextEditor(){
+                var sldtext = $('#sldtext').val();
+                if (sldtext === "" || sldtext.match(/^\s+$/g)){
+                    var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                'You must input SLD desription of your style!</td></tr></table>';
+                    $( "#messagewindow" ).empty().append(html);
+                    $( "#messagewindow" ).dialog("open");
+                    return;
+                }
+                if (!sldtext.match(/StyledLayerDescriptor/g)){
+                     var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                'Please confirm that your input is indeed an SLD style description!</td></tr></table>';
+                    $( "#messagewindow" ).empty().append(html);
+                    $( "#messagewindow" ).dialog("open");
+                    return;
+                }
+                sldtext = sldtext.replace(/[\n\r\t\v]/g, '').replace(/>\s+</g, '><');
+                if (sldtext.match(/RasterSymbolizer/g)){ $('#type-raster').prop('checked', 'checked'); }
+                if (sldtext.match(/PointSymbolizer/g)){ $('#type-point').prop('checked', 'checked'); }
+                if (sldtext.match(/LineSymbolizer/g)){ $('#type-line').prop('checked', 'checked'); }
+                if (sldtext.match(/PolygonSymbolizer/g)){ $('#type-polygon').prop('checked', 'checked'); }
+                $('#sldbodyvalue').prop('value', sldtext);
+                $('#styleform').submit();
+            }
+
+            function submitStyleFromFileUpload(){
+                var file = $('#slddefinition')[0].files[0];
+                if (file === null){
+                    var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                'Please, choose a file with the SLD description of your style!</td></tr></table>';
+                    $( "#messagewindow" ).empty().append(html);
+                    $( "#messagewindow" ).dialog("open");
+                    return;
+                }
+
+                var reader = new FileReader();
+                reader.onload = (function(theFile) {
+                    return function(e) {
+                        var sldtext = atob(e.target.result.substring(e.target.result.indexOf(',') + 1));
+                        if (!sldtext.match(/StyledLayerDescriptor/g)){
+                            var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                        'The selected file doesn\'t contain a recognized SLD style description!</td></tr></table>';
+                            $( "#messagewindow" ).empty().append(html);
+                            $( "#messagewindow" ).dialog("open");
+                            return;
+                        }
+                        sldtext = sldtext.replace(/[\n\r\t\v]/g, '').replace(/>\s+</g, '><');
+                        if (sldtext.match(/RasterSymbolizer/g)){ $('#type-raster').prop('checked', 'checked'); }
+                        if (sldtext.match(/PointSymbolizer/g)){ $('#type-point').prop('checked', 'checked'); }
+                        if (sldtext.match(/LineSymbolizer/g)){ $('#type-line').prop('checked', 'checked'); }
+                        if (sldtext.match(/PolygonSymbolizer/g)){ $('#type-polygon').prop('checked', 'checked'); }
+                        $('#sldbodyvalue').prop('value', sldtext);
+                        $('#styleform').submit();
+                    };
+                })(file);
+                reader.readAsDataURL(file);
+            }
+        </script>
+    </head>
+    <body class="bodyfullpage" onload="prepareTabs();">
+
+        {% use 'OGISIndexBundle:Default:header.html.twig' %}
+        {% block header %}
+            {{ parent() }}
+        {% endblock %}
+
+        {% block pagecontent %}
+
+            <form id="styleform"  action="{{ path('uploadstyle') }}" method="post">
+                <input type="hidden" name="_stylebody" id="sldbodyvalue" value=""/> <!-- this field is set via JS -->
+            </form>
+
+            <div class="contentbody">
+                <div class="styleproperties">
+                    <div class="stylemainpropertiesbox">
+                        <table width="100%">
+                            <tr>
+                                <td width="150px"><b>Style's name</b>:&nbsp;</td>
+                                <td width="350px">
+                                    <input type="text" name="_stylename" id="stylename" form="styleform" style="width:100%" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><b>Style's description</b>:&nbsp;</td>
+                                <td>
+                                    <textarea id="styledescription" name="_styledescription" form="styleform" style="width:100%;resize:none;" rows="6"></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><b>Target catalog</b>:&nbsp;</td>
+                                <td>
+                                    <input type="hidden" name="_targetcatalog" id="targetnode" form="styleform" value=""/>
+                                    <div style="display:none" id="selectednodeid"></div>
+                                    <div id="targettree" style="height:160px;border:1px solid #ccc;"></div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="styletypeselector" id="styletypeselector" style="display:none;">
+                        <b>Тип стиля</b>:<br/><br/>
+                        <label><input type="radio" name="_styletype" form="styleform" id="type-raster" value="raster" checked/>Raster style</label><br/>
+                        <label><input type="radio" name="_styletype" form="styleform" id="type-point" value="point"/>Point Vector style</label><br/>
+                        <label><input type="radio" name="_styletype" form="styleform" id="type-line" value="line"/>Line Vector style</label><br/>
+                        <label><input type="radio" name="_styletype" form="styleform" id="type-polygon" value="polygon"/>Polygon Vector style</label>
+                    </div>
+                </div>
+
+                <div id="tabs">
+                    <ul>
+                        <li><a href="#tabs-2" onclick="switchToTab2();">Paste SLD style description</a></li>
+                        <li><a href="#tabs-3" onclick="switchToTab3();">Upload a file with SLD style description</a></li>
+                    </ul>
+                    <div id="tabs-2" class="stylecreationbox">
+                        <br/>
+                        <b>SLD style description</b>:<br/>
+                        <textarea style="width:100%;margin-left:auto;margin-right:auto;resize:none" rows="20" id="sldtext"></textarea>
+                        <br/><br/>
+                        <button id="submitSLDEditorButton" onclick="submitStyle();">Создать стиль</button>
+                    </div>
+                    <div id="tabs-3" class="stylecreationbox">
+                        <br/>
+                        <b>SLD style description file</b>:<br/>
+                        <input type="file" style="width:200px" id="slddefinition">
+                        <br/><br/>
+                        <button id="submitSLDFileButton" onclick="submitStyle();">Создать стиль</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="messagewindow" title="Error!"></div>
+            <script type="text/javascript">
+                $( "#messagewindow" ).dialog({ autoOpen: false, resizable: false, zIndex: 9999, height: 'auto', width: 420, modal: true, buttons: { OK : function(){ $(this).dialog("close"); } }});
+            </script>
+        {% endblock %}
+
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+    </body>
+</html>
