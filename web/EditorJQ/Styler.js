@@ -181,6 +181,7 @@ function CompositionEditorLayerStyler(){
     
     // Get the palette picked by the user
     this.getSelectedPalette = function(palette_id, name){
+        var c_editor = this.parent;
         $.ajax(getPaletteRoute.replace('ID', palette_id))
             .done(function(msg){
                 if (!msg.success){
@@ -191,7 +192,7 @@ function CompositionEditorLayerStyler(){
                     $( "#messagewindow" ).dialog("open");
                     return;
                 }
-                this.current_palette = msg;
+                c_editor.LayerStyler.current_palette = msg;
                 $('#selected-palette-name').empty().append(msg.name);
                 var svg_background =    '<svg width="100%" height="100%"><defs><linearGradient id="paletteGradient" ' +
                                         'x1="0%" y1="0%" x2="100%" y2="0%">';
@@ -202,8 +203,8 @@ function CompositionEditorLayerStyler(){
                 svg_background += '</linearGradient></defs><rect width="470" height="40" fill="url(#paletteGradient)" /></svg>';
                 $('#palette-preview-line').css('display', 'block');
                 $('#palette-preview-line').empty().append(svg_background);
-                if ($('#' + this.parent.params.selectPaletteWindow).dialog('isOpen')){
-                    $('#' + this.parent.params.selectPaletteWindow).dialog('close');
+                if ($('#' + c_editor.params.selectPaletteWindow).dialog('isOpen')){
+                    $('#' + c_editor.params.selectPaletteWindow).dialog('close');
                 }
             })
             .fail(function(){
