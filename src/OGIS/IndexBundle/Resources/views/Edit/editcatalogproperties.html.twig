@@ -30,7 +30,7 @@
 
 		<script type="text/javascript">
 				function resetValues(){
-            document.getElementById("catalogtitle").value = "{{ catalog.title }}";
+						document.getElementById("catalogtitle").value = "{{ catalog.title }}";
             {% if catalog.public %}
                 document.getElementById("view1").checked = true;
                 document.getElementById("view2").checked = false;
