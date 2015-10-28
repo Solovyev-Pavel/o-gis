@@ -1,0 +1,702 @@
+{% if layer.palette != null %}
+    {% set styling = 'palette' %}
+{% else %}
+    {% if layer.style != null and layer.style != '' %}
+        {% set styling = 'style' %}
+    {% else %}
+        {% set styling = 'default' %}
+    {% endif %}
+{% endif %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <title>Editing properties of layer "{{ layer.name }}"</title>
+        <link rel="stylesheet" href="{{ asset('./css/ogis_styles.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery-ui/jquery-ui.css') }}" />
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery/jstree.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
+        
+        <link rel="stylesheet" href="{{ asset('./js/colors/jquery.minicolors.css') }}" />
+        <script type="text/javascript" src="{{ asset('./js/colors/jquery.minicolors.min.js') }}"></script>
+
+        <style>
+            .greentext{ color: #006f00; }
+            .redtext{ color: #8f0000; }
+            .bordertable{
+                width: 100%;
+                border: 1px solid #ccc;
+                margin-bottom: 8px;
+            }
+        </style>
+        <script type="text/javascript">
+            {% if styling == 'default' %}
+                {% if layer.type == 'point' %}
+                    var stylename = 'Base point vector style';
+                {% elseif layer.type == 'line' %}
+                    var stylename = 'Base line vector style';
+                {% elseif layer.type == 'polygon' %}
+                    var stylename = 'Base polygon vector style';
+                {% endif %}
+                var current_styling = { type: "Style", internal_name: "{{ layer.type }}", name: stylename };
+            {% elseif styling == 'style' %}
+                var stylename = "{{ layer.style.name }}";
+                var current_styling = { type: "Style", internal_name: "{{ layer.style.internalname }}", name: stylename };
+            {% elseif styling == 'palette' %}
+                var styling_raw = "{{ layer.palette }}";
+                var current_styling = JSON.parse(styling_raw.replace(/\&quot;/gi, '"'));
+                var stylename = current_styling.name;
+            {% endif %}
+            
+            var layer_type = '{{ layer.type }}';
+            var new_styling = null;
+            var current_palette = null;
+            var new_palette = null;
+            var sld = '';
+            
+            // sends the user back to the layer's page
+            function goBackToLayer(){
+                window.location.href = "{{ path('showlayer', {id: layer.id}) }}";
+            }
+
+            // restores layer's name and description to the values set at the last save
+            function resetValues(){
+                document.getElementById("layername").value = "{{ layer.name }}";
+                document.getElementById("layerdescription").value = "{{ layer.description|trim|replace({ ('\r\n') : ' ', ('\r') : ' ', ('\n') : ' ' }) }}";
+            }
+
+            // saves the new values for layer's name and description into the database
+            function submitFormAction(){
+                var name = document.getElementById("layername").value;
+                if (name === "" || name.match(/^\s+$/g)){
+                    $( '#messagewindow' ).dialog('option', 'title', 'Error!');
+                    var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                'Layer\'s name must include meaningful symbols!</td></tr></table>';
+                    $( "#messagewindow" ).empty().append(html);
+                    $( "#messagewindow" ).dialog("open");
+                    return;
+                }
+                document.getElementById("layerpropertiesform").submit();
+            }
+
+            // display the name of the currently-used style for the layer
+            function applyCurrentStyleName(){
+                var text = current_styling.type;
+                if (current_styling.type !== "User-defined style"){ text += ": " + current_styling.name; }
+                $('#layerstyle').append(text);
+            }
+            
+            // display the pick-new-style window
+            function showChangeLayerStyleWindow(){
+                if ($('#stylepicktree').children().length === 0){
+                    $('#stylepicktree').append('<iframe style="width:99%;height:99%;" src="{{ path('stylelistpage') }}" />');
+                }
+                $('#selectstylingwindow').dialog('open');
+            }
+            
+            // display options block - palette/style picked
+            function pickStylingOption(name, id, type, intname){
+                $('#selectstylingwindow').dialog('close');
+                new_styling = { type: 'Style', name: name, internal_name: intname };
+                $('#layerstyle').empty().append('Стиль: ' + new_styling.name);
+                $('#previewImage').prop('src', '{{ path('geoserverFunctionsProxy', {'something': 'wms'}) }}/reflect?LAYERS={{layer.workspace}}:{{layer.constring}}&STYLES=' + intname);
+            }
+            
+            // apply server default style to layer preview
+            function useServerDefaultStyle(){
+                var style = "{{ layer.type }}";
+                {% if layer.type == 'point' %}
+                    var stylename = 'Base point vector style';
+                {% elseif layer.type == 'line' %}
+                    var stylename = 'Base line vector style';
+                {% elseif layer.type == 'polygon' %}
+                    var stylename = 'Base polygon vector style';
+                {% endif %}
+                new_styling = { type: "Style", name: stylename, internal_name: style };
+                var text = new_styling.type + ": " + new_styling.name;
+                $('#layerstyle').empty().append(text);
+                $('#previewImage').prop('src', '{{ path('geoserverFunctionsProxy', {'something': 'wms'}) }}/reflect?LAYERS={{layer.workspace}}:{{layer.constring}}&STYLES=' + style);
+            }
+
+            // apply selected styling to layer preview
+            function applySelectedStyling(rollback, custom){
+                if (!rollback){
+                    if (custom){
+                        new_styling = { type: 'User-defined style', name: '', internal_name: '{{ layer.constring }}' };
+                        generateSldStyle();
+                        $('#layerstyle').empty().append('User-defined style');
+                        $('#previewImage').prop('src', '{{ path('geoserverFunctionsProxy', {'something': 'wms'}) }}/reflect?LAYERS={{layer.workspace}}:{{layer.constring}}&SLD_BODY=' + sld);
+                    }
+                }
+                else{
+                    $('#layerstyle').empty();
+                    applyCurrentStyleName();
+                    $('#previewImage').prop('src', '{{ path('geoserverFunctionsProxy', {'something': 'wms'}) }}/reflect?LAYERS={{layer.workspace}}:{{layer.constring}}');
+                }
+            }
+
+            // apply selected styling
+            function applyStyleToLayer(){
+                var styling = (new_styling === null) ? current_styling : new_styling;
+                if (styling.type === 'Style'){
+                    document.getElementById('layernewstylename').value = styling.internal_name;
+                    document.getElementById('layerstyleform').submit();
+                }
+                else{
+                    if (sld === null || sld === ''){
+                        new_styling = selected_styling;
+                        generateSldStyle();
+                    }
+                    document.getElementById('palettestylevalue').value = sld;
+                    document.getElementById('newpaletteoutbox').value = JSON.stringify(styling);
+                    document.getElementById('layerpaletteform').submit();
+                }
+            }
+            
+            // generate style from palette
+            function generateSldStyle(){
+                var tmp =   '<StyledLayerDescriptor version="1.0.0" xmlns="http://www.opengis.net/sld" ' +
+                            'xmlns:ogc="http://www.opengis.net/ogc"><NamedLayer><Name>{{ layer.workspace }}:{{ layer.constring }}' +
+                            '</Name><UserStyle><FeatureTypeStyle>';
+                {% if layer.type == 'point' %}
+                    var size = parseInt($('#point-size').val());
+                    var shape = $('#point-type').val();
+                    var mainColor = $('#colorpicker-fill').prop('value').replace('#', '0x');
+                    var ctrColor = $('#colorpicker-contour').prop('value').replace('#', '0x');
+                    var mainOpacity = document.getElementById('colorpicker-fill').getAttribute('data-opacity');
+                    var ctrOpacity = document.getElementById('colorpicker-contour').getAttribute('data-opacity');
+                    var shape_verb = (shape !== 'rhombus') ? shape : 'square';
+                    
+                    tmp +=  '<Rule><PointSymbolizer><Graphic><Mark><WellKnownName>' + shape_verb + '</WellKnownName><Fill>' +
+                            '<CssParameter name="fill">' + mainColor + '</CssParameter><CssParameter name="fill-opacity">' +
+                            mainOpacity + '</CssParameter></Fill>';
+                    if ($('#point-contour').prop('checked')){
+                        tmp +=  '<Stroke><CssParameter name="stroke">' + ctrColor + '</CssParameter><CssParameter ' +
+                                'name="stroke-width">0</CssParameter><CssParameter name="stroke-opacity">' + ctrOpacity +
+                                '</CssParameter></Stroke>';
+                    }
+                    tmp += '</Mark><Size>' + size + '</Size>';
+                    if (shape === 'rhombus'){ tmp += '<Rotation>45</Rotation>'; }
+                    tmp += '</Graphic></PointSymbolizer></Rule>';
+                {% elseif layer.type == 'line' %}
+                    var color = $('#colorpicker-contour').prop('value').replace('#', '0x');
+                    var opacity = document.getElementById('colorpicker-contour').getAttribute('data-opacity');
+                    var type = parseInt($('#contour-type').val());
+                    var width = parseInt($('#contour-width').val()) - 1;
+                    tmp +=  '<Rule><LineSymbolizer><Stroke><CssParameter name="stroke">' + color + '</CssParameter>' +
+                            '<CssParameter name="stroke-width">' + width + '</CssParameter><CssParameter name="stroke-opacity">' +
+                            opacity + '</CssParameter>';
+                    if (type === 1){ tmp += '<CssParameter name="stroke-dasharray">5 4</CssParameter>'; }
+                    tmp += '</Stroke></LineSymbolizer></Rule>';
+                {% elseif layer.type == 'polygon' %}
+                    var bkgColor = $('#colorpicker-fill').prop('value').replace('#', '0x');
+                    var ctrColor = $('#colorpicker-contour').prop('value').replace('#', '0x');
+                    var bkgOpacity = document.getElementById('colorpicker-fill').getAttribute('data-opacity');
+                    var ctrOpacity = document.getElementById('colorpicker-contour').getAttribute('data-opacity');
+                    var fillType = parseInt($('#fill-type').val());
+                    var ctrType = parseInt($('#contour-type').val());
+                    var ctrWidth = parseInt($('#contour-width').val()) - 1;
+                    tmp += '<Rule><PolygonSymbolizer><Fill>';
+                    if (fillType === 0){
+                        tmp += '<CssParameter name="fill">' + bkgColor + '</CssParameter><CssParameter name="fill-opacity">' + bkgOpacity + '</CssParameter>';
+                    }
+                    else{
+                        tmp += '<GraphicFill><Graphic><Mark><WellKnownName>shape:';
+                        if (fillType === 1){ tmp+= '//slash'; }
+                        else { tmp += '//backslash'; }
+                        tmp +=  '</WellKnownName><Stroke><CssParameter name="stroke">' + bkgColor + '</CssParameter><CssParameter name="stroke-width">' +
+                                '2</CssParameter><CssParameter name="stroke-opacity">' + bkgOpacity + '</CssParameter></Stroke></Mark>' +
+                                '<Size>16</Size></Graphic></GraphicFill>';
+                    }
+                    tmp +=  '</Fill><Stroke><CssParameter name="stroke">' + ctrColor + '</CssParameter><CssParameter name="stroke-opacity">' +
+                            ctrOpacity + '</CssParameter><CssParameter name="stroke-width">' + ctrWidth + '</CssParameter>';
+                    if (ctrType === 1){
+                        tmp += '<CssParameter name="stroke-dasharray">5 2</CssParameter>';
+                    }
+                    tmp += '</Stroke></PolygonSymbolizer></Rule>';
+                {% endif %}
+                tmp += '</FeatureTypeStyle></UserStyle></NamedLayer></StyledLayerDescriptor>';
+                sld = tmp;
+            }
+            
+            // restore current saved styling
+            function rollbackToDefaultStyle(){
+                new_styling = current_styling;
+                applySelectedStyling(true, false);
+            }
+            
+            {% if layer.type == 'point' %}
+                function updatePoint(){
+                    var point_type = $('#point-type').val();
+                    var ctr = $('#point-contour').prop('checked');
+                    var size = parseInt($('#point-size').val());
+                    var fill_color = {
+                        rgb: $('#colorpicker-fill').prop('value'),
+                        a: document.getElementById('colorpicker-fill').getAttribute('data-opacity'),
+                        rgba: $('#colorpicker-fill').minicolors('rgbaString')
+                    };
+                    var ctr_color = {
+                        rgb: $('#colorpicker-contour').prop('value'),
+                        a: document.getElementById('colorpicker-contour').getAttribute('data-opacity'),
+                        rgba: $('#colorpicker-contour').minicolors('rgbaString')
+                    };
+                    
+                    if (!ctr){ ctr_color = fill_color; }
+                    
+                    $('#style-preview-box').empty();
+                    var svg =   '<svg height="80px" width="440px">';
+                    switch (point_type){
+                        case 'circle':  svg +=  '<circle cx="20" cy="40" r="' + (size / 2) + '" stroke="' + ctr_color.rgba +
+                                                '" stroke-width="1" fill="' + fill_color.rgba + '" />' +
+                                                '<circle cx="120" cy="20" r="' + (size / 2) + '" stroke="' + ctr_color.rgba +
+                                                '" stroke-width="1" fill="' + fill_color.rgba + '" />' +
+                                                '<circle cx="220" cy="40" r="' + (size / 2) + '" stroke="' + ctr_color.rgba +
+                                                '" stroke-width="1" fill="' + fill_color.rgba + '" />' +
+                                                '<circle cx="320" cy="60" r="' + (size / 2) + '" stroke="' + ctr_color.rgba +
+                                                '" stroke-width="1" fill="' + fill_color.rgba + '" />' +
+                                                '<circle cx="420" cy="40" r="' + (size / 2) + '" stroke="' + ctr_color.rgba +
+                                                '" stroke-width="1" fill="' + fill_color.rgba + '" />';
+                                        break;
+                        case 'square':  svg +=  '<rect width="' + size + '" height="' + size + '" x="' + (20 - size / 2) +
+                                                '" y="' + (40 - size / 2) + '" stroke="' + ctr_color.rgba + '" stroke-width="1" ' +
+                                                'fill="' + fill_color.rgba + '" />' +
+                                                '<rect width="' + size + '" height="' + size + '" x="' + (120 - size / 2) +
+                                                '" y="' + (20 - size / 2) + '" stroke="' + ctr_color.rgba + '" stroke-width="1" ' +
+                                                'fill="' + fill_color.rgba + '" />' +
+                                                '<rect width="' + size + '" height="' + size + '" x="' + (220 - size / 2) +
+                                                '" y="' + (40 - size / 2) + '" stroke="' + ctr_color.rgba + '" stroke-width="1" ' +
+                                                'fill="' + fill_color.rgba + '" />' +
+                                                '<rect width="' + size + '" height="' + size + '" x="' + (320 - size / 2) +
+                                                '" y="' + (60 - size / 2) + '" stroke="' + ctr_color.rgba + '" stroke-width="1" ' +
+                                                'fill="' + fill_color.rgba + '" />' +
+                                                '<rect width="' + size + '" height="' + size + '" x="' + (420 - size / 2) +
+                                                '" y="' + (40 - size / 2) + '" stroke="' + ctr_color.rgba + '" stroke-width="1" ' +
+                                                'fill="' + fill_color.rgba + '" />';
+                                        break;
+                        case 'rhombus': svg +=  '<polygon points="20,' + (40 - size / 2) + ' ' + (20 + size / 2) + ',40 20,' + 
+                                                (40 + size / 2) + ' ' + (20 - size / 2) + ',40" style="fill:' + fill_color.rgba +
+                                                ';stroke-width:1;stroke:' + ctr_color.rgba + '" />' +
+                                                '<polygon points="120,' + (20 - size / 2) + ' ' + (120 + size / 2) + ',20 120,' + 
+                                                (20 + size / 2) + ' ' + (120 - size / 2) + ',20" style="fill:' + fill_color.rgba +
+                                                ';stroke-width:1;stroke:' + ctr_color.rgba + '" />' +
+                                                '<polygon points="220,' + (40 - size / 2) + ' ' + (220 + size / 2) + ',40 220,' + 
+                                                (40 + size / 2) + ' ' + (220 - size / 2) + ',40" style="fill:' + fill_color.rgba +
+                                                ';stroke-width:1;stroke:' + ctr_color.rgba + '" />' +
+                                                '<polygon points="320,' + (60 - size / 2) + ' ' + (320 + size / 2) + ',60 320,' + 
+                                                (60 + size / 2) + ' ' + (320 - size / 2) + ',60" style="fill:' + fill_color.rgba +
+                                                ';stroke-width:1;stroke:' + ctr_color.rgba + '" />' +
+                                                '<polygon points="420,' + (40 - size / 2) + ' ' + (420 + size / 2) + ',40 420,' + 
+                                                (40 + size / 2) + ' ' + (420 - size / 2) + ',40" style="fill:' + fill_color.rgba +
+                                                ';stroke-width:1;stroke:' + ctr_color.rgba + '" />';
+                                        break;
+                        case 'triangle': svg += '<polygon points="20,' + (40 - 2 * size / 3) + ' ' + (20 + size / 2) + ',' +
+                                                (40 + size / 3) + ' ' + (20 - size / 2) + ',' + (40 + size / 3) + '" style="fill:' +
+                                                fill_color.rgba + ';stroke-width:1;stroke:' + ctr_color.rgba + '" />' +
+                                                '<polygon points="120,' + (20 - 2 * size / 3) + ' ' + (120 + size / 2) + ',' +
+                                                (20 + size / 3) + ' ' + (120 - size / 2) + ',' + (20 + size / 3) + '" style="fill:' +
+                                                fill_color.rgba + ';stroke-width:1;stroke:' + ctr_color.rgba + '" />' +
+                                                '<polygon points="220,' + (40 - 2 * size / 3) + ' ' + (220 + size / 2) + ',' +
+                                                (40 + size / 3) + ' ' + (220 - size / 2) + ',' + (40 + size / 3) + '" style="fill:' +
+                                                fill_color.rgba + ';stroke-width:1;stroke:' + ctr_color.rgba + '" />' +
+                                                '<polygon points="320,' + (60 - 2 * size / 3) + ' ' + (320 + size / 2) + ',' +
+                                                (60 + size / 3) + ' ' + (320 - size / 2) + ',' + (60 + size / 3) + '" style="fill:' +
+                                                fill_color.rgba + ';stroke-width:1;stroke:' + ctr_color.rgba + '" />' +
+                                                '<polygon points="420,' + (40 - 2 * size / 3) + ' ' + (420 + size / 2) + ',' +
+                                                (40 + size / 3) + ' ' + (420 - size / 2) + ',' + (40 + size / 3) + '" style="fill:' +
+                                                fill_color.rgba + ';stroke-width:1;stroke:' + ctr_color.rgba + '" />';
+                                        break;
+                    }
+                    svg += '</svg>';
+                    $('#style-preview-box').append(svg);
+                }
+            {% elseif layer.type == 'line' %}
+                function updateLine(){
+                    var ctr_type = parseInt($('#contour-type').val());
+                    var ctr_width = parseInt($('#contour-width').val());
+                    var ctr_color = {
+                        rgb: $('#colorpicker-contour').prop('value'),
+                        a: document.getElementById('colorpicker-contour').getAttribute('data-opacity'),
+                        rgba: $('#colorpicker-contour').minicolors('rgbaString')
+                    };
+
+                    if (ctr_type === 0){ var sda = 'none'; }
+                    else{ var sda = '5,5'; }
+                    
+                    $('#style-preview-box').empty();
+                    var svg =   '<svg height="80px" width="440px"><path id="curve" style="fill:none;" d="M 5 40 Q 110 -25, 220 40 ' +
+                                'Q 330 105, 435 40" stroke="' + ctr_color.rgba + '" stroke-width="' +  (ctr_width - 0.5) +
+                                '" stroke-dasharray="' + sda + '" /></svg>';
+                    $('#style-preview-box').append(svg);
+                }
+            {% elseif layer.type == 'polygon' %}
+                function updatePolygon(){
+                    var fill_type = parseInt($('#fill-type').val());
+                    var ctr_type = parseInt($('#contour-type').val());
+                    var ctr_width = parseInt($('#contour-width').val());
+                    var fill_color = {
+                        rgb: $('#colorpicker-fill').prop('value'),
+                        a: document.getElementById('colorpicker-fill').getAttribute('data-opacity'),
+                        rgba: $('#colorpicker-fill').minicolors('rgbaString')
+                    };
+                    var ctr_color = {
+                        rgb: $('#colorpicker-contour').prop('value'),
+                        a: document.getElementById('colorpicker-contour').getAttribute('data-opacity'),
+                        rgba: $('#colorpicker-contour').minicolors('rgbaString')
+                    };
+
+                    if (ctr_type === 0){ var sda = 'none'; }
+                    else{ var sda = '5,5'; }
+
+                    var svg =   '<svg height="80px" width="440px">';
+                    switch(fill_type){
+                        case 0: svg +=  '<path d="M 14 36 L 98 8 L 166 65 L 91 70 Z" ' + 'fill="' + fill_color.rgba + '" stroke="' + 
+                                        ctr_color.rgba + '" stroke-width="' + ctr_width + '" stroke-dasharray="' + sda + '" />' +
+                                        '<path d="M 205 43 L 283 10 L 424 32 L 403 65 L 227 72 Z" ' + 'fill="' + fill_color.rgba + '" stroke="' + 
+                                        ctr_color.rgba + '" stroke-width="' + ctr_width + '" stroke-dasharray="' + sda + '" />';
+                                break;
+                        case 1: svg +=  '<defs><pattern id="previewPolygonFill" x="0" y="0" width="10" height="15" patternUnits="userSpaceOnUse"' +
+                                        'patternTransform="rotate(45)"><rect width="2" height="20" fill="' + fill_color.rgba +'" transform="' +
+                                        'translate(0,0)"></pattern></defs><path d="M 14 36 L 98 8 L 166 65 L 91 70 Z" fill="url(#previewPolygonFill)" ' +
+                                        'stroke="' + ctr_color.rgba + '" stroke-width="' + ctr_width + '" stroke-dasharray="' + sda + '" />' +
+                                        '<path d="M 205 43 L 283 10 L 424 32 L 403 65 L 227 72 Z" ' + 'fill="url(#previewPolygonFill)" stroke="' + 
+                                        ctr_color.rgba + '" stroke-width="' + ctr_width + '" stroke-dasharray="' + sda + '" /></svg>';
+                                break;
+                        case 2: svg +=  '<defs><pattern id="previewPolygonFill" x="0" y="0" width="10" height="15" patternUnits="userSpaceOnUse"' +
+                                        'patternTransform="rotate(135)"><rect width="2" height="20" fill="' + fill_color.rgba +'" transform="' +
+                                        'translate(0,0)"></pattern></defs><path d="M 14 36 L 98 8 L 166 65 L 91 70 Z" fill="url(#previewPolygonFill)" ' +
+                                        'stroke="' + ctr_color.rgba + '" stroke-width="' + ctr_width + '" stroke-dasharray="' + sda + '" />' +
+                                        '<path d="M 205 43 L 283 10 L 424 32 L 403 65 L 227 72 Z" ' + 'fill="url(#previewPolygonFill)" stroke="' + 
+                                        ctr_color.rgba + '" stroke-width="' + ctr_width + '" stroke-dasharray="' + sda + '" /></svg>';
+                                break;
+                    }
+
+                    $('#style-preview-box').empty().append(svg);
+                }
+            {% endif %}
+        </script>
+    </head>
+
+    <body class="bodyfullpage" onload="applyCurrentStyleName();">
+
+        {% use 'OGISIndexBundle:Default:header.html.twig' %}
+        {% block header %}
+            {{ parent() }}
+        {% endblock %}
+
+        {% block pagecontent %}
+            <div class="contentbody">
+                <form method="post" action="{{ path('edit_layer_properties_save', {id: layer.id}) }}" id="layerpropertiesform">
+                    <div style="margin-top:16px;padding:4px;">
+                        <table class="bordertable">
+                            <tr>
+                                <td width="200px"><b>Layer's title:</b></td>
+				<td>
+                                    <input type="text" style="width:calc(100% - 20px)" id="layername" name="_layername" value="{{ layer.name }}" required="required" />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><b>Layer's description:</b></td>
+                                <td>
+                                    <textarea style="width:calc(100% - 20px);resize:none;" rows="5" id="layerdescription" name="_layerdescription" form="layerpropertiesform">{{ layer.description }}</textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td  colspan="2" style="padding-top:16px;">
+                                    <button type="button" form="wrongform" onclick="submitFormAction();">Apply changes</button>&nbsp;
+                                    <button type="button" form="wrongform" onclick="resetValues();">Revert</button>&nbsp;
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </form>
+                <div style="margin-bottom:8px;padding:4px;">
+                    <table class="bordertable">
+                        <tr>
+                            <td width="200px">Styling used:</td>
+                            <td>
+                                <div id="layerstyle" style="font-weight:bold;"></div>
+                            </td>
+                            <td width="200px">
+                                <button type="button" form="wrongform" onclick="showChangeLayerStyleWindow();">Change</button>&nbsp;
+                                <button type="button" form="wrongform" onclick="useServerDefaultStyle();">Use default</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td>Preview:</td>
+                            <td colspan="2">
+                                <center>
+                                   <img id="previewImage" src="{{ path('geoserverFunctionsProxy', {'something' : 'wms'}) }}/reflect?LAYERS={{layer.workspace}}:{{layer.constring}}" />
+                                </center>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td colspan="3" style="padding-top:16px;">
+                                <button form="wrongform" onclick="applyStyleToLayer();">Apply changes</button>&nbsp;
+                                <button form="wrongform" onclick="rollbackToDefaultStyle();">Revert</button>&nbsp;
+                            </td>
+                        </tr>
+                    </table>
+                </div>
+                <form method="post" action="{{ path('applystyle', {id: layer.id}) }}" id="layerstyleform">
+                    <input type="hidden" name="_layer" value="{{ layer.workspace }}:{{ layer.constring }}" />
+                    <input type="hidden" name="_style" id="layernewstylename" value="" />
+                </form>
+                <form method="post" action="{{ path('applycustomvectorstyle') }}" id="layerpaletteform">
+                    <input type="hidden" name="_layer" value="{{ layer.constring }}" />
+                    <input type="hidden" name="_style" value="" id="palettestylevalue" />
+                    <input type="hidden" name="_palette" value="" id="newpaletteoutbox" />
+                </form>
+                <button type="button" form="wrongform" onclick="goBackToLayer();">Go back to layer</button>
+            </div>
+
+            <div id="messagewindow" title=""></div>
+            <div id="selectstylingwindow" title="Styling options">
+                <div id="stylizationtabs" style="width:100%;height:100%;">
+                    <ul>
+                        <li><a href='#custom_style'><span>Define custom styling</span></a></li>
+                        <li><a href='#select_style'><span>Choose a pre-made style</span></a></li>
+                    </ul>
+                    <div style="width:450px;height:350px;" id="custom_style">
+                        <div style="width:100%;height:330px;">
+                            {% if layer.type == 'point' %}
+                                <table width="100%">
+                                    <tr height="30px">
+                                        <th width="50%" valing="top"><center><b>Point options</b>:</center></th>
+                                        <th valing="top"><center><b>Contour</b>:</th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select id="point-type" style="width:95%;" onchange="updatePoint();">
+                                                <option value="circle">Circular point</option>
+                                                <option value="square">Square point</option>
+                                                <option value="triangle">Triangular point</option>
+                                                <option value="rhombus">Rhombus point</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <label><input type="checkbox" id="point-contour" checked="checked" onchange="updatePoint();" />
+                                                &nbsp;Draw point contour</label>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="number" min="8" max="20" value="12" id="point-size" style="width:calc(95% - 32px)" onchange="updatePoint();" />
+                                            &nbsp;px
+                                        </td>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="text" id="colorpicker-fill" data-opacity="1" value="#ff0000" />
+                                            <script type="text/javascript">
+                                                $(function(){
+                                                    $('#colorpicker-fill').minicolors({
+                                                        control: 'hue',
+                                                        defaultValue: '',
+                                                        inline: true,
+                                                        letterCase: 'lowercase',
+                                                        opacity: true,
+                                                        position: $(this).attr('data-position') || 'bottom left',
+                                                        change: function(hex, opacity) {
+                                                            updatePoint();
+                                                        },
+                                                        theme: 'bootstrap'
+                                                    });
+                                                });
+                                            </script>
+                                        </td>
+                                        <td>
+                                            <input type="text" id="colorpicker-contour" data-opacity="1" value="#000000" />
+                                            <script type="text/javascript">
+                                                $(function(){
+                                                    $('#colorpicker-contour').minicolors({
+                                                        control: 'hue',
+                                                        defaultValue: '',
+                                                        inline: true,
+                                                        letterCase: 'lowercase',
+                                                        opacity: true,
+                                                        position: $(this).attr('data-position') || 'bottom left',
+                                                        change: function(hex, opacity) {
+                                                            updatePoint();
+                                                        },
+                                                        theme: 'bootstrap'
+                                                    });
+                                                });
+                                            </script>
+                                        </td>
+                                    </tr>
+                                    <tr height="80px">
+                                        <td colspan="2" id="style-preview-box"></td>
+                                    </tr>
+                                </table>
+                            {% elseif layer.type == 'line' %}
+                                <table width="100%">
+                                    <tr height="30px">
+                                        <th width="50%" valing="top"><center><b>Line options</b>:</center></th>
+                                        <th valing="top">&nbsp;</th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select id="contour-type" style="width:95%;" onchange="updateLine();">
+                                                <option value="0">Solid line</option>
+                                                <option value="1">Dashed line</option>
+                                            </select>
+                                        </td>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="number" min="1" max="6" value="1" id="contour-width" style="width:calc(95% - 32px)" onchange="updateLine();" />
+                                            &nbsp;px
+                                        </td>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="text" id="colorpicker-contour" data-opacity="1" value="#000000" />
+                                            <script type="text/javascript">
+                                                $(function(){
+                                                    $('#colorpicker-contour').minicolors({
+                                                        control: 'hue',
+                                                        defaultValue: '',
+                                                        inline: true,
+                                                        letterCase: 'lowercase',
+                                                        opacity: true,
+                                                        position: $(this).attr('data-position') || 'bottom left',
+                                                        change: function(hex, opacity) {
+                                                            updateLine();
+                                                        },
+                                                        theme: 'bootstrap'
+                                                    });
+                                                });
+                                            </script>
+                                        </td>
+                                        <td>&nbsp;</td>
+                                    </tr>
+                                    <tr height="80px">
+                                        <td colspan="2" id="style-preview-box"></td>
+                                    </tr>
+                                </table>
+                            {% elseif layer.type == 'polygon' %}
+                                <table width="100%">
+                                    <tr height="30px">
+                                        <th width="50%" valing="top"><center><b>Polygon fill</b>:</center></th>
+                                        <th valing="top"><center><b>Polygon contour</b>:</center></th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <select id="fill-type" style="width:95%;" onchange="updatePolygon();">
+                                                <option value="0">Solid fill</option>
+                                                <option value="1">Dashed (rightwards)</option>
+                                                <option value="2">Dashed (leftwards)</option>
+                                            </select>
+                                        </td>
+                                        <td>
+                                            <select id="contour-type" style="width:95%;" onchange="updatePolygon();">
+                                                <option value="0">Solid line</option>
+                                                <option value="1">Dashed line</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>&nbsp;</td>
+                                        <td>
+                                            <input type="number" min="1" max="6" value="1" id="contour-width" style="width:calc(95% - 32px)" onchange="updatePolygon();" />
+                                            &nbsp;px
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <input type="text" id="colorpicker-fill" data-opacity="0.4" value="#afafaf" />
+                                            <script type="text/javascript">
+                                                $(function(){
+                                                    $('#colorpicker-fill').minicolors({
+                                                        control: 'hue',
+                                                        defaultValue: '',
+                                                        inline: true,
+                                                        letterCase: 'lowercase',
+                                                        opacity: true,
+                                                        position: $(this).attr('data-position') || 'bottom left',
+                                                        change: function(hex, opacity) {
+                                                            updatePolygon();
+                                                        },
+                                                        theme: 'bootstrap'
+                                                    });
+                                                });
+                                            </script>
+                                        </td>
+                                        <td>
+                                            <input type="text" id="colorpicker-contour" data-opacity="1" value="#000000" />
+                                            <script type="text/javascript">
+                                                $(function(){
+                                                    $('#colorpicker-contour').minicolors({
+                                                        control: 'hue',
+                                                        defaultValue: '',
+                                                        inline: true,
+                                                        letterCase: 'lowercase',
+                                                        opacity: true,
+                                                        position: $(this).attr('data-position') || 'bottom left',
+                                                        change: function(hex, opacity) {
+                                                            updatePolygon();
+                                                        },
+                                                        theme: 'bootstrap'
+                                                    });
+                                                });
+                                            </script>
+                                        </td>
+                                    </tr>
+                                    <tr height="80px">
+                                        <td colspan="2" id="style-preview-box"></td>
+                                    </tr>
+                                </table>
+                            {% endif %}
+                        </div>
+                        <button type="button" form="wrongform" onclick="applySelectedStyling(false, true);">Choose this styling</button>
+                    </div>
+                    <div style="width:450px;height:350px;" id="select_style">
+                        <div style="width:100%;height:100%;" id="stylepicktree"></div>
+                    </div>
+                </div>
+            </div>
+            <script type="text/javascript">
+                {% if layer.type == 'point' %}
+                    updatePoint();
+                {% elseif layer.type == 'line' %}
+                    updateLine();
+                {% elseif layer.type == 'polygon' %}
+                    updatePolygon();
+                {% endif %}
+                $( "#messagewindow" ).dialog({ autoOpen: false, resizable: false, zIndex: 9999, height: 'auto', width: 420, modal: true, buttons: { OK : function(){ $(this).dialog("close"); } }});
+                $( "#selectstylingwindow" ).dialog({ autoOpen: false, resizable: false, zIndex: 9999, height: 'auto', width: 500, modal: true, buttons: { "Close" : function(){ $(this).dialog("close"); } }});
+                $( "#stylizationtabs" ).tabs();
+            </script>
+
+        {% endblock %}
+
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+        
+    </body>
+</html>
