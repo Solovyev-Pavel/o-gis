@@ -76,6 +76,7 @@ function CompositionEditorAddLayers(){
     
     // Prepare a composition for adding to the Composition Editor
     this.addThisComposition = function(title, id){
+        var c_editor = this;
         $('#' + this.parent.params.addLayerWindow).dialog("close");
         $.ajax({url: getCompositionData.replace('ID', id), method: 'GET'})
             .done(function(msg){
@@ -86,14 +87,15 @@ function CompositionEditorAddLayers(){
                     $( '#messagewindow' ).dialog("open");
                     return;
                 }
-                this.addCmpData = msg.data;
+                c_editor.addCmpData = msg.data;
                 var html = '';
-                for (var i = this.addCmpData.layers.length - 1; i >= 0; i--){
+                for (var i = c_editor.addCmpData.layers.length - 1; i >= 0; i--){
                     html += '<div class="addCmpListItem"><label><input type="checkbox" checked="checked" id="layer-for-addition-' +
-                            i + '">&nbsp;<b>' + this.addCmpData.layers[i].name + '</b></label></div>';
+                            i + '">&nbsp;<b>' + c_editor.addCmpData.layers[i].name + '</b></label></div>';
                 }
-                $('#' + this.parent.params.addCmpWindow).children()[1].empty().append(html);
-                $('#' + this.parent.params.addCmpWindow).dialog('open');
+                var window = $('#' + c_editor.parent.params.addCmpWindow).children()[1].getAttribute('id');
+                $('#' + window).empty().append(html);
+                $('#' + c_editor.parent.params.addCmpWindow).dialog('open');
             })
             .fail(function(){
                 var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
