@@ -684,7 +684,7 @@ function CompositionEditorRasterAnalysis(){
                     '.RasterAnalysis.createNewRasterLayer()">Process</button></center>';
         $('#' + this.parent.params.rasterOpWindow).dialog('option', 'title', 'Saving new Layer');
         $('#' + this.parent.params.rasterOpWindow).empty().append(html);
-        showSaveRasterOperationTree();
+        showSaveRasterOperationTree(this.parent.user.favRoot);
     };
     
     // Validate the input for layer metadata and send request to the server
