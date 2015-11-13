@@ -140,9 +140,10 @@ function sendAddToFavoritesRequest(){
 //     Raster operations: needs separate instance of object for noninterference    //
 // ------------------------------------------------------------------------------- //
 
-function showSaveRasterOperationTree(){
+function showSaveRasterOperationTree(target){
     if ($('#saverastertree').is(':empty')){
-        $.ajax(rootFavNodes).done(function(msg){
+    	var url = (target === undefined || target === null) ? rootFavNodes : target;
+        $.ajax(url).done(function(msg){
             $('#saverastertree').jstree({
                 'core': {
                     'multiple': false,
