@@ -563,7 +563,7 @@ class ProjectController extends Controller {
     public function deleteProjectSuccessAction($projectname){
         return $this->render('OGISIndexBundle:Delete:deletesuccess.html.twig', array(
             'caption' => "Project deletion successful",
-            'message' => "Your project \"$projectname\" was successfully deleted."
+            'message' => "Project \"$projectname\" was successfully deleted."
         ));
     }
 
