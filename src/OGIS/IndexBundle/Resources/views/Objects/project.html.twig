@@ -100,6 +100,11 @@
                     });
                 }
             {% endif %}
+            {% if is_admin %}
+                function deleteProject(){
+                    window.location.href = '{{ path('deleteprojectconfirmation', {'id': project.id}) }}';
+                }
+            {% endif %}
         </script>
     </head>
 
@@ -126,6 +131,7 @@
                         {% if is_admin == true %}
                             <div class="projectlinkbox objectlink" onclick="redirectToEditProperties()">Edit project properties</div>
                             <div class="projectlinkbox objectlink" onclick="redirectToEditMembership()">Edit project members</div>
+                            <div class="projectlinkbox objectlink" onclick="deleteProject();">Delete project</div>
                         {% endif %}
                         <div style="margin-top:12px;padding-left:2px;">
                             <b>Project members</b>
