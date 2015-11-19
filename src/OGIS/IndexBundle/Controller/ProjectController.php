@@ -440,56 +440,131 @@ class ProjectController extends Controller {
     }
 
 	public function deleteProjectConfirmAction($id){
-		$em = $this->getDoctrine()->getManager();
-		$project = $em->getRepository('OGIS\IndexBundle\Entity\Project')->find($id);
-		if(!$project){
-			return $this->render('OGISIndexBundle:Error:entitynotfound.html.twig', array(
-				'caption' => "Project not found!",
-				'message' => "The targeted project doesn't exist in the database."
-			));
-		}
-		if($project->getAuthor()->getId() != $this->getUser()->getId() && !$this->get('security.context')->isGranted('ROLE_ADMIN')){
-			return $this->render('OGISIndexBundle:Error:accessdenied.html.twig', array(
-				'caption' => "Access denied!",
-				'message' => "You don't have the permissions necessary to perform this action!",
-				'tip'     => ""
-			));
-		}
-		return $this->render('OGISIndexBundle:Delete:deleteconfirmation.html.twig', array(
-				'entitytype' => "проект",
-				'entitytype_en' => "project",
-				'entitytype_rp' => "проекта",
-				'entityname' => $project->getName(),
-				'entityid' => $project->getId()
-			));
+        if ($this->getUser() == null){
+            $login_link = "<a href=\"". $this->generateUrl('fos_user_security_login') . "\">logging in</a>";
+            return $this->render('OGISIndexBundle:Error:accessdenied.html.twig', array(
+               'caption' => "Access denied!",
+                'message' => "You don't have the permission necessary to access this page!",
+                'tip'     => "To get the necessary permission, try $login_link into O-GIS."
+            ));
+        }
+        $em = $this->getDoctrine()->getManager();
+        $project = $em->getRepository('OGIS\IndexBundle\Entity\Project')->find($id);
+        if(!$project){
+            return $this->render('OGISIndexBundle:Error:entitynotfound.html.twig', array(
+                'caption' => "Project not found!",
+                'message' => "The requested project doesn't exist in the database."
+            ));
+        }
+        $this_user = $this->getUser()->getId();
+        $users = $project->getParticipants();
+        $is_proj_admin = false;
+        foreach ($users as $user){
+            if ($user->getUser()->getId() == $this_user && ($user->getRank() == 'Основатель' || $user->getRank() == 'Администратор')){
+                $is_proj_admin = true; break;
+            }
+        }
+        $is_site_admin = $this->get('security.context')->isGranted('ROLE_ADMIN');
+        if(!$is_proj_admin && !$is_site_admin){
+            return $this->render('OGISIndexBundle:Error:accessdenied.html.twig', array(
+                'caption' => "You don't have the permission necessary to perform this action!",
+                'message' => "You don't have the permission necessary to perform this action!",
+                'tip'     => ""
+            ));
+        }
+        return $this->render('OGISIndexBundle:Delete:deleteconfirmation.html.twig', array(
+            'entitytype' => "project",
+            'entitytype_en' => "project",
+            'entitytype_rp' => "project",
+            'entityname' => $project->getName(),
+            'entityid' => $project->getId()
+        ));
 	}
 
-	public function deleteProjectAction($id){
-      $em = $this->getDoctrine()->getManager();
-      $project = $em->getRepository('OGIS\IndexBundle\Entity\Project')->find($id);
-      $projectname = $project->getName();
-      if(!$project){
-          return $this->render('OGISIndexBundle:Error:entitynotfound.html.twig', array(
-              'caption' => "Project not found!",
-              'message' => "The targeted project doesn't exist in the database."
-          ));
-      }
-      $author = $project->getAuthor();
-      $author->removeProjectsAuthored($project);
-      $users = $project->getParticipants();
-      foreach($users as $user){
-          $user->removeProjectsParticipated($project);
-      }
-      $em->remove($project);
-      $em->flush();
-      return $this->redirect($this->generateUrl('deleteprojectdone', array('projectname' => $projectname)), 301);
-	}
+    protected function recursiveCatalogDelete($id){
+        $em = $this->getDoctrine()->getManager();
+        $aclProvider = $this->get('security.acl.provider');
+        $catalog = $em->getRepository('OGIS\IndexBundle\Entity\Catalog')->find($id);
+        $childCatalogs = $catalog->getChildren();
+        foreach($childCatalogs as $child){
+            if ($child->getParent() != $catalog){   // unlink
+                $catalog->removeChild($child);
+                $em->persist($child);
+            }
+            else{
+                $i = self::recursiveCatalogDelete($child->getId());
+            }
+        }
+        $links = $catalog->getLinks();
+        foreach($links as $link){
+            $catalog->removeLink($link);
+            $objectIdentity = ObjectIdentity::fromDomainObject($link);
+            $aclProvider->deleteAcl($objectIdentity);
+            $em->remove($link);
+        }
+        $objectIdentity = ObjectIdentity::fromDomainObject($catalog);
+        $aclProvider->deleteAcl($objectIdentity);
+        $em->remove($catalog);
+        $em->flush();
+    }
+        
+    public function deleteProjectAction($id){
+        if ($this->getUser() == null){
+            $login_link = "<a href=\"". $this->generateUrl('fos_user_security_login') . "\">logging in</a>";
+            return $this->render('OGISIndexBundle:Error:accessdenied.html.twig', array(
+                'caption' => "Access denied!",
+                'message' => "You don't have the permission necessary to access this page!",
+                'tip'     => "To get the necessary permission, try $login_link into O-GIS."
+            ));
+        }
+        $em = $this->getDoctrine()->getManager();
+        $project = $em->getRepository('OGIS\IndexBundle\Entity\Project')->find($id);
+        $projectname = $project->getName();
+        if(!$project){
+            return $this->render('OGISIndexBundle:Error:entitynotfound.html.twig', array(
+                'caption' => "Project not found!",
+                'message' => "The requested project doesn't exist in the database."
+            ));
+        }
+        $this_user = $this->getUser()->getId();
+        $users = $project->getParticipants();
+        $is_proj_admin = false;
+        foreach ($users as $user){
+            if ($user->getUser()->getId() == $this_user && ($user->getRank() == 'Основатель' || $user->getRank() == 'Администратор')){
+                $is_proj_admin = true; break;
+            }
+        }
+        $is_site_admin = $this->get('security.context')->isGranted('ROLE_ADMIN');
+        if(!$is_proj_admin && !$is_site_admin){
+            return $this->render('OGISIndexBundle:Error:accessdenied.html.twig', array(
+                'caption' => "You don't have the permission necessary to perform this action!",
+                'message' => "You don't have the permission necessary to perform this action!",
+                'tip'     => ""
+            ));
+        }
+        // remove users
+        $query = $em->createQuery("DELETE from OGISIndexBundle:ProjectParticipation p where p.project = " . $project->getId());
+        $query->getResult();
+        // remove catalog
+        $cat_id = $project->getCatalog();
+        var_dump($cat_id);
+        self::recursiveCatalogDelete($cat_id);
+        // remove ACL for project
+        $aclProvider = $this->get('security.acl.provider');
+        $objectIdentity = ObjectIdentity::fromDomainObject($project);
+        $aclProvider->deleteAcl($objectIdentity);
+        // remove project
+        $em->remove($project);
+        $em->flush();
 
-	public function deleteProjectSuccessAction($projectname){
-      return $this->render('OGISIndexBundle:Delete:deletesuccess.html.twig', array(
-          'caption' => "Success!",
-          'message' => "Project \"$projectname\" was successfully deleted."
-		));
-	}
+        return $this->redirect($this->generateUrl('deleteprojectdone', array('projectname' => $projectname)), 301);
+    }
+
+    public function deleteProjectSuccessAction($projectname){
+        return $this->render('OGISIndexBundle:Delete:deletesuccess.html.twig', array(
+            'caption' => "Project deletion successful",
+            'message' => "Your project \"$projectname\" was successfully deleted."
+        ));
+    }
 
 }
