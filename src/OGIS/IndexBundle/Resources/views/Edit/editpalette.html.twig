@@ -199,6 +199,7 @@
                     alert('Palette\'s title must contain meaningful symbols!');
                     return;
                 }
+                palette = {};
                 palette.name = tmp;
                 palette.desc = document.getElementById('palette_description').value;
                 palette.publ = document.getElementById('palette_public').checked;
@@ -242,6 +243,7 @@
                     .done(function(msg){
                         console.log(msg);
                         if (msg.success){
+                            palette = {};
                             palette.id = msg.id;
                             document.getElementById('savepalettebutton').disabled = false;
                             var pagetitle = palette.name +  " :: Palette editor :: project O-GIS";
