@@ -42,36 +42,49 @@ function CompositionEditorAddLayers(){
     
     // Adds a layer to the Composition Editor
     this.addThisLayer = function(title, layer_info){
-        $('#' + this.parent.params.addLayerWindow).dialog("close");
+         $('#' + this.parent.params.addLayerWindow).dialog("close");
         var data = layer_info.split('|');
-        var layer = {
-            cs: data[0].substring(data[0].indexOf(':') + 1),
-            workspace: data[0].substring(0, data[0].indexOf(':')),
-            projection: data[4],
-            name: title,
-            type: data[5],
-            vis: true,
-            transp: 1.0,
-            style: { type: 'id', value: '' }, 
-            gridvalues: {min: data[1], max: data[2], nodata: data[3]}
-        };
-        this.parent.composition.layers.push(layer);
-        var target = new OpenLayers.Layer.WMS(
-                layer.name,
-                "/o-gis/web/app.php/wms", {
-                    LAYERS: layer.workspace + ':' + layer.cs,
-                    format: 'image/png',
-                    transparent: true
-                }, {
-                    projection: this.parent.composition.projection
-                }, {
-                    singleTile: false,
-                    ratio: 1,
-                    isBaseLayer: false,
-                    displayInLayerSwitcher: true
-                });
-        this.parent.map.addLayers([target]);
-        this.parent.addLayerToTheList(layer.name, target.id, true);
+        // adding into empty editor
+        if (this.parent.map === null){
+            var c_editor = this.parent;
+            var justcs = data[0].substring(data[0].indexOf(':') + 1);
+            $.ajax({
+                url: getLayerId.replace('ID', justcs)
+            }).done(function(msg){
+                c_editor.loadObject('layer', msg.id);
+            });
+        }
+        // editor is not empty
+        else{
+            var layer = {
+                cs: data[0].substring(data[0].indexOf(':') + 1),
+                workspace: data[0].substring(0, data[0].indexOf(':')),
+                projection: data[4],
+                name: title,
+                type: data[5],
+                vis: true,
+                transp: 1.0,
+                style: { type: 'id', value: '' }, 
+                gridvalues: {min: data[1], max: data[2], nodata: data[3]}
+            };
+            this.parent.composition.layers.push(layer);
+            var target = new OpenLayers.Layer.WMS(
+                    layer.name,
+                    "/o-gis/web/app.php/wms", {
+                        LAYERS: layer.workspace + ':' + layer.cs,
+                        format: 'image/png',
+                        transparent: true
+                    }, {
+                        projection: this.parent.composition.projection
+                    }, {
+                        singleTile: false,
+                        ratio: 1,
+                        isBaseLayer: false,
+                        displayInLayerSwitcher: true
+                    });
+            this.parent.map.addLayers([target]);
+            this.parent.addLayerToTheList(layer.name, target.id, true);
+        }
     };
     
     // Prepare a composition for adding to the Composition Editor
@@ -115,31 +128,49 @@ function CompositionEditorAddLayers(){
     // Add the selected layer into the Composition Editor
     this.addCompositionLayers = function(){
         $('#' + this.parent.params.addCmpWindow).dialog("close");
-        for (var i = 0; i < this.addCmpData.layers.length; i++){
-            if ($('#layer-for-addition-' + i).prop('checked')){
-                var layer = this.addCmpData.layers[i];
-                this.parent.composition.layers.push(layer);
-                var target = new OpenLayers.Layer.WMS(
-                    layer.name,
-                    "/o-gis/web/app.php/wms", {
-                        LAYERS: layer.workspace + ':' + layer.cs,
-                        format: 'image/png',
-                        transparent: true
-                    }, {
-                        projection: this.parent.composition.projection
-                    }, {
-                        singleTile: false,
-                        ratio: 1,
-                        isBaseLayer: false,
-                        displayInLayerSwitcher: true
-                });
-                if (layer.style.type === 'sld'){
-                    // for whatever reason, we need to remove escaping of " manually
-                    target.mergeNewParams({sld_body: layer.style.value.replace(/\\"/gi, '"')});
+        // adding into an empty editor
+        if (this.parent.map === null){
+            var new_layers = [];
+            var index = 0;
+            for (var i = 0; i < this.addCmpData.layers.length; i++){
+                if ($('#layer-for-addition-' + i).prop('checked')){
+                    new_layers[index++] = this.addCmpData.layers[i];
                 }
-                else{ target.mergeNewParams({styles: layer.style.value}); }
-                this.parent.map.addLayers([target]);
-                this.parent.addLayerToTheList(layer.name, target.id, true);
+            }
+            this.addCmpData.layers = new_layers;
+            this.addCmpData.authors = [];
+            this.addCmpData.id = null;
+            this.addCmpData.name = "";
+            this.parent.initializeComposition(this.addCmpData);
+            this.parent.initializeMap();
+        }
+        else {
+            for (var i = 0; i < this.addCmpData.layers.length; i++){
+                if ($('#layer-for-addition-' + i).prop('checked')){
+                    var layer = this.addCmpData.layers[i];
+                    this.parent.composition.layers.push(layer);
+                    var target = new OpenLayers.Layer.WMS(
+                        layer.name,
+                        "/o-gis/web/app.php/wms", {
+                            LAYERS: layer.workspace + ':' + layer.cs,
+                            format: 'image/png',
+                            transparent: true
+                        }, {
+                            projection: this.parent.composition.projection
+                        }, {
+                            singleTile: false,
+                            ratio: 1,
+                            isBaseLayer: false,
+                            displayInLayerSwitcher: true
+                    });
+                    if (layer.style.type === 'sld'){
+                        // for whatever reason, we need to remove escaping of " manually
+                        target.mergeNewParams({sld_body: layer.style.value.replace(/\\"/gi, '"')});
+                    }
+                    else{ target.mergeNewParams({styles: layer.style.value}); }
+                    this.parent.map.addLayers([target]);
+                    this.parent.addLayerToTheList(layer.name, target.id, true);
+                }
             }
         }
         this.addCmpData = null;
