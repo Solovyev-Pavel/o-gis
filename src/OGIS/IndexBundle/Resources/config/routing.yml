@@ -413,7 +413,7 @@ updatepalettestyle:
 
 geoexpl:
     pattern: /editor/{datasource}/{id}
-    defaults: { _controller: OGISIndexBundle:Editor:showEditor }   
+    defaults: { _controller: OGISIndexBundle:Editor:showEditor, datasource: null, id: null }   
 
 getlayertype:
     pattern: /gettype/layer/{cs}
