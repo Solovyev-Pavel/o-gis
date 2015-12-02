@@ -72,20 +72,7 @@
             var getCompositionData = "{{ path('getCompositionData', {'id': 'ID'}) }}";
             var getLayerData = "{{ path('getLayerData', {'id': 'ID'}) }}";
 
-            {% if app.user != null %}
-                function addToFavorites(id, type){
-                    if (type === 'composition' && editor.composition.id === null){
-                        var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td>' +
-                                    '<td valign="middle">This composition isn\'t saved yet and can\'t be added to favorites!' +
-                                    '</td></tr></table>';
-                        $( "#messagewindow" ).dialog('option', 'title', 'Adding to Favorites');
-                        $( "#messagewindow" ).empty().append(html);
-                        $( "#messagewindow" ).dialog('open');
-                        return;
-                    }
-                    showTargetCatalogTree(id, type);
-                }
-            {% endif %}
+            function goToHomePage(){ window.location.href = "{{ path('homepage') }}"; }
 
             function initializeEditor(){
                 editor = new CompositionEditor();
@@ -104,6 +91,8 @@
                     editor.initializeCompositionEditor('composition', {{ composition.id }});
                 {% elseif layer != null %}
                     editor.initializeCompositionEditor('layer', {{layer.id}});
+                {% else %}
+                    editor.initializeCompositionEditor(null, null);
                 {% endif %}
                 {% if app.user != null %}
                     editor.setUser({{ app.user.id }}, "{{ app.user.username }}");
@@ -141,6 +130,8 @@
                             <span class="controlicon" onclick="editor.goToEntity('composition', {{ composition.id }});" title="Leave the Editor">
                             {% elseif layer != null %}
                             <span class="controlicon" onclick="editor.goToEntity('layer', {{ layer.id }});" title="Leave the Editor">
+                            {% else %}
+                            <span class="controlicon" onclick="goToHomePage();" title="Leave the Editor">
                             {% endif %}
                                 <img src="/o-gis/web/./EditorJQ/img/door.png" />
                             </span>
