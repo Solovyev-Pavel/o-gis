@@ -103,6 +103,14 @@ function CompositionEditor(){
     
     // Load the initial layer / composition into the Composition Editor
     this.initializeCompositionEditor = function (type, id){
+        this.initializeSubClasses();
+        // if we have something to load, load it
+        if (type !== null && id !== null){ this.loadObject(type, id); }
+        // otherwise, we're done
+    };
+    
+    // Load objects
+    this.loadObject = function(type, id){
         var c_editor = this;
         var url = (type === 'layer') ? getLayerData : getCompositionData;
         $.ajax({url: url.replace(/ID/g, id), method: 'GET'})
@@ -117,7 +125,6 @@ function CompositionEditor(){
                 }
                 c_editor.initializeComposition(msg.data);
                 c_editor.initializeMap();
-                c_editor.initializeSubClasses();
             })
             .fail(function(){
                 $( "#messagewindow" ).empty();
@@ -234,15 +241,15 @@ function CompositionEditor(){
         $.contextMenu({
             selector: '#menu-' + id,
             items: {
-                "style":    {   name: "Change Style",
+                "style":    {   name: "Stylization options",
                                 icon: "edit",
                                 callback: function(key, opt){ c_editor.LayerStyler.styleLayer(opt.selector); } },
-                "addtofav": {   name: "Add to Favourites",
+                "addtofav": {   name: "Add layer to favorites",
                                 icon: "cut",
                                 callback: function(){ 
                                     var fullcs = c_editor.map.getLayer(id).params.LAYERS;
                                     c_editor.getLayersInternalId(fullcs); } },
-                "remove":   {   name: "Remove from Composition",
+                "remove":   {   name: "Remove from composition",
                                 icon: "delete",
                                 callback: function(key, opt){ c_editor.removeLayerFromComposition(opt.selector); } }
             }
@@ -260,6 +267,14 @@ function CompositionEditor(){
     
     // Gets a layer's internal id
     this.getLayersInternalId = function(cs){
+        if (this.user === null){
+            var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td>' +
+                        '<td valign="middle">Only authenticated users can add to favorites!</td></tr></table>';
+            $( "#messagewindow" ).dialog('option', 'title', 'Adding to favorites');
+            $( "#messagewindow" ).empty().append(html);
+            $( "#messagewindow" ).dialog('open');
+            return;
+        }
         var justcs = cs.substring(cs.indexOf(':') + 1);
         $.ajax({
             url: getLayerId.replace('ID', justcs)
@@ -310,4 +325,27 @@ function CompositionEditor(){
         }
         this.map.updateSize();
     };
+    
+    // Add composition to favorites
+    this.addCompositionToFavorites = function(){
+        if (this.user === null){
+            var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td>' +
+                        '<td valign="middle">Only authenticated users can add to favorites!</td></tr></table>';
+            $( "#messagewindow" ).dialog('option', 'title', 'Adding to favorites');
+            $( "#messagewindow" ).empty().append(html);
+            $( "#messagewindow" ).dialog('open');
+            return;
+        }
+        if (this.composition.id === null){
+            var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td>' +
+                        '<td valign="middle">This composition isn\'t saved yet. You can\'t add it to your favorites!' +
+                        '</td></tr></table>';
+            $( "#messagewindow" ).dialog('option', 'title', 'Adding to favorites');
+            $( "#messagewindow" ).empty().append(html);
+            $( "#messagewindow" ).dialog('open');
+            return;
+        }
+        showTargetCatalogTree(this.composition.id, 'composition');
+    };
+    
 }
