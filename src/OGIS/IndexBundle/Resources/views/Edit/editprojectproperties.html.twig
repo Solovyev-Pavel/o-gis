@@ -28,43 +28,43 @@
 		</style>
 		<script type="text/javascript">
 			var isDirty = false;
-            var isSubmit = false;
-            
-            function MarkAsDirty(){ isDirty = true; }
-            function MarkAsSubmit(){ isSubmit = true; }
-            
-            window.onload = function(){
-                window.addEventListener('beforeunload', function(e){
-                    if (isSubmit || !isDirty){ return undefined; }
-                    var msg = "Вы уверены, что хотите покинуть данную страницу, не сохранив внесенные изменения?";
-                    (e || window.event).returnValue = msg;
-                    return msg;
-                });
-            };
-            
-            function resetValues(){
-                isDirty = false;
-                document.getElementById("projectname").value = "{{ project.name }}";
-                document.getElementById("projectdescription").value = "{{ project.description }}";
-                {% if project.publicviewable %}
-                    document.getElementById("view1").checked = true;
-                    document.getElementById("view2").checked = false;
-                {% else %}
-                    document.getElementById("view1").checked = false;
-                    document.getElementById("view2").checked = true;
-                {% endif %}
-                {% if project.publicjoinable %}
-                    document.getElementById("join1").checked = true;
-                    document.getElementById("join2").checked = false;
-                {% else %}
-                    document.getElementById("join1").checked = false;
-                    document.getElementById("join2").checked = true;
-                {% endif %}
-            }
+			var isSubmit = false;
 
-            function goBackToProject(){
-                window.location.href = "{{ path('showproject', {id: project.id}) }}";
-            }
+			function MarkAsDirty(){ isDirty = true; }
+			function MarkAsSubmit(){ isSubmit = true; }
+
+			window.onload = function(){
+				window.addEventListener('beforeunload', function(e){
+					if (isSubmit || !isDirty){ return undefined; }
+					var msg = "Вы уверены, что хотите покинуть данную страницу, не сохранив внесенные изменения?";
+					(e || window.event).returnValue = msg;
+					return msg;
+				});
+			};
+            
+			function resetValues(){
+				isDirty = false;
+				document.getElementById("projectname").value = "{{ project.name }}";
+				document.getElementById("projectdescription").value = "{{ project.description }}";
+				{% if project.publicviewable %}
+					document.getElementById("view1").checked = true;
+					document.getElementById("view2").checked = false;
+				{% else %}
+					document.getElementById("view1").checked = false;
+					document.getElementById("view2").checked = true;
+				{% endif %}
+				{% if project.publicjoinable %}
+					document.getElementById("join1").checked = true;
+					document.getElementById("join2").checked = false;
+				{% else %}
+					document.getElementById("join1").checked = false;
+					document.getElementById("join2").checked = true;
+				{% endif %}
+			}
+
+			function goBackToProject(){
+				window.location.href = "{{ path('showproject', {id: project.id}) }}";
+			}
 		</script>
 	</head>
 
@@ -76,7 +76,7 @@
 		{% endblock %}
 
 		{% block bodycontent %}
-			<form method="post" action="{{ path('edit_project_properties_save', {id: project.id}) }}" id="projectpropertiesform">
+			<form onsubmit="MarkAsSubmit();" method="post" action="{{ path('edit_project_properties_save', {id: project.id}) }}" id="projectpropertiesform">
 			<div style="width:80%;margin-left:auto;margin-right:auto;margin-top:16px;margin-bottom:8px;padding:4px;">
 				<table style="width:100%;border:1px solid #ccc;margin-bottom:8px;">
 					<tr>
