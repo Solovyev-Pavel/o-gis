@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <title>Editing notes for user "{{ user.username }}"</title>
+        <script type="text/javascript" src="{{ asset('./js/ckeditor/ckeditor.js') }}"></script>
+        <script type="text/javascript">
+            var isDirty = false;
+            var isSubmit = false;
+            
+            function MarkAsDirty(){ isDirty = true; }
+            function MarkAsSubmit(){ isSubmit = true; }
+            
+            window.onload = function(){
+                window.addEventListener('beforeunload', function(e){
+                    if (isSubmit || !isDirty){ return undefined; }
+                    var msg = "Are you sure you want to leave this page without saving changes?";
+                    (e || window.event).returnValue = msg;
+                    return msg;
+                });
+            };
+            
+            function resetValues(){
+                CKEDITOR.instances.projectmessageboard.setData(document.getElementById("messageboard_backup").value);
+                isDirty = false;
+            }
+
+            function goBackToProfile(){
+                window.location.href = "{{ path('showuser', {id: user.id}) }}";
+            }
+        </script>
+    </head>
+
+    <body style="width:100%; position:absolute; top:-8px; left:-8px;">
+
+        {% use 'OGISIndexBundle:Default:header.html.twig' %}
+        {% block header %}
+            {{ parent() }}
+        {% endblock %}
+
+        {% block bodycontent %}
+            <form onsubmit="MarkAsSubmit();" method="post" action="{{ path('usernotes', {id: user.id}) }}" id="usernotesform">
+            <div style="width:80%;margin-left:auto;margin-right:auto;margin-top:16px;margin-bottom:8px;padding:4px;">
+                <table style="width:100%;border:1px solid #ccc;margin-bottom:8px;">
+                    <tr>
+                        <td>
+                            <b>Публикуемая информация:</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <textarea style="display:none;" id="messageboard_backup">{{ user.messageboard|raw }}</textarea>
+                            <textarea style="width:calc(100% - 20px);resize:none;" id="usermessageboard" name="_projectwall" form="usernotesform">{{ user.messageboard|raw }}</textarea>
+                            <script type="text/javascript">
+                                CKEDITOR.config.height = window.innerHeight - 250;
+                                CKEDITOR.replace('usermessageboard', {
+                                    toolbar: [
+                                        { name: 'basicstyles', items : [ 'Bold','Italic','Underline','Strike' ] },
+                                        { name: 'paragraph', items : [ 'NumberedList','BulletedList','-','Outdent','Indent','-','Blockquote','-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock' ] },
+                                        { name: 'links', items : [ 'Link','Unlink' ] }                                        
+                                    ]
+                                }).on('change', function(ev){ isDirty = true; });
+                            </script>
+                        </td>
+                    </tr>
+                </table>
+                <input type="submit" value="Apply changes"/>&nbsp;
+            </form>
+                <button type="button" onclick="resetValues();">Undo changes</button>&nbsp;
+                <button type="button" onclick="goBackToProfile();">Go back to {{ user.name }}'s profile</button>
+            </div>
+        {% endblock %}
+
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+    </body>
+</html>
