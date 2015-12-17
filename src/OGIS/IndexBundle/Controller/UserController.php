@@ -93,4 +93,37 @@ class UserController extends Controller {
         return $response;
     }
     
+    public function editUserNotesAction($id){
+        $em = $this->getDoctrine()->getManager();               
+        $user = $em->getRepository('OGIS\IndexBundle\Entity\User')->find($id);
+        if(!$user){
+            return $this->render('OGISIndexBundle:Error:entitynotfound.html.twig', array(
+                'caption' => "User not found!",
+                'message' => "The requested user doesn't exist in the database."
+            ));
+        }
+        $this_user = $this->getUser();
+        if($this_user->getId() != $user->getId() && !$this->get('security.context')->isGranted('ROLE_ADMIN')){
+            return $this->render('OGISIndexBundle:Error:accessdenied.html.twig', array(
+                'caption' => "Access denied!",
+                'message' => "You do not have permissions necessary to perform this action!",
+                'tip'     => ""
+            ));
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] == 'GET'){
+            return $this->render('OGISIndexBundle:Edit:editusernotes.html.twig', array('user' => $user));
+        }
+        else{
+            $rawdata = file_get_contents('php://input');
+            $rawdata = substr($rawdata, strpos($rawdata, '_'));
+            $params = array();
+            parse_str($rawdata, $params);
+            $user->setMessageboard($params['_projectwall']);
+            $em->persist($user);
+            $em->flush();
+            return $this->render('OGISIndexBundle:Edit:editusernotes.html.twig', array('user' => $user));
+        }
+    }
+    
 }
