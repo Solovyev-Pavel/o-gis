@@ -1,3 +1,10 @@
+{% set is_owner = false %}
+{% if app.user != null %}
+    {% if app.user.id == user.id %}
+        {% set is_owner = true %}
+    {% endif %}
+{% endif %}
+
 <!DOCTYPE html>
 <html>
     <head>
@@ -34,13 +41,14 @@
         <script type="text/javascript" src="{{ asset('./js/addtofavorites.js') }}"></script>
 
         <script type="text/javascript">
-            function redirectToLayerUpload(){ window.location.href = "{{ path('createlayer') }}"; }
-
-            function redirectToStyleCreation(){ window.location.href = "{{ path('createstyle') }}"; }
-
-            function redirectToCreateProject(){ window.location.href = "{{ path('createproject') }}"; }
-
-            function redirectToPaletteCreation(){ window.location.href = "{{ path('paletteeditor', {'id': null}) }}"; }
+            {% if is_owner %}
+                function RedirectToEditNotes(){ window.location.href = "{{ path('usernotes', {'id': user.id}) }}"; }
+                function redirectToLayerUpload(){ window.location.href = "{{ path('createlayer') }}"; }
+                function redirectToCmpEditor(){ window.location.href = "{{ path('compositioneditor') }}"; }
+                function redirectToStyleCreation(){ window.location.href = "{{ path('createstyle') }}"; }
+                function redirectToCreateProject(){ window.location.href = "{{ path('createproject') }}"; }
+                function redirectToPaletteCreation(){ window.location.href = "{{ path('paletteeditor', {'id': null}) }}"; }
+            {% endif %}
 
             var homepage = "{{ path('homepage') }}";
             var catalogData = "{{ path('loadcatalogdata', {'catid': 'PATH' }) }}";
@@ -54,7 +62,22 @@
             var deleteCatalogRoute = "{{ path('deletecatalog', {'id': 'ID'}) }}";
             var modifyLinkRoute = "{{ path('updatelink') }}";
             var deleteLinkRoute = "{{ path('removefromfavorites', {'id' : 'ID'}) }}";
-            var addToFavRoute = "{{ path('addtofavorites') }}";            
+            var addToFavRoute = "{{ path('addtofavorites') }}";
+            
+            function switchTabs(id){
+                var data_tabs = ["user_tab","notes_tab","layer_tab","cmp_tab","palette_tab","proj_tab"];
+                var select_tabs = ["user_sel","notes_sel","layer_sel","cmp_sel","palette_sel","proj_sel"];
+                for (var i = 0; i < 6; i++){
+                    if (i === id){
+                        $('#' + data_tabs[i]).css('display', 'block');
+                        document.getElementById(select_tabs[i]).setAttribute('class', 'objectlinkselected userprofilelinkbox');
+                    }
+                    else{
+                        $('#' + data_tabs[i]).css('display', 'none');
+                        document.getElementById(select_tabs[i]).setAttribute('class', 'objectlink userprofilelinkbox');
+                    }
+                }
+            }
         </script>
     </head>
     <body class="bodyfullpage" onload="loadUserCatalogs();">
@@ -66,96 +89,262 @@
 
         {% block pagecontent %}
             <div class="contentbody">
+                {# avatar + instruments panel #}
                 <div class="userpageleftside">
                     <div class="useravatar">
                         <center><img src="{{ asset('./img/user.png') }}" height="200px" width="200px"></img></center>
                     </div>
-                <div>
-                {% if app.user != null %}
-                    {% if app.user.id == user.id %}
-                        {% set layersleft = user.limits.layers - user.layers|length %}
-                        {% set stylesleft = user.limits.styles - user.styles|length %}
-                        {% set palettesleft = user.limits.palettes - user.palettes|length %}
-                        <div class="userprofilelinkbox objectlink">Profile settings</div>
-                        <div class="userprofilelinkbox objectlink" onclick="redirectToCreateProject();">Found a project</div>
-                        {% if layersleft > 0 %}
-                            <div class="userprofilelinkbox objectlink" onclick="redirectToLayerUpload();">Upload a layer ({{ layersleft }})</div>
-                        {% elseif user.limits.layers == null %} {# user with rights to load unlimited number of layers #}
-                            <div class="userprofilelinkbox objectlink" onclick="redirectToLayerUpload();">Upload a layer</div>
-                        {% elseif layersleft == 0 %}
-                            <div class="userprofileunlinkbox inaccessiblelink">
-                                <span style="text-decoration:line-through;">Upload a layer</span><br/>
-                                <span class="inaccessiblelinkmessage">You've reached the limit of layers</span>
-                            </div>
+                    <div>
+                        <div class="userprofilelinkbox objectlinkselected" id="user_sel" onclick="switchTabs(0);">
+                            User Info
+                        </div>
+                        <div class="userprofilelinkbox objectlink" id="notes_sel" onclick="switchTabs(1);">
+                            {% if is_owner %}Your Notes{% else %}{{ user.username }}'s Notes{% endif %}
+                        </div>
+                        <div class="userprofilelinkbox objectlink" id="layer_sel" onclick="switchTabs(2);">
+                            {% if is_owner %}Your Layers{% else %}{{ user.username }}'s Layers{% endif %}
+                        </div>
+                        <div class="userprofilelinkbox objectlink" id="cmp_sel" onclick="switchTabs(3);">
+                            {% if is_owner %}Your Compositions{% else %}{{ user.username }}'s Compositions{% endif %}
+                        </div>
+                        <div class="userprofilelinkbox objectlink" id="palette_sel" onclick="switchTabs(4);">
+                            {% if is_owner %}Your Palettes{% else %}{{ user.username }}'s Palettes{% endif %}
+                        </div>
+                        <div class="userprofilelinkbox objectlink" id="proj_sel" onclick="switchTabs(5);">
+                            Participation in Projects
+                        </div>
+                        {% if is_owner == false%}
+                            <div class="userprofilelinkbox objectlink" onclick="showTargetCatalogTree({{ user.id }}, 'user');">Add User to Favorites</div>
                         {% endif %}
-                        {% if stylesleft > 0 %}
-                            <div class="userprofilelinkbox objectlink" onclick="redirectToStyleCreation()">Create style ({{ stylesleft }})</div>
-                        {% elseif user.limits.styles == null %} {# user with rights to load unlimited number of styles #}
-                            <div class="userprofilelinkbox objectlink" onclick="redirectToStyleCreation()">Create style</div>
-                        {% elseif stylesleft == 0 %}
-                            <div class="userprofileunlinkbox inaccessiblelink">
-                                <span style="text-decoration:line-through;">Create style</span><br/>
-                                <span class="inaccessiblelinkmessage">You've reached the limit of styles</span>
-                            </div>
-                        {% endif %}
-                        {% if palettesleft > 0 %}
-                            <div class="userprofilelinkbox objectlink" onclick="redirectToPaletteCreation()">Create palette ({{ palettesleft }})</div>
-                        {% elseif user.limits.palettes == null %} {# user with rights to load unlimited number of styles #}
-                            <div class="userprofilelinkbox objectlink" onclick="redirectToPaletteCreation()">Create palette</div>
-                        {% elseif palettesleft == 0 %}
-                            <div class="userprofileunlinkbox inaccessiblelink">
-                                <span style="text-decoration:line-through;">Create palette</span><br/>
-                                <span class="inaccessiblelinkmessage">You've reached the limit of palettes</span>
-                            </div>
-                        {% endif %}
-
-                    {% else %}
-                        <div class="userprofilelinkbox objectlink" onclick="showTargetCatalogTree({{ user.id }}, 'user');">Add to favorites</div>
-                        {% if is_granted('ROLE_ADMIN') %}
-                          {#  <div class="userprofilelinkbox objectlink">Edit profile</div> #}
-                        {% endif %}
-                    {% endif %}
-                {% else %}
-                {# display nothing #}
-                {% endif %}
-                
-                <div style="margin-top:12px;padding-left:2px;">
-                    <b>Participation in projects:</b>
-                    <div style="margin-top:10px;">
-                        {% if user.projects|length == 0 %}
-                            {% if app.user != null %}
-                                {% if app.user.id == user.id %}You don't pariticipate in any projects.
-                                {% else %}This user doesn't participate in any projects.
-                                {% endif %}
-                            {% else %}This user doesn't participate in any projects.
+                    </div>
+                </div>
+                {# main content of the page #}
+                <div class="userpagerightside">
+                    <div id="user_tab" style="height:100%;display:block">
+                        <div class="usernamebox">
+                            <span class="username">{{ user.displayname }}</span><br/>
+                            {% if user.limits.role == "ROLE_SUPER_ADMIN" %}
+                                <i class="userroleadmin">O-GIS Administrator</i>
+                            {% elseif user.limits.role == "ROLE_SYSTEM" %}
+                                <i class="userroleadmin">System User</i>
+                            {% elseif user.limits.role == "ROLE_ADMIN" %}
+                                <i class="userrolemod">O-GIS Moderator</i>
+                            {% else %}
+                                <i class="userrolebase">O-GIS User</i>
                             {% endif %}
-                        {% endif %}
-                        {% for project in user.projects %}
-                            <a href="{{ path('showproject', {'id': project.project.id}) }}">{{ project.project.name }}</a> - {{ project.rank }}<br/>
-                        {% endfor %}
+                        </div>
+                        <div class="userfilesarea">
+                            <div class="userfilesheader" style="height:30px;padding-top:6px;">User's resources</div>
+                            <div class="foldertree" id="foldertree"></div>
+                        </div>
+                    </div>
+                    <div id="notes_tab" class="userfilesareafullside" style="display:none;">
+                        <div class="userfilesheader">
+                            {% if is_owner or is_granted('ROLE_ADMIN') %}
+                                <div class="biglink" onclick="RedirectToEditNotes();"><b>Edit notes</b></div>
+                            {% else %}
+                                <div style="height:30px;width:100%;padding-top:6px;">{{ user.username }}'s Notes</div>
+                            {% endif %}
+                        </div>
+                        <div class="foldertree">
+                            {% if user.messageboard != null and user.messageboard != "" %}
+                                {{ user.messageboard|raw }}
+                            {% else %}
+                                {% if is_owner %}You{% else %}{{ user.username }}{% endif %} made no notes.
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div id="layer_tab"  class="userfilesareafullside" style="display:none;">
+                        <div class="userfilesheader">
+                            {% if is_owner %}
+                                {% set layersleft = user.limits.layers - user.layers|length %}
+                                {% if user.limits.layers == null %}
+                                    <div class="biglink" onclick="redirectToLayerUpload();"><b>Upload a Layer</b></div>
+                                {% elseif layersleft > 0 %}
+                                    <div class="biglink" onclick="redirectToLayerUpload();"><b>Upload a Layer</b> ({{ layersleft }})</div>
+                                {% elseif layersleft <= 0 %}
+                                    <div style="height:30px;width:100%;padding-top:6px;">You've reached the max permitted number of layers</div>
+                                {% endif %}
+                            {% else %}
+                                <div style="height:30px;width:100%;padding-top:6px;">{{ user.username }}'s Layers</div>
+                            {% endif %}
+                        </div>
+                        <div class="foldertree">
+                            {% if user.layers|length == 0 %}
+                                {% if is_owner %}You{% else %}{{ user.username }}{% endif %} haven't uploaded any layers yet.
+                            {% else %}
+                                {% for layer in user.layers|sort|reverse %}
+                                    <table class="listrow">
+                                        <tr>
+                                            <td rowspan="3" width="100px" style="border:1px solid #aaa;background:#fff;" valign="middle">
+                                                <a href="{{ path('showlayer', {id: layer.id}) }}">
+                                                        <img src="{{ asset(layer.preview) }}" width="144px"/>
+                                                </a>
+                                            </td>
+                                            <td valign="top" height="20px" colspan="3" style="font-size:18px;padding-left:16px;">
+                                                <a href="{{ path('showlayer', {id: layer.id}) }}">
+                                                <b>{{ layer.name }}</b></a>
+                                                {% if not is_owner %}
+                                                    <span style="display:inline;font-size:14px;padding-left:16px">
+                                                        <a href="#" onclick="showTargetCatalogTree({{ layer.id }}, 'layer');">Add to favorites</a>
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td valign="top" height="24px" width="200px" style="font-size:14px;padding-left:16px;">
+                                                <b>Last modified</b>:&nbsp;{{ layer.modified|date('d.m.Y') }}
+                                            </td>
+                                            <td valign="top" height="24px" width="150px" style="font-size:14px;">
+                                                <b>Views</b>:&nbsp; {{ layer.views }}
+                                            </td>
+                                            <td valign="top" height="24px" style="font-size:14px;">
+                                                <b>Downloads</b>:&nbsp; {{ layer.downloads }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td valign="top" colspan="3" style="font-size:14px;padding-left:16px;">
+                                                <i>"{{ layer.description }}"</i>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div id="cmp_tab" class="userfilesareafullside" style="display:none;">
+                        <div class="userfilesheader">
+                            {% if is_owner %}
+                                <div class="biglink" onclick="redirectToCmpEditor();"><b>Open Composition Editor</b></div>
+                            {% else %}
+                                <div style="height:30px;width:100%;padding-top:6px;">{{ user.username }}'s Compositions</div>
+                            {% endif %}
+                        </div>
+                        <div class="foldertree">
+                            {% if user.compositions|length == 0 %}
+                                {% if is_owner %}You{% else %}{{ user.username }}{% endif %} haven't created any compositions yet.
+                            {% else %}
+                                {% for cmp in user.compositions|sort|reverse %}
+                                    <table class="listrow">
+                                        <tr>
+                                            <td rowspan="3" style="width:48px;height:48px;" valign="middle">
+                                                <a href="{{ path('showcomposition', {id: cmp.id}) }}">
+                                                    <center><img src="{{ asset('./img/composition_icon.png') }}" width="48px" height="48px"/></center>
+                                                </a>
+                                            </td>
+                                            <td valign="top" height="20px" colspan="2" style="font-size:18px;padding-left:20px;">
+                                                <a href="{{ path('showcomposition', {id: cmp.id}) }}">
+                                                <b>{{ cmp.name }}</b></a>
+                                                {% if not is_owner %}
+                                                    <span style="display:inline;font-size:14px;padding-left:16px">
+                                                        <a href="#" onclick="showTargetCatalogTree({{ cmp.id }}, 'composition');">Add to Favorites</a>
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td valign="top" height="24px" width="300px" style="font-size:14px;padding-left:16px;">
+                                                <b>Last modified</b>:&nbsp;{{ cmp.modified|date('d.m.Y') }}
+                                            </td>
+                                            <td valign="top" height="24px" style="font-size:14px;">
+                                                <b>Views</b>:&nbsp; {{ cmp.views }}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td valign="top" colspan="2" style="font-size:14px;padding-left:16px;">
+                                                <i>"{{ cmp.description }}"</i>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div id="palette_tab" class="userfilesareafullside" style="display:none;">
+                        <div class="userfilesheader">
+                            {% if is_owner %}
+                                {% set palettesleft = user.limits.palettes - user.palettes|length %}
+                                {% if user.limits.palettes == null %}
+                                    <div class="biglink" onclick="redirectToPaletteCreation();"><b>Create Palette</b></div>
+                                {% elseif palettesleft > 0 %}
+                                    <div class="biglink" onclick="redirectToPaletteCreation();"><b>Create Palette</b> ({{ palettesleft }})</div>
+                                {% elseif palettesleft <= 0 %}
+                                    <div style="height:30px;width:100%;padding-top:6px;">You've reached max permitted number of palettes</div>
+                                {% endif %}
+                            {% else %}
+                                <div style="height:30px;width:100%;padding-top:6px;">{{ user.username }}'s Palettes</div>
+                            {% endif %}
+                        </div>
+                        <div class="foldertree">
+                            {% if user.palettes|length == 0 %}
+                                {% if is_owner %}You{% else %}{{ user.username }}{% endif %} haven't created any palettes yet.
+                            {% else %}
+                                {% for palette in user.palettes|sort|reverse %}
+                                    <table class="listrow">
+                                        <tr>
+                                            <td rowspan="3" style="width:48px;height:48px;" valign="middle">
+                                                <a href="{{ path('showpalette', {id: palette.id}) }}">
+                                                    <center><img src="{{ asset('./img/palette.png') }}" width="48px" height="48px"/></center>
+                                                </a>
+                                            </td>
+                                            <td valign="top" height="20px" colspan="2" style="font-size:18px;padding-left:20px;">
+                                                <a href="{{ path('showpalette', {id: palette.id}) }}">
+                                                <b>{{ palette.name }}</b></a>
+                                                {% if not is_owner %}
+                                                    <span style="display:inline;font-size:14px;padding-left:16px">
+                                                        <a href="#" onclick="showTargetCatalogTree({{ palette.id }}, 'palette');">Add to Favorites</a>
+                                                    </span>
+                                                {% endif %}
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td valign="top" colspan="2" style="font-size:14px;padding-left:16px;">
+                                                <i>"{{ palette.description }}"</i>
+                                            </td>
+                                        </tr>
+                                    </table>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
+                    </div>
+                    <div id="proj_tab" class="userfilesareafullside" style="display:none;">
+                        <div class="userfilesheader">
+                            {% if is_owner %}
+                                <div style="height:30px;width:100%;padding-top:6px;">Projects you participate in</div>
+                            {% else %}
+                                <div style="height:30px;width:100%;padding-top:6px;">Projects {{ user.username }} participates in</div>
+                            {% endif %}
+                        </div>
+                        <div class="foldertree">
+                            {% if user.projects|length == 0 %}
+                                {% if is_owner %}
+                                    You aren't participating in any projects.
+                                {% else %}
+                                    {{ user.username }} isn't participating in any projects.
+                                {% endif %}
+                            {% else %}
+                                {% for project in user.projects %}
+                                    <table class="listrow">
+                                        <tr>
+                                            <td width="48px" rowspan="2">
+                                                <img src="{{ asset('./img/project_user.png') }}" widht="48px" height="48px"/>
+                                            </td>
+                                            <td width="16px">&nbsp;</td>
+                                            <td style="height:36px;font-size:22px;font-weight:bold;">
+                                                <a href="{{ path('showproject', {'id': project.project.id}) }}" target="_blank">{{ project.project.name }}</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td>&nbsp;</td>
+                                            <td>Rang: <i style="color:#000090;font-size:16px;">{{ project.rank }}</i></td>
+                                        </tr>
+                                    </table>
+                                {% endfor %}
+                            {% endif %}
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
-        <div class="userpagerightside">
-            <div class="usernamebox">
-                <span class="username">{{ user.displayname }}</span><br/>
-                {% if user.limits.role == "ROLE_SUPER_ADMIN" %}
-                    <i class="userroleadmin">Project O-GIS administrator</i>
-                {% elseif user.limits.role == "ROLE_SYSTEM" %}
-                    <i class="userroleadmin">Project O-GIS system user</i>
-                {% elseif user.limits.role == "ROLE_ADMIN" %}
-                    <i class="userrolemod">Project O-GIS moderator</i>
-                {% else %}
-                    <i class="userrolebase">Project O-GIS user</i>
-                {% endif %}
-            </div>
-            <div class="userfilesarea">
-                <div class="userfilesheader">User's resources</div>
-                <div class="foldertree" id="foldertree"></div>
-            </div>
-        </div>
-    </div>
 
     <div id="messagewindow" title="Adding to favorites"></div>
     <div id="errormessagewinow" title="Error!"></div>
