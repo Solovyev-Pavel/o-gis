@@ -27,28 +27,44 @@
 			.redtext{ color: #8f0000; }
 		</style>
 		<script type="text/javascript">
-			function resetValues(){
-				document.getElementById("projectname").value = "{{ project.name }}";
-				document.getElementById("projectdescription").value = "{{ project.description }}";
-				{% if project.publicviewable %}
-					document.getElementById("view1").checked = true;
-					document.getElementById("view2").checked = false;
-				{% else %}
-					document.getElementById("view1").checked = false;
-					document.getElementById("view2").checked = true;
-				{% endif %}
-				{% if project.publicjoinable %}
-					document.getElementById("join1").checked = true;
-					document.getElementById("join2").checked = false;
-				{% else %}
-					document.getElementById("join1").checked = false;
-					document.getElementById("join2").checked = true;
-				{% endif %}
-			}
+			var isDirty = false;
+            var isSubmit = false;
+            
+            function MarkAsDirty(){ isDirty = true; }
+            function MarkAsSubmit(){ isSubmit = true; }
+            
+            window.onload = function(){
+                window.addEventListener('beforeunload', function(e){
+                    if (isSubmit || !isDirty){ return undefined; }
+                    var msg = "Вы уверены, что хотите покинуть данную страницу, не сохранив внесенные изменения?";
+                    (e || window.event).returnValue = msg;
+                    return msg;
+                });
+            };
+            
+            function resetValues(){
+                isDirty = false;
+                document.getElementById("projectname").value = "{{ project.name }}";
+                document.getElementById("projectdescription").value = "{{ project.description }}";
+                {% if project.publicviewable %}
+                    document.getElementById("view1").checked = true;
+                    document.getElementById("view2").checked = false;
+                {% else %}
+                    document.getElementById("view1").checked = false;
+                    document.getElementById("view2").checked = true;
+                {% endif %}
+                {% if project.publicjoinable %}
+                    document.getElementById("join1").checked = true;
+                    document.getElementById("join2").checked = false;
+                {% else %}
+                    document.getElementById("join1").checked = false;
+                    document.getElementById("join2").checked = true;
+                {% endif %}
+            }
 
-			function goBackToProject(){
-				window.location.href = "{{ path('showproject', {id: project.id}) }}";
-			}
+            function goBackToProject(){
+                window.location.href = "{{ path('showproject', {id: project.id}) }}";
+            }
 		</script>
 	</head>
 
@@ -68,7 +84,7 @@
 							<b>Project's title:</b>
 						</td>
 						<td colspan="2">
-							<input type="text" style="width:calc(100% - 20px)" id="projectname" name="_projectname" value="{{ project.name }}" required="required" />
+							<input onkeypress="MarkAsDirty();" type="text" style="width:calc(100% - 20px)" id="projectname" name="_projectname" value="{{ project.name }}" required="required" />
 						</td>
 					</tr>
 					<tr>
@@ -76,7 +92,7 @@
 							<b>Project's description:</b>
 						</td>
 						<td colspan="2">
-							<textarea style="width:calc(100% - 20px);resize:none;" rows="5" id="projectdescription" name="_projectdescription" form="projectpropertiesform">{{ project.description }}</textarea>
+							<textarea onkeypress="MarkAsDirty();" style="width:calc(100% - 20px);resize:none;" rows="5" id="projectdescription" name="_projectdescription" form="projectpropertiesform">{{ project.description }}</textarea>
 						</td>
 					</tr>
 					<tr>
@@ -84,7 +100,7 @@
 							<b>View permissions:</b>
 						</td>
 						<td valign="top">
-							<input type="radio" id="view1" name="_publicviewable" value="true" {% if project.publicviewable %}checked{% endif %}>
+							<input onchange="MarkAsDirty();" type="radio" id="view1" name="_publicviewable" value="true" {% if project.publicviewable %}checked{% endif %}>
 						</td>
 						<td>
 							<label class="greentext" for="view1">Anyone can view this projects or its files.</label>
@@ -92,7 +108,7 @@
 					</tr>
 					<tr>
 						<td valign="top">
-							<input type="radio" id="view2" name="_publicviewable" value="false" {% if project.publicviewable == false %}checked{% endif %}>
+							<input onchange="MarkAsDirty();" type="radio" id="view2" name="_publicviewable" value="false" {% if project.publicviewable == false %}checked{% endif %}>
 						</td>
 						<td>
 							<label class="redtext" for="view2">Only project members and site administration can view files of this project.</label>
@@ -101,7 +117,7 @@
 					<tr>
 						<td rowspan="2"><b>Project membership:</b></td>
 						<td valign="top">
-							<input type="radio" id="join1" name="_publicjoinable" value="true" {% if project.publicjoinable %}checked{% endif %}>
+							<input onchange="MarkAsDirty();" type="radio" id="join1" name="_publicjoinable" value="true" {% if project.publicjoinable %}checked{% endif %}>
 						</td>
 						<td>
 							<label class="greentext" for="join1">Anyone can join the project.</label>
@@ -109,7 +125,7 @@
 					</tr>
 					<tr>
 						<td valign="top">
-							<input type="radio" id="join2" name="_publicjoinable" value="false" {% if project.publicjoinable == false %}checked{% endif %}>
+							<input onchange="MarkAsDirty();" type="radio" id="join2" name="_publicjoinable" value="false" {% if project.publicjoinable == false %}checked{% endif %}>
 						</td>
 						<td>
 							<label class="redtext" for="join2">Only project administration can add new members to the project.</label>
