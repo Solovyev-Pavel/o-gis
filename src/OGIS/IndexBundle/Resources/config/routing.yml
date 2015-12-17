@@ -47,6 +47,10 @@ userlist:
 userlistitems:
     pattern: /list/users
     defaults: { _controller: OGISIndexBundle:User:userListItems }
+    
+usernotes:
+    pattern: /user/notes/{id}
+    defaults: { _controller: OGISIndexBundle:User:editUserNotes }
 
  # ########################################################################## #
  #                               catalog tree pages                           #
@@ -255,6 +259,10 @@ edit_project_properties_save:
     pattern: /project/properties/save/{id}
     defaults: { _controller: OGISIndexBundle:Project:saveProjectProperties }
     methods: [POST]
+    
+update_project_notes:
+    pattern: /project/notes/{id}
+    defaults: { _controller: OGISIndexBundle:Project:editProjectNotes }
 
 edit_project_members:
     pattern: /edit/project/members/{id}
