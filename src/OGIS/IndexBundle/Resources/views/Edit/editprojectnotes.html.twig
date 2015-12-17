@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+<!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
+<!--                        Sergey Sevryukov (sevrukovs@gmail.com)             -->
+<!--                        Alexander Afonin (acer737@yandex.ru)               -->
+<!--                                                                           -->
+<!--  Licensed under the Apache License, Version 2.0 (the "License");          -->
+<!--  you may not use this file except in compliance with the License.         -->
+<!--  You may obtain a copy of the License at                                  -->
+<!--              http://www.apache.org/licenses/LICENSE-2.0                   -->
+<!--                                                                           -->
+<!--  Unless required by applicable law or agreed to in writing, software      -->
+<!--  distributed under the License is distributed on an "AS IS" BASIS,        -->
+<!--  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. -->
+<!--  See the License for the specific language governing permissions and      -->
+<!--  limitations under the License.                                           -->
+<!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+        
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <title>Editing notes for project "{{ project.name }}"</title>
+        <script type="text/javascript" src="{{ asset('./js/ckeditor/ckeditor.js') }}"></script>
+        <script type="text/javascript">
+            var isDirty = false;
+            var isSubmit = false;
+            
+            function MarkAsDirty(){ isDirty = true; }
+            function MarkAsSubmit(){ isSubmit = true; }
+            
+            window.onload = function(){
+                window.addEventListener('beforeunload', function(e){
+                    if (isSubmit || !isDirty){ return undefined; }
+                    var msg = "Are you sure you want to leave this page without saving changes?";
+                    (e || window.event).returnValue = msg;
+                    return msg;
+                });
+            };
+            
+            function resetValues(){
+                CKEDITOR.instances.projectmessageboard.setData(document.getElementById("messageboard_backup").value);
+                isDirty = false;
+            }
+
+            function goBackToProject(){
+                window.location.href = "{{ path('showproject', {id: project.id}) }}";
+            }
+        </script>
+    </head>
+
+    <body style="width:100%; position:absolute; top:-8px; left:-8px;">
+
+        {% use 'OGISIndexBundle:Default:header.html.twig' %}
+        {% block header %}
+            {{ parent() }}
+        {% endblock %}
+
+        {% block bodycontent %}
+            <form onsubmit="MarkAsSubmit();" method="post" action="{{ path('update_project_notes', {id: project.id}) }}" id="projectnotesform">
+            <div style="width:80%;margin-left:auto;margin-right:auto;margin-top:16px;margin-bottom:8px;padding:4px;">
+                <table style="width:100%;border:1px solid #ccc;margin-bottom:8px;">
+                    <tr>
+                        <td>
+                            <b>Notes:</b>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <textarea style="display:none;" id="messageboard_backup">{{ project.messageboard|raw }}</textarea>
+                            <textarea style="width:calc(100% - 20px);resize:none;" id="projectmessageboard" name="_projectwall" form="projectnotesform">{{ project.messageboard|raw }}</textarea>
+                            <script type="text/javascript">
+                                CKEDITOR.config.height = window.innerHeight - 250;
+                                CKEDITOR.replace('projectmessageboard', {
+                                    toolbar: [
+                                        { name: 'basicstyles', items : [ 'Bold','Italic','Underline','Strike' ] },
+                                        { name: 'paragraph', items : [ 'NumberedList','BulletedList','-','Outdent','Indent','-','Blockquote','-','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock' ] },
+                                        { name: 'links', items : [ 'Link','Unlink' ] }                                        
+                                    ]
+                                }).on('change', function(ev){ isDirty = true; });
+                            </script>
+                        </td>
+                    </tr>
+                </table>
+                <input type="submit" value="Apply changes"/>&nbsp;
+            </form>
+                <button type="button" onclick="resetValues();">Undo changes</button>&nbsp;
+                <button type="button" onclick="goBackToProject();">Return to project</button>
+            </div>
+        {% endblock %}
+
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+    </body>
+</html>
