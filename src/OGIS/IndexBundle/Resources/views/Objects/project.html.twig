@@ -4,19 +4,18 @@
 {% if app.user != null %}
     {% if is_granted('ROLE_ADMIN') %}
         {% set is_admin = true %}
-    {% else %}
-        {% for user in project.participants %}
-            {% if user.user.id == app.user.id %}
-                {% set is_member = true %}
-                {% if user.rank == 'Administrator' %}
-                    {% set is_admin = true %}
-                {% elseif user.rank == 'Founder' %}
-                    {% set is_founder = true %}
-                    {% set is_admin = true %}
-                {% endif %}
-            {% endif %}
-        {% endfor %}
     {% endif %}
+    {% for user in project.participants %}
+        {% if user.user.id == app.user.id %}
+            {% set is_member = true %}
+            {% if user.rank == 'Administrator' %}
+                {% set is_admin = true %}
+            {% elseif user.rank == 'Founder' %}
+                {% set is_founder = true %}
+                {% set is_admin = true %}
+            {% endif %}
+        {% endif %}
+    {% endfor %}
 {% endif %}
 
 <!DOCTYPE html>
@@ -55,7 +54,7 @@
         <script type="text/javascript" src="{{ asset('./js/addtofavorites.js') }}"></script>
         <script type="text/javascript">
 
-            var homepage = "{{ path('homepage') }}" + "/";
+            var homepage = "{{ path('homepage') }}";
             var catalogData = "{{ path('loadcatalogdata', {'catid': 'PATH' }) }}";
             var rootNodes = "{{ path('loadprojectcatalogs', {'catid': project.catalog}) }}";
             {% if app.user != null %}
@@ -67,11 +66,29 @@
             var modifyLinkRoute = "{{ path('updatelink') }}";
             var deleteLinkRoute = "{{ path('removefromfavorites', {'id' : 'ID'}) }}";
             var addToFavRoute = "{{ path('addtofavorites') }}";
-                        
-                    
+            
+            function switchTabs(id){
+                var data_tabs = ["files_data","notes_data","users_data"];
+                var select_tabs = ["files_tab","notes_tab","users_tab"];
+                for (var i = 0; i < 3; i++){
+                    if (i === id){
+                        $('#' + data_tabs[i]).css('display', 'block');
+                        document.getElementById(select_tabs[i]).setAttribute('class', 'objectlinkselected projectinfobutton');
+                    }
+                    else{
+                        $('#' + data_tabs[i]).css('display', 'none');
+                        document.getElementById(select_tabs[i]).setAttribute('class', 'objectlink projectinfobutton');
+                    }
+                }
+            }
+            
             {% if is_admin == true %}
                 function redirectToEditProperties(){
                     window.location.href = "{{ path('edit_project_properties', {'id': project.id}) }}";
+                }
+                
+                function redirectToEditNotes(){
+                     window.location.href = "{{ path('update_project_notes', {'id': project.id}) }}";
                 }
 
                 function redirectToEditMembership(){
@@ -123,36 +140,52 @@
                     </div>
                     <div class="projectleftpanel">
                         {% if app.user != null and is_member == false and project.publicjoinable == true %}
-                            <div class="projectlinkbox objectlink" onclick="joinProject()">Join the project</div>
+                            <div class="projectlinkbox objectlink" onclick="joinProject();">Join Project</div>
                         {% endif %}
                         {% if is_member == true and is_founder == false %}
-                            <div class="projectlinkbox objectlink" onclick="leaveProject()">Leave the project</div>
+                            <div class="projectlinkbox objectlink" onclick="leaveProject();">Leave Project</div>
                         {% endif %}
                         {% if is_admin == true %}
-                            <div class="projectlinkbox objectlink" onclick="redirectToEditProperties()">Edit project properties</div>
-                            <div class="projectlinkbox objectlink" onclick="redirectToEditMembership()">Edit project members</div>
+                            <div class="projectlinkbox objectlink" onclick="redirectToEditProperties();">Edit Project Settings</div>
+                            <div class="projectlinkbox objectlink" onclick="redirectToEditNotes();">Edit Project Notes</div>
+                            <div class="projectlinkbox objectlink" onclick="redirectToEditMembership();">Edit Project Members</div>
                             <div class="projectlinkbox objectlink" onclick="deleteProject();">Delete project</div>
                         {% endif %}
-                        <div style="margin-top:12px;padding-left:2px;">
-                            <b>Project members</b>
-                            <div style="margin-top:10px;">
-                            {% for user in project.participants %}
-                                <a href="{{ path('showuser', {'id': user.user.id}) }}">{{ user.user.displayname }}</a> - {{ user.rank }}<br/>
-                            {% endfor %}
-                            </div>
-                        </div>
                     </div>
                 </div>
                 <div class="projectpagerightside">
                     <div class="projectnamebox">{{ project.name }}</div>
                     <div class="projectdescriptionbox"><i>{{ project.description }}</i></div>
                     <div class="projectfilesarea">
-                        <div class="projectfilesheader">Project resources</div>
-                        {% if project.publicviewable %}
-                            <div class="foldertree" id="foldertree"></div>
-                        {% else %}
-                            <div> You can't view this project's resources </div>
-                        {% endif %}
+                        <div class="projectinfotable">
+                            <div class="objectlinkselected projectinfobutton" onclick="switchTabs(0);" id="files_tab">Project Resources</div>
+                            <div class="objectlink projectinfobutton" onclick="switchTabs(1);" id="notes_tab">Project Notes</div>
+                            <div class="objectlink projectinfobutton" onclick="switchTabs(2);" id="users_tab">Project Participants</div>
+                        </div>
+                        
+                        <div class="datablockcontainer">
+                            <div id="files_data" class="datablock" style="display:block;">
+                                {% if project.publicviewable %}
+                                    <div class="foldertree" id="foldertree"></div>
+                                {% else %}
+                                    <div> You can't view this project's resources! </div>
+                                {% endif %}
+                            </div>
+                            <div id="notes_data" class="datablock" style="display:none;">
+                                {% if project.publicviewable == false %}
+                                    You can't view this project's resources
+                                {% elseif project.messageboard == null %}
+                                    There's nothing here
+                                {% else %}
+                                    {{ project.messageboard|raw }}
+                                {% endif %}
+                            </div>
+                            <div id="users_data" class="datablock" style="display:none;">
+                                {% for user in project.participants %}
+                                    <a href="{{ path('showuser', {'id': user.user.id}) }}">{{ user.user.displayname }}</a> - {{ user.rank }}<br/>
+                                {% endfor %}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
