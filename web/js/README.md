@@ -7,7 +7,7 @@ The following JS libraries should be added to this folder:
 - jQuery-contextMenu by B. Brala, R. Rehm, C. Baartse, A. Osmani
 - jQuery-minicolors by Cory LaViska
 - OpenLayers 2.* by OpenGeo
-- CKEditor by A. Tomanek, F. Knabben, M. Lewandowski, J. Swiderski, A. Nowodzinski, P. Jasiun, P. Koszuliński and W. Walc
+- CKEditor by A. Tomanek, F. Knabben, M. Lewandowski, J. Swiderski, A. Nowodzinski, P. Jasiun, P. Koszuliński, W. Walc
 
 Additionally, to keep jQuery-contextMenu CSS unchanged, the following images will have to be updated:
 
