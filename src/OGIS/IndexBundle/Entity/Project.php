@@ -27,6 +27,11 @@ class Project
 	 * @ORM\Column(type="string", length=1024)
 	 */
 	private $description;
+        
+        /**
+         * @ORM\Column(type="text", nullable=true)
+         */
+        private $messageboard;
 
 	/**
 	 * @ORM\OneToMany(targetEntity="ProjectParticipation", mappedBy="project", fetch="LAZY", orphanRemoval=true, cascade={"persist","remove"})
@@ -284,5 +289,28 @@ class Project
         $this->participants[] = $participants;
 
         return $this;
+    }
+
+    /**
+     * Set messageboard
+     *
+     * @param string $messageboard
+     * @return Project
+     */
+    public function setMessageboard($messageboard)
+    {
+        $this->messageboard = $messageboard;
+
+        return $this;
+    }
+
+    /**
+     * Get messageboard
+     *
+     * @return string 
+     */
+    public function getMessageboard()
+    {
+        return $this->messageboard;
     }
 }
