@@ -25,6 +25,11 @@ class User extends BaseUser {
 	 * @ORM\Column(type="string", length=128, nullable=true)
 	 */
 	protected $displayname;
+        
+        /**
+         * @ORM\Column(type="text", nullable=true)
+         */
+        protected $messageboard;
 
 	/**
         * @ORM\OneToMany(targetEntity="Layer", mappedBy="author", fetch="LAZY")
