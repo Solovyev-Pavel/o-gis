@@ -566,5 +566,39 @@ class ProjectController extends Controller {
             'message' => "Project \"$projectname\" was successfully deleted."
         ));
     }
+    
+    // a project's notes edit page
+    public function editProjectNotesAction($id){
+        $em = $this->getDoctrine()->getManager();               
+        $authorizationChecker = $this->get('security.context');
+        $project = $em->getRepository('OGIS\IndexBundle\Entity\Project')->find($id);
+        if(!$project){
+		return $this->render('OGISIndexBundle:Error:entitynotfound.html.twig', array(
+			'caption' => "Project not found!",
+			'message' => "The requested project doesn't exist in the database."
+		));
+        }
+        if(!$authorizationChecker->isGranted('EDIT', $project) && !$this->get('security.context')->isGranted('ROLE_ADMIN')){
+		return $this->render('OGISIndexBundle:Error:accessdenied.html.twig', array(
+                        'caption' => "You don't have the permission necessary to perform this action!",
+			'message' => "You don't have the permission necessary to perform this action!",
+			'tip'     => ""
+                ));
+        }
+        
+        if ($_SERVER['REQUEST_METHOD'] == 'GET'){
+            return $this->render('OGISIndexBundle:Edit:editprojectnotes.html.twig', array('project' => $project));
+        }
+        else{
+            $rawdata = file_get_contents('php://input');
+            $rawdata = substr($rawdata, strpos($rawdata, '_'));
+            $params = array();
+            parse_str($rawdata, $params);
+            $project->setMessageboard($params['_projectwall']);
+            $em->persist($project);
+            $em->flush();
+            return $this->render('OGISIndexBundle:Edit:editprojectnotes.html.twig', array('project' => $project));
+        }
+    }
 
 }
