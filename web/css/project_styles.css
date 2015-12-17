@@ -26,7 +26,7 @@ a { color: #4040af; }
 	position: absolute;
 	top: -8px;
 	left: -8px;
-	height: 100%;
+	height: calc(100% - 8px);
 }
 
 .contentbody{
@@ -45,6 +45,18 @@ a { color: #4040af; }
 }
 
 .objectlink:hover{
+	background: #efefef;
+}
+
+.objectlinkselected{
+	color: #555;
+        background: #f8f8f8;
+	text-decoration: none;
+	cursor: hand;
+	cursor: pointer;
+}
+
+.objectlinkselected:hover{
 	background: #efefef;
 }
 
@@ -121,9 +133,40 @@ a { color: #4040af; }
 	color: #555;
 }
 
+.projectinfotable{
+    border-bottom: 1px solid #ccc;
+    font-size: 17px;
+    height: 30px;
+    width: 100%;
+    text-align: center;
+    border-collapse: collapse;
+}
+
+.projectinfobutton{
+    padding-top: 4px;
+    padding-bottom: 4px;
+    display: inline-block;
+    color: #999;
+    text-decoration: none;
+    border-right: 1px solid #ccc;
+    width: calc(100% / 3 - 5px);
+    height: 22px
+}
+
+.datablockcontainer{
+    height: calc(100% - 36px);
+    width: 100%;
+}
+
+.datablock{
+    height: calc(100% - 16px);
+    width: calc(100% - 16px);
+    padding: 8px;
+    overflow: auto;
+}
+
 .foldertree{
 	height: calc( 100% - 36px );
-	border-right: 1px solid #d8d8d8;
 	overflow-x: auto;
 	overflow-y: auto;
 }
@@ -143,6 +186,6 @@ a { color: #4040af; }
 }
 
 .projectmembership{
-        padding-top: 12px;
-        padding-left: 4px;
+    padding-top: 12px;
+    padding-left: 4px;
 }
