@@ -574,7 +574,7 @@ function CompositionEditorRasterAnalysis(){
         }
         else{
             var inputtext = document.getElementById('expressionArea').value;
-            var cursorPos = getInputSelection(document.getElementById('expressionArea'));
+            var cursorPos = this.getInputSelection(document.getElementById('expressionArea'));
             var prevChar = (inputtext[cursorPos.start - 1] === undefined) ? null : inputtext[cursorPos.start - 1];
             var nextChar = (inputtext[cursorPos.end] === undefined) ? null : inputtext[cursorPos.end];
 
