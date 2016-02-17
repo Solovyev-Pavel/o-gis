@@ -21,69 +21,75 @@
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
 		<link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
-		<title>{{ caption }}</title>
-		<style type="text/css">
-			.infobox{
-				width: 80%;
-				background: #c9e9c9;
-				border: solid 2px #00a000;
-				color: #00a000;
-				padding-top: 10px;
-				padding-bottom: 10px;
-				font-weight: bold;
-				font-size: 28px;
-				margin-top: 15px;
-				margin-bottom: 15px;
-				min-height: 128px;
-			}
-			.tip{
-				color: #009000;
-				font-size: 18px;
-				padding-top: 5px;
-				padding-bottom: 5px;
-			}
-		</style>
-	</head>
+        <title>{{ caption }}</title>
+        <style type="text/css">
+            .infobox{
+                width: 80%;
+                background: #c9e9c9;
+                border: solid 2px #00a000;
+                color: #00a000;
+                padding-top: 10px;
+                padding-bottom: 10px;
+                font-weight: bold;
+                font-size: 28px;
+                margin-top: 15px;
+                margin-bottom: 15px;
+                min-height: 128px;
+            }
+            .tip{
+                color: #009000;
+                font-size: 18px;
+                padding-top: 5px;
+                padding-bottom: 5px;
+            }
+        </style>
+    </head>
 
-	<body style="width:100%; position:absolute; top:-8px; left:-8px;">
+    <body style="width:100%; position:absolute; top:-8px; left:-8px;">
 
-		{% use 'OGISIndexBundle:Default:header.html.twig' %}
-		{% block header %}
-			{{ parent() }}
-		{% endblock %}
+        {% use 'OGISIndexBundle:Default:header.html.twig' %}
+        {% block header %}
+            {{ parent() }}
+        {% endblock %}
 
-		{% block bodycontent %}
+        {% block bodycontent %}
+            <center>
+                <table class="infobox">
+                    <tr>
+                        <td width="96px" rowspan="2" valign="middle">
+                            <center>
+                                <img src="{{ asset('./img/ok.png') }}"/>
+                            </center>
+                        </td>
+                        <td>
+                            <center>{{ message }}</center>
+                        </td>
+                        <td width="96px" rowspan="2" valign="middle">
+                            <center>
+                                <img src="{{ asset('./img/ok.png') }}"/>
+                            </center>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td class="tip" style="padding-left:calc(10%);">
+                            <!--<center>-->
+                                <ul>
+                                    <li>Перейти к <a href="{{ path('showlayer', {id: layer}) }}">Загруженному слою</a></li>
+                                    {% if canupload %}
+                                        <li><a href="{{ path('createlayer') }}">Загрузить еще один слой</a></li>
+                                    {% endif %}
+                                    <li>Вернуться к <a href="{{ path('showuser', {'id': user}) }}">Вашему профилю</a></li>
+                                    <li>Вернуться на <a href="{{ path('homepage') }}">главную страницу</a></li>
+                                </ul>
+                            <!--</center>-->
+                        </td>
+                    </tr>
+                </table>
+            </center>
+        {% endblock %}
 
-			<center>
-				<table class="infobox">
-					<tr>
-						<td width="96px" rowspan="2" valign="middle">
-							<center>
-								<img src="{{ asset('./img/ok.png') }}"/>
-							</center>
-						</td>
-						<td>
-							<center>{{ message }}</center>
-						</td>
-						<td width="96px" rowspan="2" valign="middle">
-							<center>
-								<img src="{{ asset('./img/ok.png') }}"/>
-							</center>
-						</td>
-					</tr>
-					<tr>
-						<td class="tip">
-							<center>
-								You can view <a href="{{ path('showlayer', {id: layer}) }}">your layer</a> or return to the <a href="{{ path('homepage') }}">homepage</a>.
-							</center>
-						</td>
-					</tr>
-				</table>
-			</center>
-		{% endblock %}
-
-		{% block footer %}
-			{{ parent() }}
-		{% endblock %}
-	</body>
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+    </body>
 </html>
