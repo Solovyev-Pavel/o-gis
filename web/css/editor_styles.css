@@ -143,6 +143,19 @@ a { color: #4040af; }
     background: #e6e6e6 url("/o-gis/web/js/jquery-ui/images/ui-bg_glass_75_e6e6e6_1x400.png") 50% 50%;
 }
 
+.editorcursorposition{
+    width: 160px;
+    height: 20px;
+    position: absolute;
+    bottom: 40px;
+    right: 12px;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    z-index: 9977;
+    background: #fff;
+    padding-left: 16px;
+}
+
 /* ********************** Raster calculator buttons *********************** */
 
 .smallRCbutton{
