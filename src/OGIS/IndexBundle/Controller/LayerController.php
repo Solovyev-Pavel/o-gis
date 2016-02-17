@@ -591,10 +591,17 @@ class LayerController extends Controller {
         $id = $layername;
         $layer = $em->getRepository('OGIS\IndexBundle\Entity\Layer')->find($id);
         $layername = $layer->getName();
+        $user = $em->getRepository('OGIS\IndexBundle\Entity\User')->find($this->getUser()->getId());
+        $user_id = $user->getId();
+        $layers = count($user->getLayers());
+        $limits = $user->getLimits()->getLayers();
+        $can_upload = ($limits == null || $limits <= 0 || $layers < $limits) ? true : false;
         return $this->render('OGISIndexBundle:Create:uploadsuccessful.html.twig', array(
-            'caption' => "Success!",
-            'message' => "Your layer \"$layername\" was uploaded successfully!",
-            'layer' => $id
+            'caption' => "Слой $layername успешно загружен",
+            'message' => "Ваш слой \"$layername\" был успешно загружен!",
+            'layer' => $id,
+            'user' => $user_id,
+            'canupload' => $can_upload
         ));
     }
 
