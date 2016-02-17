@@ -50,7 +50,8 @@ function CompositionEditor(){
         stylerWindow: '',           // DOM of a window used for styling layers
         selectPaletteWindow: '',    // DOM of a window used for selecting a raster palette
         rasterOpWindow: '',         // DOM of a window used for Raster Analysis interface
-        selectRasterWindow: ''      // DOM of a window used for selecting a raster layer
+        selectRasterWindow: '',     // DOM of a window used for selecting a raster layer
+        coordOutputDiv: ''          // DOM for cursor coordinate output
     };
     
     // Object with the data about the current user
@@ -90,6 +91,9 @@ function CompositionEditor(){
     
     // Sets the id of the DOM of a window used for selecting a raster layer
     this.setSelectRasterWindow = function(id){ this.params.selectRasterWindow = id; };
+    
+    // Sets the cursour position output DOM
+    this.setCursorPositionDom = function(id){ this.params.coordOutputDiv = id; };
     
     // Set current user
     this.setUser = function(id, name){
@@ -185,6 +189,11 @@ function CompositionEditor(){
         // start adding layers - empty base layer first
         var baseLayer = new OpenLayers.Layer("Empty base layer", {isBaseLayer: true, displayInLayerSwitcher: false});
         this.map.addLayers([baseLayer]);
+        // begin outputing coordinates
+        if (document.getElementById(this.params.coordOutputDiv)){
+            var dom = document.getElementById(this.params.coordOutputDiv);
+            this.map.addControl(new OpenLayers.Control.MousePosition({element: dom}));
+        }
         // start adding layers - composition layers
         for (var i = 0; i < this.composition.layers.length; i++){
             var target = new OpenLayers.Layer.WMS(
