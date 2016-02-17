@@ -87,6 +87,7 @@
                 editor.setPaletteSelectWindow('selectpalettewindow');
                 editor.setRasterOpWindow('rasteropeationswindow');
                 editor.setSelectRasterWindow('selectrasterwindow');
+                editor.setCursorPositionDom('coordinatesOutput');
                 {% if composition != null %}
                     editor.initializeCompositionEditor('composition', {{ composition.id }});
                 {% elseif layer != null %}
@@ -156,8 +157,9 @@
 
             <div id="mappanelmain" class="editormain">
                 <div style="width:100%;height:100%" id="map_container"></div>
-                
             </div>
+            
+            <div id="coordinatesOutput" class="editorcursorposition"></div>
 
             <div id="addlayerwindow" title="Add a layer or a composition"></div>
             <div id="addcompositionwindow" title="Adding a composition">
