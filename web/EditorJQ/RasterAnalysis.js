@@ -608,7 +608,7 @@ function CompositionEditorRasterAnalysis(){
             if (!is_used){ this.RasterOperation.selectedRasters.push({"cs": cs, "ws": ws, "text": text}); }
             inputtext = inputtext.substring(0, cursorPos.start) + '{' + text + '}' + inputtext.substring(cursorPos.end);
             document.getElementById('expressionArea').value = inputtext;
-            setInputSelections(document.getElementById('expressionArea'), cursorPos.start + text.length + 2);
+            this.setInputSelections(document.getElementById('expressionArea'), cursorPos.start + text.length + 2);
         }
     };
     
