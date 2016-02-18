@@ -31,11 +31,11 @@ function CompositionEditorWMSFeatureInfo(){
     this.WMSFeatureInfoSwitcher = function(){
         this.WMSFeatureInfoOn = !this.WMSFeatureInfoOn;
         if (this.WMSFeatureInfoOn){
-            $('.olfibuttonItemActive').css('background-color', 'rgba(0,10,63,0.6)');
+            $('.olfibuttonItemActive').attr('class', 'olfibuttonItemActiveSelected olButton');
             this.parent.map.events.register('click', this.parent.map, this.WMSFeatureInfoGet);
         }
         else{
-            $('.olfibuttonItemActive').css('background-color', 'rgba(0,60,136,0.5)');
+            $('.olfibuttonItemActiveSelected').attr('class', 'olfibuttonItemActive olButton');
             this.parent.map.events.unregister('click', this.parent.map, this.WMSFeatureInfoGet);
         }
     };
