@@ -126,12 +126,39 @@ a { color: #4040af; }
 	background-color: rgba(0, 60, 136, 0.7);
 }
 
+.olfibuttonItemActiveSelected{
+	background-color: rgba(0, 63, 10, 0.5);
+	border-radius: 4px;
+	color: #ffffff;
+	cursor: pointer;
+	cursor: hand;
+	display: block;
+	height: 18px;
+	line-height: 19px;
+	margin: 1px;
+	text-align: center;
+	width: 18px;
+        padding: 2px;
+}
+
+.olfibuttonItemActiveSelected:after{
+	content: "i";
+	font-weight: bold;
+}
+
+.olfibuttonItemActiveSelected:hover{
+	background-color: rgba(0, 63, 10, 0.7);
+}
+
 .olControlPanel {
 	width: 25px;
 	height: 25px;
 	position: relative;
 	top: 60px;
-	left: 10px;
+	left: 8px;
+        background: rgba(255,255,255,0.4);
+        border-radius: 4px;
+        padding: 2px;
 }
 
 .addCmpListItem{
