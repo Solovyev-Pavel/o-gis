@@ -710,7 +710,10 @@ function CompositionEditorRasterAnalysis(){
             params: this.RasterOperation.operationParams
         };
         var json = JSON.stringify(json_object);
-        //console.log(json);
+        if (document.getElementById(this.parent.params.waitAnimBox)){
+            $('#' + this.parent.params.waitAnimBox).css('display', 'block');
+            var c_editor = this.parent;
+        }
 
         $.ajax({url: "/o-gis/web/app.php/rasterop", method: "POST", data: json})
                 .done(function(msg){
@@ -737,6 +740,10 @@ function CompositionEditorRasterAnalysis(){
                                 'An error occured while processing your request!</td></tr></table>';
                     $( "#messagewindow" ).empty().append(html);
                     $( "#messagewindow" ).dialog("open");
+                }).always(function(){
+                    if (document.getElementById(c_editor.params.waitAnimBox)){
+                        $('#' + c_editor.params.waitAnimBox).css('display', 'none');
+                    }
                 });
     };
 }
