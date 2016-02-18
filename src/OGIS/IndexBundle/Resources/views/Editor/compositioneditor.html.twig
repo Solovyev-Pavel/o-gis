@@ -88,6 +88,7 @@
                 editor.setRasterOpWindow('rasteropeationswindow');
                 editor.setSelectRasterWindow('selectrasterwindow');
                 editor.setCursorPositionDom('coordinatesOutput');
+                editor.setWaitAnimDom('processingbox');
                 {% if composition != null %}
                     editor.initializeCompositionEditor('composition', {{ composition.id }});
                 {% elseif layer != null %}
