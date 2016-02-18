@@ -153,7 +153,19 @@ a { color: #4040af; }
     border: 1px solid #ccc;
     z-index: 9977;
     background: #fff;
-    padding-left: 16px;
+}
+
+.processingbox{
+    height: 48px;
+    position: absolute;
+    left: calc(50% - 120px);
+    bottom: 40px;
+    border: 1px solid #ccc;
+    background: #fff;
+    border-radius: 12px;
+    padding-left: 8px;
+    padding-right: 8px;
+    z-index: 9977;
 }
 
 /* ********************** Raster calculator buttons *********************** */
