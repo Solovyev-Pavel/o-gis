@@ -11,3 +11,4 @@ Contents of this folder must include:
 - stop.png → 64x64 image for access denied messages
 - user.png → image used as users' default avatar
 - warning.png → 64x64 image for warning messages
+- loading3.gif → wait message animation
