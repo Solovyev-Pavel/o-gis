@@ -51,7 +51,8 @@ function CompositionEditor(){
         selectPaletteWindow: '',    // DOM of a window used for selecting a raster palette
         rasterOpWindow: '',         // DOM of a window used for Raster Analysis interface
         selectRasterWindow: '',     // DOM of a window used for selecting a raster layer
-        coordOutputDiv: ''          // DOM for cursor coordinate output
+        coordOutputDiv: '',         // DOM for cursor coordinate output
+        waitAnimBox: ''             // DOM to be displayed while raster operation is being processed
     };
     
     // Object with the data about the current user
@@ -94,6 +95,9 @@ function CompositionEditor(){
     
     // Sets the cursour position output DOM
     this.setCursorPositionDom = function(id){ this.params.coordOutputDiv = id; };
+    
+    // Sets DOM to be displayed while raster operation is being processed
+    this.setWaitAnimDom = function(id){ this.params.waitAnimBox = id; };
     
     // Set current user
     this.setUser = function(id, name){
