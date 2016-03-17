@@ -47,10 +47,35 @@ class AuthManagerController extends Controller {
             $session = $request->getSession();
             $session->set('_security_main',  serialize($token));
             $session_id = $session->getId();
-
+            
+            $cmp = $_REQUEST['composition'];
+            $overwrite = 0;
+            if ($cmp != 'null' && $cmp != 'undefined'){
+                $composition = $em->getRepository('OGIS\IndexBundle\Entity\Composition')->find($cmp);
+                $authorizationChecker = $this->get('security.context');                
+                $found = false;
+                if ($authorizationChecker->isGranted('EDIT', $composition)){ $overwrite = 1; $found = true; }
+                $cmp_projects = $composition->getCompositionsProjects();
+                $user = $em->getRepository('OGIS\IndexBundle\Entity\User')->find($this->getUser()->getId());
+                $usr_projects = $user->getUsersProjects();
+                if (!found){
+                    foreach($cmp_projects as $prj){
+                        foreach($usr_projects as $p){
+                            if ($p->getId() == $prj->getId()){
+                                $found = true;
+                                $overwrite = 1;
+                                break;
+                            }
+                        }
+                        if ($found){ break; }
+                    }
+                }
+            }
+            
             $id = $user->getId();
             $name = $user->getDisplayname();
-            $output = "{ \"id\": $id, \"name\": \"$name\", \"session\": \"$session_id\" }";
+            $limit = $user->getLimits()->getLayers() - count($user->getLayers());
+            $output = "{ \"id\": $id, \"name\": \"$name\", \"session\": \"$session_id\", \"overwrite\": $overwrite, \"limit\": $limit }";
             $response = new Response($output);
             $response->headers->set('Content-Type', 'application/json');
             $response->setCharset('UTF-8');
