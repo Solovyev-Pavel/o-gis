@@ -89,15 +89,16 @@
                 editor.setSelectRasterWindow('selectrasterwindow');
                 editor.setCursorPositionDom('coordinatesOutput');
                 editor.setWaitAnimDom('processingbox');
+                {% if app.user != null %}
+                    editor.setUser({{ app.user.id }}, "{{ app.user.username }}", {{ ulimit }});
+                {% endif %}
                 {% if composition != null %}
                     editor.initializeCompositionEditor('composition', {{ composition.id }});
+                    editor.setEditPermission({{ permission }});
                 {% elseif layer != null %}
                     editor.initializeCompositionEditor('layer', {{layer.id}});
                 {% else %}
                     editor.initializeCompositionEditor(null, null);
-                {% endif %}
-                {% if app.user != null %}
-                    editor.setUser({{ app.user.id }}, "{{ app.user.username }}");
                 {% endif %}
             }
         </script>
