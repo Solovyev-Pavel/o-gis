@@ -39,6 +39,15 @@ function CompositionEditorRasterAnalysis(){
             $( "#messagewindow2" ).dialog("open");
             return;
         }
+        if (this.parent.user.limit === 0){
+            var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                        'You\'ve reached the allowed limit of layers on your profile and can\'t perform' +
+                        'raster analysis operations!</td></tr></table>';
+            $( "#messagewindow" ).dialog('option', 'title', 'Error');
+            $( "#messagewindow" ).empty().append(html);
+            $( "#messagewindow" ).dialog("open");
+            return;
+        }
         this.RasterOperation = {};
         var html = '<table width="100%"><tr>' +
                     '<td colspan="2">Select a raster operation you want to perform:</td></tr><tr><td colspan="2"><ul>' +
@@ -50,6 +59,12 @@ function CompositionEditorRasterAnalysis(){
                     '.RasterAnalysis.beginReclassification();">Begin Raster Reclassification</button></td><td><button type="button" ' +
                     'style="width:200px;height:40px" onclick="' + this.parent.params.thisVar + '.RasterAnalysis.beginAlgebra();">' +
                     'Begin Raster Algebra</button></td></tr></table>';
+        if (this.parent.user.limit > 0){
+            html += '<br/><div><center style="font-size:13px;">You can created <b>' + this.parent.user.limit;
+            if (this.parent.user.limit !== 11 && this.parent.user.limit % 10 === 1){ html += '</b> more layer.'; }
+            else{ html += '</b> more layers.'; }
+            html += '</center></div>';
+        }
         $('#' + this.parent.params.rasterOpWindow).dialog('option', 'title', 'Select Raster Operation');
         $('#' + this.parent.params.rasterOpWindow).empty().append(html);
         $('#' + this.parent.params.rasterOpWindow).dialog("open");
@@ -710,9 +725,10 @@ function CompositionEditorRasterAnalysis(){
             params: this.RasterOperation.operationParams
         };
         var json = JSON.stringify(json_object);
+        var c_editor = this.parent;
+        this.parent.user.limit--;
         if (document.getElementById(this.parent.params.waitAnimBox)){
             $('#' + this.parent.params.waitAnimBox).css('display', 'block');
-            var c_editor = this.parent;
         }
 
         $.ajax({url: "/o-gis/web/app.php/rasterop", method: "POST", data: json})
@@ -735,6 +751,7 @@ function CompositionEditorRasterAnalysis(){
                     }
                    //console.log(response);
                 }).fail(function(){
+                    c_editor.user.limit++;
                     $( "#messagewindow" ).dialog('option', 'title', 'Raster Operation');
                     var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
                                 'An error occured while processing your request!</td></tr></table>';
