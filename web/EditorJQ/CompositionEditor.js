@@ -99,9 +99,17 @@ function CompositionEditor(){
     // Sets DOM to be displayed while raster operation is being processed
     this.setWaitAnimDom = function(id){ this.params.waitAnimBox = id; };
     
-    // Set current user
     this.setUser = function(id, name){
-        this.user = { id: id, name: name, favRoot: "/o-gis/web/app.php/catalog/user/" + id };
+        this.user = { id: id, name: name, favRoot: "/o-gis/web/app.php/catalog/user/" + id, can_overwrite: false, limit: 0 };
+    };
+    this.setUser = function(id, name, limit){
+        this.user = { id: id, name: name, favRoot: "/o-gis/web/app.php/catalog/user/" + id, can_overwrite: false, limit: limit };
+    };
+    
+    // Set user's permission to edit composition he isn't an author of
+    this.setEditPermission = function(value){
+        if (this.user === null){ return; }
+        this.user.can_overwrite = (value === 1) ? true : false;
     };
     
     // Get the information about the current user
