@@ -65,6 +65,8 @@ function CompositionEditorAuthenticate(){
                 c_editor.parent.user.id = data.id;
                 c_editor.parent.user.name = data.name;
                 c_editor.parent.user.favRoot = "/o-gis/web/app.php/catalog/user/" + data.id;
+                c_editor.parent.user.can_overwrite = (data.overwrite === 1) ? true : false;
+                c_editor.parent.user.limit = data.limit;
                 document.cookie = 'PHPSESSID=' + data.session + ';PATH=/;';
                 $('#' + c_editor.parent.params.addLayerWindow).empty();
             }
