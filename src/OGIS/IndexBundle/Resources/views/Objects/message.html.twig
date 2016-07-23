@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <title>Message :: project O-GIS</title>
+        <link rel="stylesheet" href="{{ asset('./css/ogis_styles.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery/themes/default/style.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery-ui/jquery-ui.css') }}" />
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
+        
+        <script type="text/javascript">
+            
+            function returnToProfile(){ window.location.href = "{{ path('showuser', {'id': app.user.id}) }}"; }
+            function returnToMessageBox(){ window.location.href = "{{ path('usermessages') }}"; }
+            
+            function ShowSendMessageDialog(){ $( "#writemessage" ).dialog('open'); }
+            
+            function sendMessageToUser(){
+                var user_id = {{ message.sender.id }}
+                var subject = document.getElementById('message_subject').value;
+                var body = document.getElementById('message_body').value;
+                var url = "{{ path('sendmessage') }}";
+                url += '?addressee=' + user_id + '&subject=' + subject + '&body=' + body;
+                $.ajax({
+                    url: url,
+                    method: 'POST'
+                }).done(function(response){
+                    if (!response.success){
+                        var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' + response.message + '</td></tr></table>';
+                        $( "#messagewindow" ).dialog('option', 'title', 'Sending message');
+                        $( "#messagewindow" ).empty();
+                        $( "#messagewindow" ).append(html);
+                        $( "#messagewindow" ).dialog("open");
+                    }
+                    else {
+                        var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' + response.message + '</td></tr></table>';
+                        $( "#messagewindow" ).dialog('option', 'title', 'Sending message');
+                        $( "#messagewindow" ).empty();
+                        $( "#messagewindow" ).append(html);
+                        $( "#messagewindow" ).dialog("open");
+                    }
+                }).fail(function(){
+                    var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">Unknown error while sending your message!</td></tr></table>';
+                    $( "#messagewindow" ).dialog('option', 'title', 'Sending message');
+                    $( "#messagewindow" ).empty();
+                    $( "#messagewindow" ).append(html);
+                    $( "#messagewindow" ).dialog("open");
+                });
+            }
+            
+        </script>
+        
+    </head>
+    
+    <body class="bodyfullpage">
+        {% use 'OGISIndexBundle:Default:header.html.twig' %}
+        {% block header %}
+            {{ parent() }}
+        {% endblock %}
+
+        {% block pagecontent %}
+            
+            <div class="contentbody">
+                {# leftpanel #}
+                <div class="userpageleftside">
+                    <div>
+                        <div class="userprofilelinkbox objectlink" onclick="returnToMessageBox();">
+                            Back to messagebox
+                        </div>
+                        <div class="userprofilelinkbox objectlink" onclick="returnToProfile();">
+                            Back to profile
+                        </div>
+                    </div>
+                </div>
+                {# rightside #}
+                <div class="userpagerightside">
+                    <div class="userfilesareafullside" style="padding:10px;">
+                        <table width="100%">
+                            <tr>
+                                <td width="125px"><b>Sender</b>:</td>
+                                <td>
+                                    <a href="{{ path('showuser', {'id': message.sender.id}) }}" target="_blank">
+                                        {{ message.sender.displayname }}
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><b>Sent on</b>:</td>
+                                <td>{{ message.sent|date('H:i:s d.m.Y') }}</td>
+                            </tr>
+                            <tr>
+                                <td><b>Sunject</b>:</td>
+                                <td>{{ message.subject }}</td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <br/>
+                                    {{ message.body|raw }}
+                                </td>
+                            </tr>
+                            <tr>
+                                <td colspan="2">
+                                    <br/>
+                                    {% if app.user.id != message.sender.id %}
+                                        <button type="button" onclick="ShowSendMessageDialog();">Reply</button>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+        {% endblock %}
+        
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+        
+        <div id="messagewindow" title="Sending message"></div>
+        <div id="writemessage" title="New message">
+            <table width="100%" height="100%">
+                <tr>
+                    <td>Subject:&nbsp;</td>
+                    <td><input id="message_subject" type="text" maxlenght="128" style="width:100%" value="Re: {{ message.subject }}"/>
+                </tr>
+                <tr>
+                    <td colspan="2">
+                        <textarea id="message_body" rows="7" style="resize:none;width:100%;"></textarea>
+                    </td>
+                </tr>
+            </table>
+        </div>
+        <script type="text/javascript">
+            $( "#messagewindow" ).dialog({
+                    autoOpen: false,
+                    resizable: false,
+                    zIndex: 9999,
+                    height: 'auto',
+                    width: 400,
+                    modal: false,
+                    buttons: { OK : function(){ $(this).dialog("close"); }
+                }});
+            $( "#writemessage" ).dialog({
+                    autoOpen: false,
+                    resizable: false,
+                    zIndex: 9999,
+                    height: 'auto',
+                    width: 400,
+                    modal: false,
+                    buttons: [
+                        { text: "Send", click: function(){ sendMessageToUser(); $(this).dialog("close"); window.location.reload(); } },
+                        { text: "Cancel", click: function(){ $(this).dialog("close"); } }]
+                    });
+        </script>
+    </body>
+</html>
