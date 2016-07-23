@@ -30,11 +30,11 @@ class MessageController extends Controller {
         $em = $this->getDoctrine()->getManager();
         // authentification is required
         if(!$this->getUser()){
-            $login_link = "<a href=\"". $this->generateUrl('fos_user_security_login') . "\">авторизоваться</a>";
+            $login_link = "<a href=\"". $this->generateUrl('fos_user_security_login') . "\">authorizing</a>";
             return $this->render('OGISIndexBundle:Error:accessdenied.html.twig', array(
-                'caption' => "Просмотр сообщений недоступен для анонимных пользователей!",
-                'message' => "Просмотр сообщений недоступен для анонимных пользователей!",
-                'tip'     => "Для доступа к вашему почтовому ящику вам необходимо $login_link в системе."
+                'caption' => "Unauthorized users can't view messages!",
+                'message' => "Unauthorized users can't view messages!",
+                'tip'     => "To gain access to messagebox try $login_link in O-GIS."
             ));
         }
         $user = $em->getRepository('OGIS\IndexBundle\Entity\User')->find($this->getUser()->getId());
@@ -49,8 +49,8 @@ class MessageController extends Controller {
         $message = $em->getRepository('OGIS\IndexBundle\Entity\Message')->find($id);
         if (!$message){
             return $this->render('OGISIndexBundle:Error:entitynotfound.html.twig', array(
-                'caption' => "Ошибка при получении сообщения!",
-                'message' => "Запрашиваемое Вами сообщение не найдено!"
+                'caption' => "Error!",
+                'message' => "Message not found!"
             ));
         }
         $sender = $message->getSender();
@@ -62,8 +62,8 @@ class MessageController extends Controller {
         }
         if ($this->getUser() != $sender && $this->getUser() != $addressee && !$is_admin){
             return $this->render('OGISIndexBundle:Error:accessdenied.html.twig', array(
-                'caption' => "Ошибка доступа!",
-                'message' => "Вы не имеете права просматривать данное сообщение!"
+                'caption' => "Error!",
+                'message' => "You can't view this message!"
             ));
         }
         // return message data
@@ -74,11 +74,11 @@ class MessageController extends Controller {
     public function SendMessageAction() {
         // authentification is required
         if(!$this->getUser()){
-            $login_link = "<a href=\"". $this->generateUrl('fos_user_security_login') . "\">авторизоваться</a>";
+            $login_link = "<a href=\"". $this->generateUrl('fos_user_security_login') . "\">authorizing</a>";
             return $this->render('OGISIndexBundle:Error:accessdenied.html.twig', array(
-                'caption' => "Отправка сообщений пользователям O-GIS недоступна для анонимных пользователей!",
-                'message' => "Отправка сообщений пользователям O-GIS недоступна для анонимных пользователей!",
-                'tip'     => "Для отправки сообщения пользователя O-GIS, вам необходимо $login_link в системе."
+                'caption' => "Unauthorized users can't send messages!",
+                'message' => "Unauthorized users can't send messages!",
+                'tip'     => "To be able to send messages, try $login_link in O-GIS."
             ));
         }
         // pull message data from the request
@@ -90,7 +90,7 @@ class MessageController extends Controller {
         $em = $this->getDoctrine()->getManager();
         $user = $em->getRepository('OGIS\IndexBundle\Entity\User')->find($addressee);
         if (!$user){
-            $i = '{"success": false, "message":"Невозможно отправить сообщение: указанный адресат не зарегистрирован в O-GIS!"}';
+            $i = '{"success": false, "message":"Impossible to send message: O-GIS user not found!"}';
             $response = new Response($i);
             $response->headers->set('Content-Type', 'application/json');
             $response->setCharset('UTF-8');
@@ -107,7 +107,7 @@ class MessageController extends Controller {
         $em->persist($message);
         $em->flush();
         // send response that message is sent
-        $i = '{"success": true, "message":"Ваше сообщение было отправлено!"}';
+        $i = '{"success": true, "message":"Your message was successfully sent!"}';
         $response = new Response($i);
         $response->headers->set('Content-Type', 'application/json');
         $response->setCharset('UTF-8');
