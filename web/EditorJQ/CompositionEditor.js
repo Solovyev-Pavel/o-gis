@@ -139,13 +139,15 @@ function CompositionEditor(){
                     $( "#messagewindow" ).dialog("open");
                     return;
                 }
-                c_editor.initializeComposition(msg.data);
+                if (type === 'layer'){ id = null; }
+                if (msg.maxExtent === undefined || msg.maxExtent === null){ msg.maxExtent = msg.data.extent; }
+                c_editor.initializeComposition(msg.data, id, msg.maxExtent);
                 c_editor.initializeMap();
             })
             .fail(function(){
                 $( "#messagewindow" ).empty();
                 var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
-                            'Error while loading data!</td></tr></table>';
+                            'Ошибка при загрузке данных!</td></tr></table>';
                 $( "#messagewindow" ).append(html);
                 $( "#messagewindow" ).dialog("open");
                 return;
@@ -153,12 +155,15 @@ function CompositionEditor(){
     };
 
     // Initialize the composition object
-    this.initializeComposition = function(data){
+    this.initializeComposition = function(data, id, maxExtent){
         this.composition = new Composition();
+        this.composition.authors = data.authors;
         this.composition.layers = data.layers;
         this.composition.extent = data.extent;
-        this.composition.id = data.id;
+        this.composition.maxExtent = maxExtent;
+        this.composition.id = id;
         this.composition.name = data.name;
+        this.composition.description = data.description;
         this.composition.projection = data.projection;
     };
 
@@ -186,9 +191,9 @@ function CompositionEditor(){
         this.map = new OpenLayers.Map(this.params.mapDOM, { projection: new OpenLayers.Projection(this.composition.projection) });
         this.map.parent = this;
         this.map.addControl(new OpenLayers.Control.Navigation());
-        this.map.maxExtent = new OpenLayers.Bounds(this.composition.extent.minX, this.composition.extent.minY,
-                                                   this.composition.extent.maxX, this.composition.extent.maxY);
-        this.map.maxResolution = (this.composition.extent.maxX - this.composition.extent.minX) / 256;
+        this.map.maxExtent = new OpenLayers.Bounds(this.composition.maxExtent.minX, this.composition.maxExtent.minY,
+                                                   this.composition.maxExtent.maxX, this.composition.maxExtent.maxY);
+        this.map.maxResolution = (this.composition.maxExtent.maxX - this.composition.maxExtent.minX) / 256;
         // add the WMS Feature Info button to the map
         var c_editor = this;
         var activateWMSInfoFeature = function(){ c_editor.WMSFeatureInfo.WMSFeatureInfoSwitcher(); };
