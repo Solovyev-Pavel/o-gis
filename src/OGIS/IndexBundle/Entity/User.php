@@ -60,6 +60,18 @@ class User extends BaseUser {
 	 * @ORM\ManyToMany(targetEntity="Catalog", mappedBy="owner", fetch="LAZY")
 	 */
 	private $catalogs;
+        
+/* ********************** Messages ********************** */
+        
+        /**
+         * @ORM\OneToMany(targetEntity="Message", mappedBy="sender", fetch="LAZY")
+	 */
+	protected $messagesSent;
+        
+        /**
+         * @ORM\OneToMany(targetEntity="Message", mappedBy="addressee", fetch="LAZY")
+	 */
+	protected $messagesReceived;
 
 /* *********************** Limits *********************** */
 
@@ -79,6 +91,8 @@ class User extends BaseUser {
 		$this->catalogs = new ArrayCollection();
 		$this->projects = new ArrayCollection();
 		$this->palettes = new ArrayCollection();
+                $this->messagesSent = new ArrayCollection();
+                $this->messagesReceived = new ArrayCollection();
 	}
 
 
@@ -145,6 +159,24 @@ class User extends BaseUser {
 		return $this->palettes->toArray();
 	}
 
+        /**
+	 * Get messagesSent
+	 *
+	 * @return \Doctrine\Common\Collections\Collection 
+	 */
+	public function getMessagesSent(){
+		return $this->messagesSent->toArray();
+	}
+        
+        /**
+	 * Get messagesReceived
+	 *
+	 * @return \Doctrine\Common\Collections\Collection 
+	 */
+	public function getMessagesReceived(){
+		return $this->messagesReceived->toArray();
+	}
+        
 
     /**
      * Set displayname
@@ -341,5 +373,74 @@ class User extends BaseUser {
     public function removePalette(\OGIS\IndexBundle\Entity\Palette $palettes)
     {
         $this->palettes->removeElement($palettes);
+    }
+
+    /**
+     * Set messageboard
+     *
+     * @param string $messageboard
+     * @return User
+     */
+    public function setMessageboard($messageboard)
+    {
+        $this->messageboard = $messageboard;
+
+        return $this;
+    }
+
+    /**
+     * Get messageboard
+     *
+     * @return string 
+     */
+    public function getMessageboard()
+    {
+        return $this->messageboard;
+    }
+
+    /**
+     * Add messagesSent
+     *
+     * @param \OGIS\IndexBundle\Entity\Message $messagesSent
+     * @return User
+     */
+    public function addMessagesSent(\OGIS\IndexBundle\Entity\Message $messagesSent)
+    {
+        $this->messagesSent[] = $messagesSent;
+
+        return $this;
+    }
+
+    /**
+     * Remove messagesSent
+     *
+     * @param \OGIS\IndexBundle\Entity\Message $messagesSent
+     */
+    public function removeMessagesSent(\OGIS\IndexBundle\Entity\Message $messagesSent)
+    {
+        $this->messagesSent->removeElement($messagesSent);
+    }
+
+    /**
+     * Add messagesReceived
+     *
+     * @param \OGIS\IndexBundle\Entity\Message $messagesReceived
+     * @return User
+     */
+    public function addMessagesReceived(\OGIS\IndexBundle\Entity\Message $messagesReceived)
+    {
+        $this->messagesReceived[] = $messagesReceived;
+
+        return $this;
+    }
+
+    /**
+     * Remove messagesReceived
+     *
+     * @param \OGIS\IndexBundle\Entity\Message $messagesReceived
+     */
+    public function removeMessagesReceived(\OGIS\IndexBundle\Entity\Message $messagesReceived)
+    {
+        $this->messagesReceived->removeElement($messagesReceived);
     }
 }
