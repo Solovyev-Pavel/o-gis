@@ -61,7 +61,12 @@ class CompositionController extends Controller{
             return $response;
         }
         $data = $composition->getData();
-        $output = '{"success":true,"data":' . $data . '}';
+        $minx = $composition->getBoundingBoxMinX();
+        $miny = $composition->getBoundingBoxMinY();
+        $maxx = $composition->getBoundingBoxMaxX();
+        $maxy = $composition->getBoundingBoxMaxY();
+//        $output = '{"success":true,"data":' . $data . '}';
+        $output = '{"success":true,"data":' . $data . ',"maxExtent":{"minX":' . $minx . ',"minY":' . $miny . ',"maxX":' . $maxx . ',"maxY":' . $maxy . '}}';
         $response = new Response($output);
         $response->headers->set('Content-Type', 'application/json');
         $response->setCharset('UTF-8');
