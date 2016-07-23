@@ -2,6 +2,12 @@
 <html>
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        {% if composition != null %}
+            <title>{{ composition.name }} :: Composition editor :: project O-GIS</title>
+        {% else %}
+            <title>Composition editor :: project O-GIS</title>
+        {% endif %}
         
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 <!--  Copyright © 2015      Pavel Solovyev (solovyev.p.a@gmail.com)            -->
@@ -20,20 +26,12 @@
 <!--  limitations under the License.                                           -->
 <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
 
-        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
-        {% if composition != null %}
-            <title>{{ composition.name }} :: Composition Editor :: O-GIS project</title>
-        {% else %}
-            <title>Composition Editor :: O-GIS project</title>
-        {% endif %}
-
         <!-- styling and jquery -->
         <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
         <script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
         <script type="text/javascript" src="http://openlayers.org/api/OpenLayers.js"></script>
         <script type="text/javascript" src="{{ asset('./js/jquery-context/jquery.contextMenu.js') }}"></script>
         <script type="text/javascript" src="{{ asset('./js/jquery-context/jquery.ui.position.js') }}"></script>
-<!--        <script type="text/javascript" src="{{ asset('./js/imagepicker/image-picker.min.js') }}"></script> -->
         <script type="text/javascript" src="{{ asset('./js/addtofavorites.js') }}"></script>
         <script type="text/javascript" src="{{ asset('./js/jquery/jstree.min.js') }}"></script>
         
@@ -73,7 +71,7 @@
             var getLayerData = "{{ path('getLayerData', {'id': 'ID'}) }}";
 
             function goToHomePage(){ window.location.href = "{{ path('homepage') }}"; }
-
+            
             function initializeEditor(){
                 editor = new CompositionEditor();
                 editor.setVariable('editor');
@@ -111,30 +109,30 @@
                 <div class="editorwestpanel">
                     <div id="layerlistpanel" style="width:240px;height:100%;float:left;">
                         <div class="editorwestpaneltoolbar">
-                            <span class="controlicon" onclick="editor.AddLayers.showAvaliableLayers();" title="Add into Composition Editor...">
+                            <span class="controlicon" onclick="editor.AddLayers.showAvaliableLayers();" title="Add...">
                                 <img src="/o-gis/web/./EditorJQ/img/add.png" />
                             </span>
-                            <span class="controlicon" onclick="editor.RasterAnalysis.beginRasterOperations();" title="Raster Opertaions...">
+                            <span class="controlicon" onclick="editor.RasterAnalysis.beginRasterOperations();" title="Raster operations...">
                                 <img src="/o-gis/web/./EditorJQ/img/mathops.png" />
                             </span>
-                            <span class="controlicon" onclick="editor.CompositionSave.reloadComposition();" title="Revert the Composition">
+                            <span class="controlicon" onclick="editor.CompositionSave.reloadComposition();" title="Rollback to last save">
                                 <img src="/o-gis/web/./EditorJQ/img/refresh.png" />
                             </span>
-                            <span class="controlicon" onclick="editor.CompositionSave.saveTheComposition(false);" title="Save this Composition">
+                            <span class="controlicon" onclick="editor.CompositionSave.saveTheComposition(false);" title="Save">
                                 <img src="/o-gis/web/./EditorJQ/img/save.png" />
                             </span>
-                            <span class="controlicon" onclick="editor.CompositionSave.saveTheComposition(true);" title="Save this Composition as...">
+                            <span class="controlicon" onclick="editor.CompositionSave.saveTheComposition(true);" title="Save as..">
                                 <img src="/o-gis/web/./EditorJQ/img/saveas.png" />
                             </span>
-                            <span class="controlicon" onclick="addToFavorites(null, 'composition');" title="Add this Composition to Favorites">
+                            <span class="controlicon" onclick="editor.addCompositionToFavorites()" title="Add composition to favorites">
                                 <img src="/o-gis/web/./EditorJQ/img/star.png" />
                             </span>
                             {% if composition != null %}
-                            <span class="controlicon" onclick="editor.goToEntity('composition', {{ composition.id }});" title="Leave the Editor">
+                            <span class="controlicon" onclick="editor.goToEntity('composition', {{ composition.id }});" title="Leave editor">
                             {% elseif layer != null %}
-                            <span class="controlicon" onclick="editor.goToEntity('layer', {{ layer.id }});" title="Leave the Editor">
+                            <span class="controlicon" onclick="editor.goToEntity('layer', {{ layer.id }});" title="Leave editor">
                             {% else %}
-                            <span class="controlicon" onclick="goToHomePage();" title="Leave the Editor">
+                            <span class="controlicon" onclick="goToHomePage();" title="Leave editor">
                             {% endif %}
                                 <img src="/o-gis/web/./EditorJQ/img/door.png" />
                             </span>
@@ -150,7 +148,7 @@
                         </div>
                     </div>
                     <div class="listvisibilitytoggler">
-                        <div id="listvisibilitytoggler" title="Hide the Layer List" class="listvisibilitytogglerbutton" onclick="editor.toggleLayerListVisibility();">
+                        <div id="listvisibilitytoggler" title="Hide" class="listvisibilitytogglerbutton" onclick="editor.toggleLayerListVisibility();">
                             <p style="padding-top:11px;font-weight:bold;">►</p>
                         </div>
                     </div>
@@ -158,30 +156,45 @@
             </div>
 
             <div id="mappanelmain" class="editormain">
-                <div style="width:100%;height:100%" id="map_container"></div>
+                <div style="width:100%;height:100%" id="map_container"></div>  
             </div>
-            
+
             <div class="editorcursorposition"><center style="font-size:14px;padding-top:3px;" id="coordinatesOutput"></center></div>
             <div class="processingbox" id="processingbox" style="display:none;">
                 <table width="100%">
                     <tr>
                         <td><img src="{{ asset('./img/loading3.gif') }}"/></td>
-                        <td>Processing raster operation.<br/>Please wait...</td>
+                        <td>Processing your request<br/>Please wait...</td>
+                    </tr>
+                </table>
+            </div>
+                                
+            <div class="editorfooter">
+                <table width="100%">
+                    <tr>
+                        <td width="33%">
+                        </td>
+                        <td width="34%">
+                            <center>(c) O-GIS team, 2014 - {{ "now"|date('Y') }}</center>
+                        </td>
+                        <td align="right">
+                            <a href="maito:">O-GIS support</a>
+                        </td>
                     </tr>
                 </table>
             </div>
 
-            <div id="addlayerwindow" title="Add a layer or a composition"></div>
-            <div id="addcompositionwindow" title="Adding a composition">
-                <p>Select the layers you wish to add:<br/></p>
-                <div id="innercmpaddwindow" style="height:275px;overflow-x:hidden;overflow-y:scroll"></div>
+            <div id="addlayerwindow" title="Adding layer"></div>
+            <div id="addcompositionwindow" title="Adding composition">
+                <p>Select layers to add into editor:<br/></p>
+                <div id="innercmpaddwindow" style="height:260px;overflow-x:hidden;overflow-y:scroll"></div>
             </div>
-            <div id="stylelayerwindow" title="Styling options"></div>
-            <div id="newcompositionwindow" title="Saving a composition"></div>
+            <div id="stylelayerwindow" title="Visualization settings"></div>
+            <div id="newcompositionwindow" title="Saving composition"></div>
             <div id="messagewindow" title=""></div>
-            <div id="messagewindow2" title="Saving a composition"></div>
-            <div id="authwindow" title="Logging in"></div>
-            <div id="targetcatalogselector" title="Select a catalog">
+            <div id="messagewindow2" title="Saving composition"></div>
+            <div id="authwindow" title="Logging into O-GIS"></div>
+            <div id="targetcatalogselector" title="Select catalog">
                 <div id="targettree" style="width:100%;height:300px;"></div>
                 <div id="targetnodeid" style="display:none"></div>
                 <div id="targetnodetype" style="display:none"></div>
@@ -189,8 +202,8 @@
                 <div id="selectednode" style="height:20px;width:100%;float:bottom;padding-top:5px;border-top:1px solid #ccc"></div>
             </div>
             <div id="rasteropeationswindow" title=""></div>
-            <div id="selectrasterwindow" title="Select a raster layer"></div>
-            <div id="selectpalettewindow" title="Select a palette"></div>
+            <div id="selectrasterwindow" title="Select raster layer"></div>
+            <div id="selectpalettewindow" title="Select palette"></div>
             <script type="text/javascript">
                 $( "#addlayerwindow" ).dialog({ autoOpen: false,
                                                 resizable: false,
