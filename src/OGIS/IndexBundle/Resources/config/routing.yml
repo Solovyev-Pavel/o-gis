@@ -51,6 +51,24 @@ userlistitems:
 usernotes:
     pattern: /user/notes/{id}
     defaults: { _controller: OGISIndexBundle:User:editUserNotes }
+    
+usermessages:
+    pattern: /messagebox
+    defaults: { _controller: OGISIndexBundle:Message:GetMessages }
+
+viewmessage:
+    pattern: /message/view/{id}
+    defaults: { _controller: OGISIndexBundle:Message:ViewMessage, id: null }
+
+sendmessage:
+    pattern: /send/message
+    defaults: { _controller: OGISIndexBundle:Message:SendMessage }
+    methods: [POST]
+
+markasread:
+    pattern: /message/read/{id}
+    defaults: { _controller: OGISIndexBundle:Message:MarkAsRead, id: null }
+    methods: [POST]
 
  # ########################################################################## #
  #                               catalog tree pages                           #
