@@ -1,0 +1,122 @@
+{% set unread = 0 %}
+{% for message in user.messagesReceived %}
+    {% if message.read == false %}
+        {% set unread = unread + 1 %}
+    {% endif %}
+{% endfor %}
+
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <title>Your messagebox :: project O-GIS</title>
+        <link rel="stylesheet" href="{{ asset('./css/ogis_styles.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery/themes/default/style.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./js/jquery-ui/jquery-ui.css') }}" />
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
+        
+        <script type="text/javascript">
+            
+            function returnToProfile(){ window.location.href = "{{ path('showuser', {'id': user.id}) }}"; }
+            
+            function switchTabs(id){
+                var data_tabs = ["inbox_tab", "outbox_tab"];
+                var select_tabs = ["inbox_sel", "outbox_sel"];
+                for (var i = 0; i < 2; i++){
+                    if (i === id){
+                        $('#' + data_tabs[i]).css('display', 'block');
+                        document.getElementById(select_tabs[i]).setAttribute('class', 'objectlinkselected userprofilelinkbox');
+                    }
+                    else{
+                        $('#' + data_tabs[i]).css('display', 'none');
+                        document.getElementById(select_tabs[i]).setAttribute('class', 'objectlink userprofilelinkbox');
+                    }
+                }
+            }
+            
+        </script>
+        
+    </head>
+    
+    <body class="bodyfullpage">
+        {% use 'OGISIndexBundle:Default:header.html.twig' %}
+        {% block header %}
+            {{ parent() }}
+        {% endblock %}
+
+        {% block pagecontent %}
+            
+            <div class="contentbody">
+                {# leftpanel #}
+                <div class="userpageleftside">
+                    <div>
+                        <div class="userprofilelinkbox objectlinkselected" id="inbox_sel" onclick="switchTabs(0);">
+                            Inbox
+                            {% if unread > 0 %}
+                                &nbsp;({{unread}})
+                            {% endif %}
+                        </div>
+                        <div class="userprofilelinkbox objectlink" id="outbox_sel" onclick="switchTabs(1);">
+                            Outbox
+                        </div>
+                        <div class="userprofilelinkbox objectlink" onclick="returnToProfile();">
+                            Back to profile
+                        </div>
+                    </div>
+                </div>
+                {# rightside #}
+                <div class="userpagerightside">
+                    <div id="inbox_tab" class="userfilesareafullside" style="display:block;">
+                        {% if user.messagesReceived|length == 0 %}
+                            <center><br/><b>No messages in the inbox!</b></center>
+                        {% else %}
+                            <div class="internalboxcontainer">
+                                {% for message in user.messagesReceived %}
+                                    {% if message.read == true %}
+                                        <div class="messagecontainer">
+                                            <b><a href="{{ path('viewmessage', {'id': message.id}) }}">{{ message.subject }}</a></b> from&nbsp;
+                                            <a href="{{ path('showuser', {'id': message.sender.id}) }}" target="_blank">
+                                                {{ message.sender.displayname }}
+                                            </a>&nbsp;( {{ message.sent|date('H:i:s d.m.Y') }} )
+                                        </div>
+                                    {% else %}
+                                        <div class="messagecontainernew">
+                                            <b><a href="{{ path('viewmessage', {'id': message.id}) }}">{{ message.subject }}</a></b> from&nbsp;
+                                            <a href="{{ path('showuser', {'id': message.sender.id}) }}" target="_blank">
+                                                {{ message.sender.displayname }}
+                                            </a>&nbsp;( {{ message.sent|date('H:i:s d.m.Y') }} )
+                                        </div>
+                                    {% endif %}
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div id="outbox_tab" class="userfilesareafullside" style="display:none;">
+                        {% if user.messagesSent|length == 0 %}
+                            <center><br/><b>No messages in the outbox!</b></center>
+                        {% else %}
+                            <div style="width:100%;height:100%;padding-left:10px;padding-right:10px;padding-top:6px;padding-bottom:6px;overflow-y:scroll;">
+                                {% for message in user.messagesSent %}
+                                    <div class="messagecontainer">
+                                        <b><a href="{{ path('viewmessage', {'id': message.id}) }}">{{ message.subject }}</a></b> to&nbsp;
+                                        <a href="{{ path('showuser', {'id': message.addressee.id}) }}" target="_blank">
+                                            {{ message.addressee.displayname }}
+                                        </a>&nbsp;( {{ message.sent|date('H:i:s d.m.Y') }} )
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+        {% endblock %}
+        
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+        
+    </body>
+</html>
