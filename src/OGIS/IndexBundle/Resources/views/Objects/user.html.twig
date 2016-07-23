@@ -2,6 +2,12 @@
 {% if app.user != null %}
     {% if app.user.id == user.id %}
         {% set is_owner = true %}
+        {% set unread = 0 %}
+        {% for message in user.messagesReceived %}
+            {% if message.read == false %}
+                {% set unread = unread + 1 %}
+            {% endif %}
+        {% endfor %}
     {% endif %}
 {% endif %}
 
@@ -48,6 +54,7 @@
                 function redirectToStyleCreation(){ window.location.href = "{{ path('createstyle') }}"; }
                 function redirectToCreateProject(){ window.location.href = "{{ path('createproject') }}"; }
                 function redirectToPaletteCreation(){ window.location.href = "{{ path('paletteeditor', {'id': null}) }}"; }
+                function goToMessagebox(){ window.location.href = "{{ path('usermessages') }}" }
             {% endif %}
 
             var homepage = "{{ path('homepage') }}";
@@ -78,6 +85,42 @@
                     }
                 }
             }
+            
+            function ShowSendMessageDialog(){ $( "#writemessage" ).dialog('open'); }
+            
+            function sendMessageToUser(){
+                var user_id = {{ user.id }}
+                var subject = document.getElementById('message_subject').value;
+                var body = document.getElementById('message_body').value;
+                var url = "{{ path('sendmessage') }}";
+                url += '?addressee=' + user_id + '&subject=' + subject + '&body=' + body;
+                $.ajax({
+                    url: url,
+                    method: 'POST'
+                }).done(function(response){
+                    if (!response.success){
+                        var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' + response.message + '</td></tr></table>';
+                        $( "#messagewindow" ).dialog('option', 'title', 'Sending Message');
+                        $( "#messagewindow" ).empty();
+                        $( "#messagewindow" ).append(html);
+                        $( "#messagewindow" ).dialog("open");
+                    }
+                    else {
+                        var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' + response.message + '</td></tr></table>';
+                        $( "#messagewindow" ).dialog('option', 'title', 'Sending Message');
+                        $( "#messagewindow" ).empty();
+                        $( "#messagewindow" ).append(html);
+                        $( "#messagewindow" ).dialog("open");
+                    }
+                }).fail(function(){
+                    var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">Unknown error while sending your message!</td></tr></table>';
+                    $( "#messagewindow" ).dialog('option', 'title', 'Sending Message');
+                    $( "#messagewindow" ).empty();
+                    $( "#messagewindow" ).append(html);
+                    $( "#messagewindow" ).dialog("open");
+                });
+            }
+            
         </script>
     </head>
     <body class="bodyfullpage" onload="loadUserCatalogs();">
@@ -95,6 +138,20 @@
                         <center><img src="{{ asset('./img/user.png') }}" height="200px" width="200px"></img></center>
                     </div>
                     <div>
+                        {% if app.user != null %}
+                            {% if is_owner %}
+                                <div class="userprofilelinkbox objectlink" onclick="goToMessagebox();">
+                                    Your messagebox
+                                    {% if unread > 0 %}
+                                        &nbsp;({{unread}})
+                                    {% endif %}
+                                </div>
+                            {% else %}
+                                <div class="userprofilelinkbox objectlink" onclick="ShowSendMessageDialog();">
+                                    Send {{ user.username }} a message
+                                </div>
+                            {% endif %}
+                        {% endif %}
                         <div class="userprofilelinkbox objectlinkselected" id="user_sel" onclick="switchTabs(0);">
                             User Info
                         </div>
@@ -355,6 +412,19 @@
         <div id="selectednodeid" style="display:none"></div>
         <div id="selectednode" style="height:20px;width:100%;float:bottom;padding-top:5px;border-top:1px solid #ccc"></div>
     </div>
+    <div id="writemessage" title="New message">
+        <table width="100%" height="100%">
+            <tr>
+                <td>Subject:&nbsp;</td>
+                <td><input id="message_subject" type="text" maxlenght="128" style="width:100%" value=""/>
+            </tr>
+            <tr>
+                <td colspan="2">
+                    <textarea id="message_body" rows="7" style="resize:none;width:100%;"></textarea>
+                </td>
+            </tr>
+        </table>
+    </div>
     <script type="text/javascript">
         $( "#messagewindow" ).dialog({
             autoOpen: false,
@@ -384,6 +454,17 @@
             buttons: [
                 { text: "OK", click: function(){ sendAddToFavoritesRequest(null); $(this).dialog("close"); } },
                 { text: "Cancel", click: function(){ buffer = null; $(this).dialog("close"); } }]
+            });
+        $( "#writemessage" ).dialog({
+            autoOpen: false,
+            resizable: false,
+            zIndex: 9999,
+            height: 'auto',
+            width: 400,
+            modal: false,
+            buttons: [
+                { text: "Send", click: function(){ sendMessageToUser(); $(this).dialog("close"); } },
+                { text: "Cancel", click: function(){ $(this).dialog("close"); } }]
             });
         </script>
 
