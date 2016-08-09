@@ -138,6 +138,18 @@ class CompositionController extends Controller{
                 if ($layer->getBoundingBoxMaxX() > $maxx){ $maxx = $layer->getBoundingBoxMaxX(); }
                 if ($layer->getBoundingBoxMaxY() > $maxy){ $maxy = $layer->getBoundingBoxMaxY(); }
             }
+            if ($minx == -1000000000 || $miny == 1000000000 || $maxx == 1000000000 || $maxy == 1000000000){
+                // all layers have a projection different from the base composition projection
+                // updade composition projection
+                $cmp_proj = $layers[0]->getProjection();
+                foreach($layers as $layer){
+                    if ($layer->getProjection() != $cmp_proj){ continue; }
+                    if ($layer->getBoundingBoxMinX() < $minx){ $minx = $layer->getBoundingBoxMinX(); }
+                    if ($layer->getBoundingBoxMinY() < $miny){ $miny = $layer->getBoundingBoxMinY(); }
+                    if ($layer->getBoundingBoxMaxX() > $maxx){ $maxx = $layer->getBoundingBoxMaxX(); }
+                    if ($layer->getBoundingBoxMaxY() > $maxy){ $maxy = $layer->getBoundingBoxMaxY(); }
+                }
+            }
 
             $filename = time() . "_" . $user->getId();
             // get the preview image
@@ -233,6 +245,20 @@ class CompositionController extends Controller{
                 if ($layer->getBoundingBoxMaxX() > $maxx){ $maxx = $layer->getBoundingBoxMaxX(); }
                 if ($layer->getBoundingBoxMaxY() > $maxy){ $maxy = $layer->getBoundingBoxMaxY(); }
             }
+            if ($minx == -1000000000 || $miny == 1000000000 || $maxx == 1000000000 || $maxy == 1000000000){
+                // all layers have a projection different from the old composition one
+                // updade composition projection
+                $cmp_proj = $layers[0]->getProjection();
+                $composition->setProjection($cmp_proj);
+                foreach($layers as $layer){
+                    if ($layer->getProjection() != $cmp_proj){ continue; }
+                    if ($layer->getBoundingBoxMinX() < $minx){ $minx = $layer->getBoundingBoxMinX(); }
+                    if ($layer->getBoundingBoxMinY() < $miny){ $miny = $layer->getBoundingBoxMinY(); }
+                    if ($layer->getBoundingBoxMaxX() > $maxx){ $maxx = $layer->getBoundingBoxMaxX(); }
+                    if ($layer->getBoundingBoxMaxY() > $maxy){ $maxy = $layer->getBoundingBoxMaxY(); }
+                }
+            }
+                    
             $preview = $composition->getPreview();
             $filename = substr($preview, strlen($preview) - 16, 12);
             $boundingBox = array('minx' => $minx, 'miny' => $miny, 'maxx' => $maxx, 'maxy' => $maxy);
