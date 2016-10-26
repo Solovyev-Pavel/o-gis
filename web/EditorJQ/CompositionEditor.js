@@ -256,26 +256,24 @@ function CompositionEditor(){
     // Adds a layer to the user-visible list
     this.addLayerToTheList = function(name, id, visibility){
         var c_editor = this;
-        var li_text =   '<li id="menu-' + id + '" class="ui-state-default sortableelement"><span class="sortableelementinner">' +
-                        '<input type="checkbox" onclick="' + this.params.thisVar + '.toggleLayerVisibility(\'' + id + 
-                        '\', this.checked)"';
+        var li_text = '<li id="menu-' + id + '" class="ui-state-default sortableelement"><table style="margin-left:-24px" width="210px"><tr><td width="24px" valign="middle">' +
+                      '<input type="checkbox" onclick="' + this.params.thisVar + '.toggleLayerVisibility(\'' + id + '\', this.checked)"';
         li_text += (visibility) ? 'checked />' : '/>';
-        li_text +=  '</span><div id="wmsinfo-' + id + '" onclick="' + this.params.thisVar +
-                    '.WMSFeatureInfo.toggleWMSInfoLayer(this.id);" class="notwmsselectedlayer">' + name + '</div></li>';
-
+        li_text += '</td><td><div id="wmsinfo-' + id + '" onclick="' + this.params.thisVar + '.WMSFeatureInfo.toggleWMSInfoLayer(this.id);" ' +
+                   'class="notwmsselectedlayer">' + name + '</div></td></tr></table></li>'
         $('#' + this.params.layerListDOM).prepend(li_text);
         $.contextMenu({
             selector: '#menu-' + id,
             items: {
-                "style":    {   name: "Stylization options",
+                "style":    {   name: "Change Styling",
                                 icon: "edit",
                                 callback: function(key, opt){ c_editor.LayerStyler.styleLayer(opt.selector); } },
-                "addtofav": {   name: "Add layer to favorites",
+                "addtofav": {   name: "Add to Favorites",
                                 icon: "cut",
                                 callback: function(){ 
                                     var fullcs = c_editor.map.getLayer(id).params.LAYERS;
                                     c_editor.getLayersInternalId(fullcs); } },
-                "remove":   {   name: "Remove from composition",
+                "remove":   {   name: "Remove from Composition",
                                 icon: "delete",
                                 callback: function(key, opt){ c_editor.removeLayerFromComposition(opt.selector); } }
             }
