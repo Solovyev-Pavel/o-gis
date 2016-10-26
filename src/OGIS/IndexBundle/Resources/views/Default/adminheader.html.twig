@@ -1,0 +1,52 @@
+{% block header %}
+    <div class="panelmain">
+        <div class="logobox">
+            <center>
+                <div class="logo">O-GIS</div>
+                Admin Dashboard
+            </center>
+        </div>
+        
+        <div class="linkbox">
+            <a href="{{ path('adminhome') }}">
+                <div class="linkitembox">
+                    <div class="linkitem">Admin Dashboard</div>
+                </div>
+            </a>
+            <a href="{{ path('adminnewslist') }}">
+                <div class="linkitembox">
+                    <div class="linkitem">O-GIS News</div>
+                </div>
+            </a>
+            <a href="{{ path('admingeoserver') }}">
+                <div class="linkitembox">
+                    <div class="linkitem">GeoServer Reboot</div>
+                </div>
+            </a>
+        </div>
+        
+        <div class="userbox">
+            <table>
+                <tr>
+                    <td colspan="2"><center><b>{{ app.user.username }}</b></center></td>
+                </tr>
+                <tr>
+                    <td><a href="{{ path('showuser', {'id' : app.user.id}) }}" target="_blank">Profile</a> --- </td>
+                    <td><a href="{{ path('homepage') }}">Return to O-GIS</a></td>
+                </tr>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block footer %}
+    <table width="100%">
+        <tr>
+            <td width="33%"></td>
+            <td width="34%">
+                <center>(c) O-GIS team, 2014 - {{ "now"|date('Y') }}</center>
+            </td>
+            <td></td>
+        </tr>
+    </table>
+{% endblock %}
