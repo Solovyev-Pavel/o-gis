@@ -464,6 +464,42 @@ removefromfavorites:
     defaults: { _controller: OGISIndexBundle:Catalog:removeFavorite }
     methods: [POST]
 
+# ############################################## #
+#               admin panel pages                #
+# ############################################## #
+
+adminhome:
+    pattern: /admin/home
+    defaults: { _controller: OGISIndexBundle:Default:admin }
+    
+admingeoserver:
+    pattern: /admin/geoserver
+    defaults: { _controller: OGISIndexBundle:Admin:geoserverPage }
+    
+admingeoserverrestart:
+    pattern: /admin/restart/geoserver
+    defaults: { _controller: OGISIndexBundle:Admin:geoserverRestart }
+
+adminnewslist:
+    pattern: /admin/list/news
+    defaults: { _controller: OGISIndexBundle:Admin:newsList }
+    
+admingetnews:
+    pattern: /admin/get/news
+    defaults: { _controller: OGISIndexBundle:Admin:getNewsList }
+
+admineditnews:
+    pattern: /admin/edit/news/{id}
+    defaults: { _controller: OGISIndexBundle:Admin:editNews, id: null }
+
+adminsavenews:
+    pattern: /admin/save/news/{id}
+    defaults: { _controller: OGISIndexBundle:Admin:saveNews, id: null }
+
+admindeletenews:
+    pattern: /admin/delete/news/{id}
+    defaults: { _controller: OGISIndexBundle:Admin:deleteNews }
+
  # ########################################################################## #
  #                                administrative                              #
  # ########################################################################## #
