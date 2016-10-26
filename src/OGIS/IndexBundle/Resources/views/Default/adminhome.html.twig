@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <link rel="stylesheet" href="{{ asset('./css/admin_styles.css') }}" />
+        <title>Admin Dashboard :: O-GIS project</title>
+    </head>
+    
+    <body class="bodyfullpage">
+        
+        {% use 'OGISIndexBundle:Default:adminheader.html.twig' %}
+        {% block header %}
+            {{ parent() }}
+        {% endblock %}
+        
+        {% block content %}
+            <center>O-GIS Admin Dashboard</center>
+        {% endblock %}
+        
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+    </body>
+</html>
