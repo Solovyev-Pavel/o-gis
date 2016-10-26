@@ -141,6 +141,7 @@ function CompositionEditorCompositionSave(){
         var json = JSON.stringify(data);
         var local = "http://" + window.location.hostname;
         var url = '/o-gis/web/app.php/savecomposition';
+        var c_editor = this.parent;
         url += (this.parent.composition.id === null || save_as) ? '' : '/' + this.parent.composition.id;
         
         var xmlhttp;
@@ -156,7 +157,7 @@ function CompositionEditorCompositionSave(){
                 if(xmlhttp.status === 200){
                     var response = xmlhttp.responseText;
                     if (isNaN(response)){
-                        $('#messagewindow').dialog('option', 'title', 'Error while saving the composition!');
+                        $('#messagewindow').dialog('option', 'title', 'Error!');
                         $('#messagewindow').empty();
                         var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
                                     'Error:<br/>' + response + '</td></tr></table>';
@@ -164,33 +165,36 @@ function CompositionEditorCompositionSave(){
                         $('#messagewindow').dialog("open");
                     }
                     else{
-                        this.parent.composition.id = response;
-                        this.parent.cmpBackUp = this.parent.composition;
-                        var pagetitle = this.parent.composition.name +  " :: Composition Editor :: project O-GIS";
-                        var pageurl = local + "/o-gis/web/app.php/editor/composition/" + this.parent.composition.id;
+                        c_editor.composition.id = response;
+                        c_editor.cmpBackUp = c_editor.composition;
+                        var pagetitle = c_editor.composition.name +  " :: Composition Editor :: project O-GIS";
+                        var pageurl = local + "/o-gis/web/app.php/editor/composition/" + c_editor.composition.id;
                         window.history.pushState({}, pagetitle, pageurl);
-                        $('#messagewindow').dialog('option', 'title', 'Composition Saved Successfully!');
+                        // update composition description
+                        $('#descriptionwindow').empty().append(c_editor.composition.description);
+                        // show popup for successful composition save
+                        $('#messagewindow').dialog('option', 'title', 'Composition Saved!');
                         $('#messagewindow').empty();
                         var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' +
-                                    'Composition ' + this.parent.composition.name + ' was successfully saved!</td></tr></table>';
+                                    'Composition "' + c_editor.composition.name + '" was successfully saved!</td></tr></table>';
                         $('#messagewindow').append(html);
                         $('#messagewindow').dialog("open");
                     }
                 }
                 else if(xmlhttp.status === 403) {
-                    $('#messagewindow').dialog('option', 'title', 'Error while saving the composition!');
+                    $('#messagewindow').dialog('option', 'title', 'Error!');
                     $('#messagewindow').empty();
                     var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
-                                'Error: illegal action while saving the composition!</td></tr></table>';
+                                'Error: you aren\'t allowed to save a composition!</td></tr></table>';
                     $('#messagewindow').append(html);
                     $('#messagewindow').dialog("open");
-                    this.parent.user = null;
+                    c_editor.user = null;
                 }
                 else {
-                    $('#messagewindow').dialog('option', 'title', 'Error while saving the composition!');
+                    $('#messagewindow').dialog('option', 'title', 'Error!');
                     $('#messagewindow').empty();
                     var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
-                                'Error while saving the composition!</td></tr></table>';
+                                'An error occurred while saving the composition!</td></tr></table>';
                     $('#messagewindow').append(html);
                     $('#messagewindow').dialog("open");
                 }
@@ -198,7 +202,7 @@ function CompositionEditorCompositionSave(){
         };
         xmlhttp.open("POST", url, true);
         xmlhttp.setRequestHeader("Content-type", "text/plain");
-        xmlhttp.send(data);
+        xmlhttp.send(json);
     };
     
     // Reload the composition from the last save point
