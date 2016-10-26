@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <link rel="stylesheet" href="{{ asset('./css/admin_styles.css') }}" />
+        <title>GeoServer Remote Restart :: Admin Dashboard :: O-GIS project</title>
+        <link rel="stylesheet" href="{{ asset('./js/jquery-ui/jquery-ui.css') }}" />
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./js/jquery-ui/jquery-ui.min.js') }}"></script>
+        <script type="text/javascript">
+            function buttonclick(){
+                if(!confirm("Are you sure you want to restart GeoServer right now?")){ return; }
+                $.ajax({url: "{{ path('admingeoserverrestart') }}"})
+                .done(function(msg){
+                    var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/info.png"/></td><td valign="middle">' +
+                                msg.message + '</td></tr></table>';
+                    $( "#messagewindow" ).empty().append(html);
+                    $( "#messagewindow" ).dialog("open");
+                }).fail(function(){
+                    var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                'Error while restarting GeoServer!</td></tr></table>';
+                    $( "#messagewindow" ).empty().append(html);
+                    $( "#messagewindow" ).dialog("open");
+                });
+            }
+        </script>
+    </head>
+    
+    <body class="bodyfullpage">
+        
+        {% use 'OGISIndexBundle:Default:adminheader.html.twig' %}
+        {% block header %}
+            {{ parent() }}
+        {% endblock %}
+        
+        {% block content %}
+            <div class="infoblock">
+                <table>
+                    <tr>
+                        <td width="144px"><img src="{{ asset('./img/warning.png') }}"/></td>
+                        <td style="font-size:20px;font-weight:bold;color:#a11;">
+                            From here you can remotely restart the GeoServer in control of O-GIS layers.&nbsp;<br/><br/>
+                            Reloading GeoServer can take some time, during which all interactive maps at O-GIS will not work.&nbsp;
+                            Publishing new layers or creating new palettes will not work either while GeoServer is restarting.&nbsp;
+                        </td>
+                    </tr>
+                </table>
+                <br/>
+                <center>
+                    <button type="button" onclick="buttonclick();" class="centerpagebutton">Restart GeoServer</button>
+                </center>
+            </div>
+        {% endblock %}
+        
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+        
+        <div id="messagewindow" title="Restarting GeoServer"></div>
+        <script type="text/javascript">
+            $( "#messagewindow" ).dialog({  autoOpen: false,
+                                            resizable: false,
+                                            zIndex: 9999,
+                                            height: 'auto',
+                                            width: 400,
+                                            modal: true,
+                                            buttons: { OK : function(){ $(this).dialog("close"); } }
+            });
+        </script>
+    </body>
+</html>
