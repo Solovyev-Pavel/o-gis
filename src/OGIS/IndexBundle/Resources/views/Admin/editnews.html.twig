@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+{% if news == null %}
+    {% set id = null %}
+    {% set title = '' %}
+    {% set body = '' %}
+{% else %}
+    {% set id = news.id %}
+    {% set title = news.title %}
+    {% set body = news.text %}
+{% endif %}
+    
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <link rel="stylesheet" href="{{ asset('./css/admin_styles.css') }}" />
+        <title>Editing Newspost :: Admin Dashboard :: O-GIS project</title>
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript">
+            function returnToList(){
+                window.location.href = '{{ path('adminnewslist') }}';
+            }
+            
+            function revertValues(){
+                document.getElementById('newstitle').value = '{{ title }}';
+                document.getElementById('newsbody').value = '{{ body }}';
+            }
+            
+            function submitNewsEdit(){
+                var name = document.getElementById('newstitle').value;
+                if (name === "" || name.match(/^\s+$/g)){
+                    alert('Newspost must have a title!');
+                    return;
+                }
+                document.getElementById("newspropertiesform").submit();
+            }
+        </script>
+    </head>
+    
+    <body class="bodyfullpage">
+        {% use 'OGISIndexBundle:Default:adminheader.html.twig' %}
+        {% block header %}
+            {{ parent() }}
+        {% endblock %}
+        
+        {% block content %}
+            <div class="contentbody">
+                {% if success %}
+                    <div class="successbox">
+                        <table>
+                            <tr>
+                                <td><img src="{{ asset('./img/ok.png') }}" width="32px" height="32px" /></td>
+                                <td><center><b>Changes were successfully saved!</b></center></td>
+                            </tr>
+                        </table>
+                    </div>
+                {% endif%}
+                
+                <form method="post" action="{{ path('adminsavenews', {id: id}) }}" id="newspropertiesform">
+                <table width="90%" style="border:1px solid #ccc;margin-left:auto;margin-right:auto;margin-top:12px;margin-bottom:8px;">
+                    <tr>
+                        <td width="175px"><b>Newspost title</b>:</td>
+                        <td>
+                            <input style="width:99%" id="newstitle" name="_title" maxlength="256" value="{{ title }}"/>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><b>Newspost body</b>:</td>
+                        <td>
+                            <textarea rows="8" style="width:99%" id="newsbody" name="_text" maxlength="2048" form="newspropertiesform">{{ body }}</textarea>
+                        </td>
+                    </tr>
+                </table>
+                </form>
+                <div style="width:90%;margin-left:auto;margin-right:auto;margin-bottom:12px;">
+                    <center>
+                        <button style="width:275px;height:30px;" type="button" onclick="submitNewsEdit();">Save Changes</button>&nbsp;&nbsp;
+                        <button style="width:275px;height:30px;" type="button" onclick="revertValues();">Undo Changes</button>&nbsp;&nbsp;
+                        <button style="width:275px;height:30px;" type="button" onclick="returnToList();">Back to Newsposts List</button>
+                    </center>
+                </div>
+            </div>
+        {% endblock %}
+        
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+    </body>
+</html>
