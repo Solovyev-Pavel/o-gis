@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <link rel="shortcut icon" href="{{ asset('favicon.ico') }}" />
+        <link rel="stylesheet" href="{{ asset('./css/admin_styles.css') }}" />
+        <title>Newsposts :: Admin Dashboard :: O-GIS project</title>
+        <script type="text/javascript" src="{{ asset('./js/jquery/jquery-2.min.js') }}"></script>
+        <script type="text/javascript">
+            var page = 1;
+            var page_changed = false;
+            
+            function GoToPage(direction){
+                page_changed = true;
+                if (direction){ page++; }
+                else { page--; }
+                loadNews();
+            }
+            
+            function newNewsCreate(){
+                window.location.href = "{{ path('admineditnews', {'id': null}) }}";
+            }
+            
+            function deleteNews(id){
+                if (!confirm('Are you sure you want to delete this newspost?')){ return; }
+                url = '{{ path('admindeletenews', {'id': 'ID'}) }}';
+                window.location.href = url.replace('ID', id);
+            }
+            
+            function loadNews(){
+                var ordering = document.getElementById('orderingselector').value;
+                var order = document.getElementById('orderselector').value;
+                var finurl = "{{ path('admingetnews') }}?ordering=" + ordering + "&order=" + order;
+                if (page_changed){ finurl += '&page=' + page; }
+                else{ finurl += '&page=1'; }
+                $.ajax(finurl)
+                        .done(function(msg){
+                            console.log(msg);
+                            var userprofilelink = '{{ path('showuser', {'id' : 'ID'}) }}';
+                            var editnewslink = '{{ path('admineditnews', {'id' : 'ID'}) }}';
+                            if(msg.news.length === 0){
+                                var html = '<center>No published newsposts!</center>';
+                                $('#newslist').empty().append(html);
+                                return;
+                            }
+                            var html =  '<center><table width="90%"><tr style="background:#eee"><td><b><center>ID</center></b></td>' +
+                                        '<td><b><center>Title</center></b></td><td><b><center>Author</center></b></td>' +
+                                        '<td><center><b>Published</b></center></td><td><center><b>Available Actions</b></center>' +
+                                        '</td></tr>';
+                            for (var i = 0; i < msg.news.length; i++){
+                                html += '<tr><td><center>' + msg.news[i].id + '</center></td><td><center><a href="' +
+                                        editnewslink.replace('ID', msg.news[i].id) + '">' + msg.news[i].name +
+                                        '</a></center></td><td><center><a href="' + userprofilelink.replace('ID', msg.news[i].author.id) +
+                                        '" target="_blank">' + msg.news[i].author.name + '</a></center></td><td><center>' +
+                                        msg.news[i].posted.replace(/-/g, '.') + '</center></td><td><center><a href="' +
+                                        editnewslink.replace('ID', msg.news[i].id) + '">Edit</a>&nbsp;---&nbsp;' +
+                                        '<a href="#" onclick="deleteNews(' + msg.news[i].id + ')">Delete</a></center></td></tr>';
+                            }
+                            html += '</table></center>';
+                            $('#newslist').empty().append(html);
+                            
+                            if (msg.tpages > 0){ $('#navigationblock').css('display', 'block'); }
+                            $('#currentpagebox').empty().append('<center>Page ' + msg.cpage + ' из ' + msg.tpages + '</center>');
+                            if (msg.tpages > 1 && msg.cpage > 1){
+                                html = '<a href="#" onclick="GoToPage(false);"><< Previous</a>';
+                                $('#prevpagebox').empty().append();
+                            }
+                            if (msg.tpages > 1 && msg.cpage < msg.tpages){
+                                html = '<a href="#" onclick="GoToPage(true);">Next >></a>';
+                                $('#prevpagebox').empty().append();
+                            }
+                        })
+                        .fail(function(){
+                            var html = '<div class="loaderrormsg"><b>Error while loading newspost list!</b></div>';
+                            $('#newslist').empty().append(html);
+                            $('#navigationblock').css('display', 'none');
+                        });
+            }
+        </script>
+    </head>
+    
+    <body class="bodyfullpage" onload="loadNews();">
+        {% use 'OGISIndexBundle:Default:adminheader.html.twig' %}
+        {% block header %}
+            {{ parent() }}
+        {% endblock %}
+        
+        {% block content %}
+            <div class="contentbody">
+                <!-- параметры поиска -->
+                <div class="newssearchpanel">
+                    <span style="width:100%;font-size:22px;display:block;padding-top:8px;">
+                        <center><b style="color:#4040af;">O-GIS</b> Newsposts</center>
+                    </span>
+                    
+                    <table width="90%" style="margin-left:auto;margin-right:auto;">
+                        <tr>
+                            <td width="175px"><b>Sort By</b>:</td>
+                            <td width="200px">
+                                <select id="orderingselector" style="width:100%;" onchange="loadNews();">
+                                    <option value="id">Date Posted</option>
+                                    <option value="title">Title</option>
+                                </select>
+                            </td>
+                            <td>&nbsp;</td>
+                            <td rowspan="2" width="175px">
+                                <button style="height:32px;width:100%;" type="button" onclick="newNewsCreate();">Add Newspost</button>
+                            </td>
+                        </tr>
+                        <tr>
+                            <td><b>Sorting</b>:</td>
+                            <td>
+                                <select id="orderselector" style="width:100%;" onchange="loadNews();">
+                                    <option value="ASC">A → Z</option>
+                                    <option value="DESC">Z → A</option>
+                                </select>
+                            </td>
+                            <td>&nbsp;</td>
+                        </tr>
+                    </table>
+                </div>
+                    
+                <div id="navigationblock" class="newslistpanel" style="display:none;">
+                    <table width="100%">
+                        <tr>
+                            <td>&nbsp;</td>
+                            <td width="20%" id="prevpagebox">&nbsp;</td>
+                            <td width="20%" id="currentpagebox"></td>
+                            <td width="20%" id="nextpagebox">&nbsp;</td>
+                            <td>&nbsp;</td>
+                        </tr>
+                    </table>
+                </div>
+                
+                <div class="newslistpanel" id="newslist">
+                    <center>No published news!</center>    
+                </div>
+            </div>
+        {% endblock %}
+        
+        {% block footer %}
+            {{ parent() }}
+        {% endblock %}
+    </body>
+</html>
