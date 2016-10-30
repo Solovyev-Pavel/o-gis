@@ -696,7 +696,7 @@ function CompositionEditorRasterAnalysis(){
                     '<tr><td><b>Target Catalog</b>:</td><td><input type="hidden" id="newrasterlayercat" />' +
                     '<div id="saverastertree" style="max-width:285px;width:100%;height:150px;border:1px solid #ccc;overflow:auto;"></div></td></tr></table><br/>' +
                     '<center><button type="button" style="height:30px;width:80%;" onclick="' + this.parent.params.thisVar +
-                    '.RasterAnalysis.createNewRasterLayer()">Выполнить</button></center>';
+                    '.RasterAnalysis.createNewRasterLayer()">Perform Operation</button></center>';
         $('#' + this.parent.params.rasterOpWindow).dialog('option', 'title', 'Saving new Layer');
         $('#' + this.parent.params.rasterOpWindow).empty().append(html);
         showSaveRasterOperationTree(this.parent.user.favRoot);
