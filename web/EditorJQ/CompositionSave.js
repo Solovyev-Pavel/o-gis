@@ -42,7 +42,7 @@ function CompositionEditorCompositionSave(){
             var html =  '<table width="100%"><tr><td width="100px">Title:</td><td><input id="composition-name" maxlength="256" ' +
                         'style="width:100%"/></td></tr><tr><td>Description:</td><td><textarea id="composition-description" ' +
                         'style="resize:none;width:100%" rows="6"></textarea></td></tr><tr><td>Каталог:</td><td><div ' +
-                        'style="display:none" id="targetcatid"></div><div style="width:100%;height:200px;border:1px solid #ccc;" ' +
+                        'style="display:none" id="targetcatid"></div><div style="width:100%;max-width:367px;height:200px;border:1px solid #ccc;overflow:auto;" ' +
                         'id="savetargettree"></div></td></tr></table>';
             $('#' + this.parent.params.saveCmpWindow).empty().append(html);
             showSaveTargetCatalogTree(this.parent.user.favRoot);
