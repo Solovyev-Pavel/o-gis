@@ -689,14 +689,14 @@ function CompositionEditorRasterAnalysis(){
     
     // Get the name, description and target catalog for the new layer
     this.gatherRasterLayerOuputParams = function(){
-        var html =  '<table width="100%"><tr><td width="150px"><b>Layer Title</b>:</td><td>' +
+        var html =  '<table width="100%"><tr><td width="130px"><b>Layer Title</b>:</td><td>' +
                     '<input id="newrasterlayername" type="text" maxlength="256" style="width:100%" /></td></tr>' +
                     '<tr><td><b>Layer Description</b>:</td><td><textarea id="newrasterlayerdesc" ' +
                     'style="width:100%;height:75px;resize:none;" maxlength="1024"></textarea></td></tr>' + 
                     '<tr><td><b>Target Catalog</b>:</td><td><input type="hidden" id="newrasterlayercat" />' +
-                    '<div id="saverastertree" style="width:100%;height:150px;border:1px solid #ccc;"></div></td></tr></table><br/>' +
+                    '<div id="saverastertree" style="max-width:285px;width:100%;height:150px;border:1px solid #ccc;overflow:auto;"></div></td></tr></table><br/>' +
                     '<center><button type="button" style="height:30px;width:80%;" onclick="' + this.parent.params.thisVar +
-                    '.RasterAnalysis.createNewRasterLayer()">Process</button></center>';
+                    '.RasterAnalysis.createNewRasterLayer()">Выполнить</button></center>';
         $('#' + this.parent.params.rasterOpWindow).dialog('option', 'title', 'Saving new Layer');
         $('#' + this.parent.params.rasterOpWindow).empty().append(html);
         showSaveRasterOperationTree(this.parent.user.favRoot);
