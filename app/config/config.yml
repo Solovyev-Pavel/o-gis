@@ -18,7 +18,8 @@
  imports:
     - { resource: parameters.yml }
     - { resource: security.yml }
-    - { resource: @OGISIndexBundle/Resources/config/admin.yml }
+# The following import is no longer needed as sonata-project/admin-bundle is no longer used in this project
+#    - { resource: @OGISIndexBundle/Resources/config/admin.yml }
 
 framework:
     translator: ~
@@ -97,15 +98,15 @@ swiftmailer:
         type: file
         path: %kernel.root_dir%/spool
 
-sonata_block:
-    default_contexts: [cms]
-    blocks:
-        # Enable the SonataAdminBundle block
-        sonata.admin.block.admin_list:
-            contexts:   [admin]
-
-sonata_admin:
-    title: O-GIS project
+#sonata_block:
+#    default_contexts: [cms]
+#    blocks:
+#        # Enable the SonataAdminBundle block
+#        sonata.admin.block.admin_list:
+#            contexts:   [admin]
+#
+#sonata_admin:
+#    title: O-GIS project
 
 fos_user:
     db_driver: orm # other valid values are 'mongodb', 'couchdb' and 'propel'
