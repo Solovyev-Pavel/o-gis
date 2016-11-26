@@ -247,6 +247,16 @@ deletecomposition:
 deletecompositionsuccess:
     pattern: /deletecomposition/success/{name}
     defaults: { _controller: OGISIndexBundle:Composition:deleteCompositionSuccess }
+    
+altercompositionsharing:
+    pattern: /edit/composition/project/alter
+    defaults: { _controller: OGISIndexBundle:Composition:addProjectSharing }
+    methods: [POST]
+    
+removecompositionsharing:
+    pattern: /edit/composition/project/remove
+    defaults: { _controller: OGISIndexBundle:Composition:removeProjectSharing }
+    methods: [POST]
 
  # ########################################################################## #
  #                              project entity pages                          #
