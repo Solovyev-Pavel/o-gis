@@ -77,5 +77,64 @@ class EditorController extends Controller{
             'ulimit' => $limit
 		));
 	}
-	
+
+	public function showCompositionEditorAction($datasource, $id){
+        $em = $this->getDoctrine()->getManager();
+        $composition = null;
+        $layer = null;
+        $can_overwrite = 0;
+        if ($datasource == "composition"){
+            $composition = $em->getRepository('OGIS\IndexBundle\Entity\Composition')->find($id);
+            if(!$composition){
+                return $this->render('OGISIndexBundle:Error:entitynotfound.html.twig', array(
+                        'caption' => "Ошибка при получении композиции!",
+                        'message' => "В базе данных не найдено информации по запрашиваемой Вами композиции."
+                ));
+            }
+            if ($this->getUser() != null){
+                $found = false;
+                $authorizationChecker = $this->get('security.context');
+                if ($authorizationChecker->isGranted('EDIT', $composition)){ $can_overwrite = 1; $found = true; }
+                $cmp_projects = $composition->getCompositionsProjects();
+                $user = $em->getRepository('OGIS\IndexBundle\Entity\User')->find($this->getUser()->getId());
+                $usr_projects = $user->getUsersProjects();
+                if (!$found){
+                    foreach($cmp_projects as $prj){
+                        foreach($usr_projects as $p){
+                            if ($p->getId() == $prj->getId()){
+                                $found = true;
+                                $can_overwrite = 1;
+                                break;
+                            }
+                        }
+                        if ($found){ break; }
+                    }
+                }
+            }
+        }
+        if ($datasource == "layer"){
+            $layer = $em->getRepository('OGIS\IndexBundle\Entity\Layer')->find($id);
+            if(!$layer){
+                return $this->render('OGISIndexBundle:Error:entitynotfound.html.twig', array(
+                        'caption' => "Ошибка при получении слоя!",
+                        'message' => "В базе данных не найдено информации по запрашиваемом Вами слое."
+                ));
+            }
+        }
+        if ($this->getUser() != null){
+            $user = $em->getRepository('OGIS\IndexBundle\Entity\User')->find($this->getUser()->getId());
+            $limit = $user->getLimits()->getLayers();
+            if ($limit == null){ $limit = -1; }
+        }
+        else {
+            $limit = 0;
+        }
+        return $this->render('OGISIndexBundle:Editor:compositioneditor.html.twig', array(
+            'composition' => $composition,
+            'layer' => $layer,
+            'permission' => $can_overwrite,
+            'ulimit' => $limit
+        ));
+    }
+
 }
