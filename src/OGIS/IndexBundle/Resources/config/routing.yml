@@ -441,6 +441,10 @@ geoexpl:
     pattern: /editor/{datasource}/{id}
     defaults: { _controller: OGISIndexBundle:Editor:showEditor, datasource: null, id: null }   
 
+compositioneditor:
+    pattern: /ceditor/{datasource}/{id}
+    defaults: { _controller: OGISIndexBundle:Editor:showCompositionEditor, datasource: null, id: null }
+
 getlayertype:
     pattern: /gettype/layer/{cs}
     defaults: { _controller: OGISIndexBundle:Layer:getLayerType }
