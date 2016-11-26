@@ -87,8 +87,8 @@ class EditorController extends Controller{
             $composition = $em->getRepository('OGIS\IndexBundle\Entity\Composition')->find($id);
             if(!$composition){
                 return $this->render('OGISIndexBundle:Error:entitynotfound.html.twig', array(
-                        'caption' => "Ошибка при получении композиции!",
-                        'message' => "В базе данных не найдено информации по запрашиваемой Вами композиции."
+                        'caption' => "Error while retrieving composition data!",
+                        'message' => "Requested composition wasn't found in the O-GIS database."
                 ));
             }
             if ($this->getUser() != null){
@@ -116,8 +116,8 @@ class EditorController extends Controller{
             $layer = $em->getRepository('OGIS\IndexBundle\Entity\Layer')->find($id);
             if(!$layer){
                 return $this->render('OGISIndexBundle:Error:entitynotfound.html.twig', array(
-                        'caption' => "Ошибка при получении слоя!",
-                        'message' => "В базе данных не найдено информации по запрашиваемом Вами слое."
+                        'caption' => "Error while retrieving layer data!",
+                        'message' => "Requested layer wasn't found in the O-GIS database."
                 ));
             }
         }
