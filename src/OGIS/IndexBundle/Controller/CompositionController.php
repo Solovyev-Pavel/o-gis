@@ -416,4 +416,117 @@ class CompositionController extends Controller{
         ));
     }
 
+    // marks a project as a 'friend' entity so that the members of that project can overwrite the composition
+    public function addProjectSharingAction(){
+        $cmp_id = $_REQUEST['composition'];
+        $em = $this->getDoctrine()->getManager();
+        $authorizationChecker = $this->get('security.context');
+        $composition = $em->getRepository('OGIS\IndexBundle\Entity\Composition')->find($cmp_id);
+        if (!$composition){
+            $msg = '{"success": false, "message": "Composition not found!"}';
+            $response = new Response($msg);
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setCharset('UTF-8');
+            return $response;
+        }
+        if (!$authorizationChecker->isGranted('OWNER', $composition)){
+            $msg = '{"success": false, "message": "Only composition\'s author can change its sharing!"}';
+            $response = new Response($msg);
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setCharset('UTF-8');
+            return $response;
+        }
+        $prj_id = $_REQUEST['project'];
+        if (is_numeric($prj_id)){ $identitytype = 'id'; }
+        else { $identitytype = 'name'; }
+        $project = $em->getRepository('OGIS\IndexBundle\Entity\Project')->findOneBy(array($identitytype => $prj_id));
+        if (!$project){
+            $msg = '{"success": false, "message": "Project not found!"}';
+            $response = new Response($msg);
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setCharset('UTF-8');
+            return $response;
+        }
+        $is_admin_only = ($_REQUEST['admin'] == 'true') ? true : false;
+        $projects = $composition->getProjects();
+        foreach ($projects as $proj){
+            if ($proj->getProject()->getId() == $project->getId()){
+                if ($proj->getAdminOnly() == $is_admin_only){
+                    $msg = '{"success": false, "message": "Members of this project are already allowed to edit this composition!"}';
+                    $response = new Response($msg);
+                    $response->headers->set('Content-Type', 'application/json');
+                    $response->setCharset('UTF-8');
+                    return $response;
+                }
+                else {
+                    $proj->setAdminOnly($is_admin_only);
+                    $em->persist($proj);
+                    $em->flush();
+                    $msg = '{"success": true, "message": "Edit permissions have been updated!"}';
+                    $response = new Response($msg);
+                    $response->headers->set('Content-Type', 'application/json');
+                    $response->setCharset('UTF-8');
+                    return $response;
+                }
+            }
+        }
+        $cmp_edit = new ProjectComposition();
+        $cmp_edit->setComposition($composition);
+        $cmp_edit->setProject($project);
+        $cmp_edit->setAdminOnly($is_admin_only);
+        $em->persist($cmp_edit);
+        $em->flush();
+        $id = $project->getId();
+        $name = $project->getName();
+        $msg = '{"success": true, "prj_id": ' . $id . ', "prj_name": "' . $name . '", "message": "Members of project \"' . $name .'</b>\" are now allowed to edit this composition!"}';
+        $response = new Response($msg);
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setCharset('UTF-8');
+        return $response;
+    }
+    
+    // undoes composition sharing with the project
+    public function removeProjectSharingAction(){
+        $cmp_id = $_REQUEST['composition'];
+        $em = $this->getDoctrine()->getManager();
+        $authorizationChecker = $this->get('security.context');
+        $composition = $em->getRepository('OGIS\IndexBundle\Entity\Composition')->find($cmp_id);
+        if (!$composition){
+            $msg = '{"success": false, "message": "Composition not found!"}';
+            $response = new Response($msg);
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setCharset('UTF-8');
+            return $response;
+        }
+        if (!$authorizationChecker->isGranted('OWNER', $composition)){
+            $msg = '{"success": false, "message": "Only composition\'s author can change its sharing!"}';
+            $response = new Response($msg);
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setCharset('UTF-8');
+            return $response;
+        }
+        $prj_id = $_REQUEST['project'];
+        if (is_numeric($prj_id)){ $identitytype = 'id'; }
+        else { $identitytype = 'name'; }
+        $project = $em->getRepository('OGIS\IndexBundle\Entity\Project')->findOneBy(array($identitytype => $prj_id));
+        if (!$project){
+            $msg = '{"success": false, "message": "Project not found!"}';
+            $response = new Response($msg);
+            $response->headers->set('Content-Type', 'application/json');
+            $response->setCharset('UTF-8');
+            return $response;
+        }
+        $projects = $composition->getProjects();
+        foreach ($projects as $proj){
+            if ($proj->getProject()->getId() == $project->getId()){
+                $em->remove($proj);
+                $em->flush();
+                $msg = '{"success": true, "message": "Members of this project aren\'t allowed to edit this composition anymore!"}';
+                $response = new Response($msg);
+                $response->headers->set('Content-Type', 'application/json');
+                $response->setCharset('UTF-8');
+                return $response;
+            }
+        }
+    }
 }
