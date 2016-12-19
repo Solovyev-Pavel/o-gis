@@ -654,7 +654,8 @@ function CompositionEditorRasterAnalysis(){
                 for (var j = 0; j < this.RasterOperation.selectedRasters.length; j++){
                     if ('{' + this.RasterOperation.selectedRasters[j].text + '}' === layerName){
                         layer = this.RasterOperation.selectedRasters[j];
-                        layer.variable = 'layer' + (operation.selectedRasters.length + 1);
+                        layer.variable = 'layer' + j;
+                        break;
                     }
                 }
                 var is_used = false;
