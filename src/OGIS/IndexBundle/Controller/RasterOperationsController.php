@@ -1041,7 +1041,7 @@ class RasterOperationsController extends Controller {
         $data = $calc->GetTokens();
         $tokens = $calc->GetTokens();
         
-        $value = false;
+        $value = true;
         for ($i = 0; $i < $count; $i++){
             fseek($tiffs[$i], $stripOffsets[$i][1]);
             $indexes[$i] = 1;
@@ -1057,7 +1057,7 @@ class RasterOperationsController extends Controller {
                 $in_buffers[$i] = unpack($valueins[$i], $dataBytes);
                 $index_lims[$i] = $lim;
             }
-            if ($in_buffers[$i][$indexes[$i]] == $nodatas[$i]){ $value = true; }
+            if ($in_buffers[$i][$indexes[$i]] != $nodatas[$i]){ $value = false; }
             $layers[$i] = $in_buffers[$i][$indexes[$i]];
             for ($j = 0; $j < count($data); $j++){
                 if ($data[$j] == '{{' . $json->sources[$i]->variable . '}}'){
@@ -1075,7 +1075,7 @@ class RasterOperationsController extends Controller {
             if ($data < $min && $data > $nodata){ $min = $data; }
             $buffer .= pack($valueout, $data);
             $pointsleft--;
-            $value = false;
+            $value = true;
             $i = 0;
             while ($i < $count){
                 $indexes[$i]++;
@@ -1100,7 +1100,7 @@ class RasterOperationsController extends Controller {
                         $buffer = '';
                     }
                 }
-                if ($in_buffers[$i][$indexes[$i]] == $nodatas[$i]){ $value = true; }
+                if ($in_buffers[$i][$indexes[$i]] != $nodatas[$i]){ $value = false; }
                 $layers[$i] = $in_buffers[$i][$indexes[$i]];
                 $i++;
             }
