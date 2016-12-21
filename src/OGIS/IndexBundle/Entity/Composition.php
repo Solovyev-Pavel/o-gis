@@ -21,7 +21,7 @@ class Composition
 	private $id;
 
 	/**
-	 * @ORM\Column(type="string", length=256, nullable=false, unique=true)
+	 * @ORM\Column(type="string", length=256, nullable=false, unique=false)
 	 */
 	private $name;
 
