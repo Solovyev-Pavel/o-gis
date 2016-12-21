@@ -1275,6 +1275,7 @@ class Expression{
         $left; $right;                                      // operands holders
         for ($i = 0; $i < $count; $i++){
             $token = $this->_tokens[$i];
+            $token = "$token";
             switch($token){
                 case '+' :  $right = array_pop($this->_evstack);
                             $left = array_pop($this->_evstack);
