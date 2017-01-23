@@ -42,7 +42,7 @@
                 var title = $('#layername').val();
                 title = title.replace(/^[\s\r\n]+|[\s\r\n]+$/gm,'');
                 if (title.length < 1 || title[0] === ''){
-                    var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">You should enter a meaningful name for your layer!</td></tr></table>';
+                    var html = '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">You should enter a meaningful name for your layer!</td></tr></table>';
                     $('#errormessagewindow').empty();
                     $('#errormessagewindow').append(html);
                     $('#errormessagewindow').dialog('open');
@@ -51,7 +51,7 @@
                 // check selected node
                 var node = $('#selectednodeid').text();
                 if (node === '' || node === null || node === undefined){
-                    var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">You should choose a catalog to place a link to your layer into!</td></tr></table>';
+                    var html = '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">You should choose a catalog to place a link to your layer into!</td></tr></table>';
                     $('#errormessagewindow').empty();
                     $('#errormessagewindow').append(html);
                     $('#errormessagewindow').dialog('open');
@@ -63,7 +63,7 @@
                 // check archive with files
                 var file = document.getElementById("layerfile").files[0];
                 if (!file || !file.name.toLowerCase().match(/\.zip$/g)){
-                    var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">Please, choose a *.zip archive with layer\'s files!</td></tr></table>';
+                    var html = '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">Please, choose a *.zip archive with layer\'s files!</td></tr></table>';
                     $('#errormessagewindow').empty();
                     $('#errormessagewindow').append(html);
                     $('#errormessagewindow').dialog('open');
@@ -104,7 +104,7 @@
                                 document.getElementById("layerform").submit();
                                 return;
                             }
-                            var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">Please check the files in the archive!\r\n* There may be missing or extra files\r\n* Or the layer is in an unsupported format</td></tr></table>';
+                            var html = '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">Please check the files in the archive!\r\n* There may be missing or extra files\r\n* Or the layer is in an unsupported format</td></tr></table>';
                             $('#errormessagewindow').empty();
                             $('#errormessagewindow').append(html);
                             $('#errormessagewindow').dialog('open');

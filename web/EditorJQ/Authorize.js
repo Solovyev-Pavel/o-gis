@@ -52,19 +52,19 @@ function CompositionEditorAuthenticate(){
         }
         $('#' + this.parent.params.authWindow).dialog("close");
         var c_editor = this;
-        $.post("/o-gis/web/app.php/auth/editor?username=" + username + "&password=" + password, function(data){
+        $.post("./app.php/auth/editor?username=" + username + "&password=" + password, function(data){
             if (data.toString().match(/^Error/g)){
                 var message = data.substring(7);
-                var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td> '+
+                var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td> '+
                             '<td valign="middle">' + message + '</td></tr></table>';
             }
             else {
-                var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td> '+
+                var html =  '<table><tr><td width="64px"><img src="./img/ok.png"/></td> '+
                             '<td valign="middle">You\'ve been successfully logged in!</td></tr></table>';
                 c_editor.parent.user = {};
                 c_editor.parent.user.id = data.id;
                 c_editor.parent.user.name = data.name;
-                c_editor.parent.user.favRoot = "/o-gis/web/app.php/catalog/user/" + data.id;
+                c_editor.parent.user.favRoot = "./app.php/catalog/user/" + data.id;
                 c_editor.parent.user.can_overwrite = (data.overwrite === 1) ? true : false;
                 c_editor.parent.user.limit = data.limit;
                 document.cookie = 'PHPSESSID=' + data.session + ';PATH=/;';

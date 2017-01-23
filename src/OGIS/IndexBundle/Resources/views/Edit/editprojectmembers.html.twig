@@ -67,12 +67,12 @@
                                     ',' + rows + ', true)">Promote</a> - <a href="#" onclick="removeFromProject(' + msg.id + ',' + rows +
                                     ')">Remove from project</a></td></tr>'
                         $('#userlist').append(html);
-                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        html = '<table><tr><td width="64px"><img src="./img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                         $('#messagewindow').empty().append(html);
                         $('#messagewindow').dialog('open');
                         }
                     else{
-                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        html = '<table><tr><td width="64px"><img src="./img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                         $('#messagewindow').empty().append(html);
                         $('#messagewindow').dialog('open');
                     }
@@ -87,12 +87,12 @@
                 }).done(function(msg){
                     if(msg.success){
                         $('#row-' + row).remove();
-                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        html = '<table><tr><td width="64px"><img src="./img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                         $('#messagewindow').empty().append(html);
                         $('#messagewindow').dialog('open');
                         }
                     else{
-                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        html = '<table><tr><td width="64px"><img src="./img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                         $('#messagewindow').empty().append(html);
                         $('#messagewindow').dialog('open');
                     }
@@ -127,12 +127,12 @@
                                 ')">Remove from project</a></td>';
                         }
                         $('#row-' + row).empty().append(html);
-                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        html = '<table><tr><td width="64px"><img src="./img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                         $('#messagewindow').empty().append(html);
                         $('#messagewindow').dialog('open');
                         }
                     else{
-                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        html = '<table><tr><td width="64px"><img src="./img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                         $('#messagewindow').empty().append(html);
                         $('#messagewindow').dialog('open');
                     }

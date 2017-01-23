@@ -130,7 +130,7 @@
                             // add layer
                             var target =  new OpenLayers.Layer.WMS(
                                 cmp.layers[i].name,
-                                "/o-gis/web/app.php/wms", {
+                                "./app.php/wms", {
                                     LAYERS: cmp.layers[i].workspace + ':' + cmp.layers[i].cs,
                                     format: 'image/png',
                                     transparent: true
@@ -216,7 +216,7 @@
                         <div style="height:300px">
                                 {% if composition.layers|length != 0 %}
                                         {% for layer in composition.layers|sort %}
-                                                <img src="/o-gis/web/img/icons/layer.png"/>&nbsp;
+                                                <img src="./img/icons/layer.png"/>&nbsp;
                                                 <a href="{{ path('showlayer', {'id': layer.id }) }}" target="_blank">{{ layer.name }}</a><br/>
                                         {% endfor %}
                                 {% endif %}

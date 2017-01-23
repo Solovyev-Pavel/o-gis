@@ -13,7 +13,7 @@
 			{% if app.user == true %}
 				<b>{{ app.user.username }}</b> :: <a href="{{ path('showuser', {'id' : app.user.id}) }}">Your Profile</a> |
 {#			{% if app.user.roles[0] == "ROLE_ADMIN" or app.user.roles[0] == "ROLE_SUPER_ADMIN" or app.user.roles[0] == "ROLE_SYSTEM" %}
-					<a href="/o-gis/web/app.php/admin" target="_blank">Admin dashboard</a> |
+					<a href="./app.php/admin" target="_blank">Admin dashboard</a> |
 				{% endif %} #}
 				<a href="{{ path('fos_user_security_logout') }}">Log out</a>
 			{% else %}

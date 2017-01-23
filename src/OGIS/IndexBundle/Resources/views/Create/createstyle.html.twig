@@ -59,7 +59,7 @@
             function submitStyle(){
                 var name = $('#stylename').val();
                 if (name === "" || name.match(/^\s+$/g)){
-                    var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                    var html =	'<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 'You must enter style\'s title!<br/>Title can\'t consist of whitespace symbols.</td></tr></table>';
                     $( "#messagewindow" ).empty().append(html);
                     $( "#messagewindow" ).dialog("open");
@@ -67,7 +67,7 @@
                 }
                 var node = $('#selectednodeid').text();
                     if (node === ""){
-                    var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                    var html =	'<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 'You must choose a catalog into which the link to this style will be placed!</td></tr></table>';
                     $( "#messagewindow" ).empty().append(html);
                     $( "#messagewindow" ).dialog("open");
@@ -86,14 +86,14 @@
             function submitStyleFromPlaintextEditor(){
                 var sldtext = $('#sldtext').val();
                 if (sldtext === "" || sldtext.match(/^\s+$/g)){
-                    var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                    var html =	'<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 'You must input SLD desription of your style!</td></tr></table>';
                     $( "#messagewindow" ).empty().append(html);
                     $( "#messagewindow" ).dialog("open");
                     return;
                 }
                 if (!sldtext.match(/StyledLayerDescriptor/g)){
-                     var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                     var html =	'<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 'Please confirm that your input is indeed an SLD style description!</td></tr></table>';
                     $( "#messagewindow" ).empty().append(html);
                     $( "#messagewindow" ).dialog("open");
@@ -111,7 +111,7 @@
             function submitStyleFromFileUpload(){
                 var file = $('#slddefinition')[0].files[0];
                 if (file === null){
-                    var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                    var html =	'<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 'Please, choose a file with the SLD description of your style!</td></tr></table>';
                     $( "#messagewindow" ).empty().append(html);
                     $( "#messagewindow" ).dialog("open");
@@ -123,7 +123,7 @@
                     return function(e) {
                         var sldtext = atob(e.target.result.substring(e.target.result.indexOf(',') + 1));
                         if (!sldtext.match(/StyledLayerDescriptor/g)){
-                            var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                            var html =	'<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                         'The selected file doesn\'t contain a recognized SLD style description!</td></tr></table>';
                             $( "#messagewindow" ).empty().append(html);
                             $( "#messagewindow" ).dialog("open");

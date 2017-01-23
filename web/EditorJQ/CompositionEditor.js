@@ -100,10 +100,10 @@ function CompositionEditor(){
     this.setWaitAnimDom = function(id){ this.params.waitAnimBox = id; };
     
     this.setUser = function(id, name){
-        this.user = { id: id, name: name, favRoot: "/o-gis/web/app.php/catalog/user/" + id, can_overwrite: false, limit: 0 };
+        this.user = { id: id, name: name, favRoot: "./app.php/catalog/user/" + id, can_overwrite: false, limit: 0 };
     };
     this.setUser = function(id, name, limit){
-        this.user = { id: id, name: name, favRoot: "/o-gis/web/app.php/catalog/user/" + id, can_overwrite: false, limit: limit };
+        this.user = { id: id, name: name, favRoot: "./app.php/catalog/user/" + id, can_overwrite: false, limit: limit };
     };
     
     // Set user's permission to edit composition he isn't an author of
@@ -133,7 +133,7 @@ function CompositionEditor(){
             .done(function(msg){
                 if (!msg.success){
                     $( "#messagewindow" ).empty();
-                    var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                    var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 msg.msg + '</td></tr></table>';
                     $( "#messagewindow" ).append(html);
                     $( "#messagewindow" ).dialog("open");
@@ -146,7 +146,7 @@ function CompositionEditor(){
             })
             .fail(function(){
                 $( "#messagewindow" ).empty();
-                var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                             'Ошибка при загрузке данных!</td></tr></table>';
                 $( "#messagewindow" ).append(html);
                 $( "#messagewindow" ).dialog("open");
@@ -215,7 +215,7 @@ function CompositionEditor(){
         for (var i = 0; i < this.composition.layers.length; i++){
             var target = new OpenLayers.Layer.WMS(
                     this.composition.layers[i].name,
-                    "/o-gis/web/app.php/wms", {
+                    "./app.php/wms", {
                         LAYERS: this.composition.layers[i].workspace + ':' + this.composition.layers[i].cs,
                         format: 'image/png',
                         transparent: true
@@ -292,7 +292,7 @@ function CompositionEditor(){
     // Gets a layer's internal id
     this.getLayersInternalId = function(cs){
         if (this.user === null){
-            var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td>' +
+            var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td>' +
                         '<td valign="middle">Only authenticated users can add to favorites!</td></tr></table>';
             $( "#messagewindow" ).dialog('option', 'title', 'Adding to favorites');
             $( "#messagewindow" ).empty().append(html);
@@ -318,7 +318,7 @@ function CompositionEditor(){
     };
     
     // Leave the editor
-    this.goToEntity = function(type, id){ window.location.href = "/o-gis/web/app.php/" + type + "/" + id; };
+    this.goToEntity = function(type, id){ window.location.href = "./app.php/" + type + "/" + id; };
     
     // Hide / show the list of the layers
     this.toggleLayerListVisibility = function(){
@@ -353,7 +353,7 @@ function CompositionEditor(){
     // Add composition to favorites
     this.addCompositionToFavorites = function(){
         if (this.user === null){
-            var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td>' +
+            var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td>' +
                         '<td valign="middle">Only authenticated users can add to favorites!</td></tr></table>';
             $( "#messagewindow" ).dialog('option', 'title', 'Adding to favorites');
             $( "#messagewindow" ).empty().append(html);
@@ -361,7 +361,7 @@ function CompositionEditor(){
             return;
         }
         if (this.composition.id === null){
-            var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td>' +
+            var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td>' +
                         '<td valign="middle">This composition isn\'t saved yet. You can\'t add it to your favorites!' +
                         '</td></tr></table>';
             $( "#messagewindow" ).dialog('option', 'title', 'Adding to favorites');

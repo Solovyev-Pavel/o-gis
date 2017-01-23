@@ -1,5 +1,4 @@
 <?php
-
 /* ************************************************************************** *
  *   Copyright © 2015       Pavel Solovyev (solovyev.p.a@gmail.com)           *
  *                          Sergey Sevryukov (sevrukovs@gmail.com)            *
@@ -16,13 +15,11 @@
  *   See the License for the specific language governing permissions and      *
  *   limitations under the License.                                           *
  * ************************************************************************** */
-
 namespace OGIS\IndexBundle\Controller;
 
+
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
-
 class EditorController extends Controller{
-
 	public function showEditorAction($datasource, $id){
 		$em = $this->getDoctrine()->getManager();
 		$composition = null;
@@ -77,7 +74,7 @@ class EditorController extends Controller{
             'ulimit' => $limit
 		));
 	}
-
+}
 	public function showCompositionEditorAction($datasource, $id){
         $em = $this->getDoctrine()->getManager();
         $composition = null;
@@ -136,5 +133,4 @@ class EditorController extends Controller{
             'ulimit' => $limit
         ));
     }
-
 }

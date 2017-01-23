@@ -13,12 +13,12 @@
                 if(!confirm("Are you sure you want to restart GeoServer right now?")){ return; }
                 $.ajax({url: "{{ path('admingeoserverrestart') }}"})
                 .done(function(msg){
-                    var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/info.png"/></td><td valign="middle">' +
+                    var html =  '<table><tr><td width="64px"><img src="./img/info.png"/></td><td valign="middle">' +
                                 msg.message + '</td></tr></table>';
                     $( "#messagewindow" ).empty().append(html);
                     $( "#messagewindow" ).dialog("open");
                 }).fail(function(){
-                    var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                    var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 'Error while restarting GeoServer!</td></tr></table>';
                     $( "#messagewindow" ).empty().append(html);
                     $( "#messagewindow" ).dialog("open");

@@ -60,13 +60,13 @@
                                   ' target="_blank">' + msg.name +'</a></td><td style="text-align:right;"><a href="#" onclick="removeViewPrivelegy(' + msg.id + ',' + rows +
                                   ')">Revoke view permission</a></td></tr>';
                         $('#userlist').append(html);
-                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        html = '<table><tr><td width="64px"><img src="./img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                         $('#messagewindow').empty().append(html);
                         $('#messagewindow').dialog('open');
                     }
                 }
                 else{
-                    html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                    html = '<table><tr><td width="64px"><img src="./img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                     $('#messagewindow').empty().append(html);
                     $('#messagewindow').dialog('open');
                 }
@@ -83,13 +83,13 @@
                 if(msg.success){
                     if(!msg.added){
                         $('#row-' + pos).remove();
-                        html = '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                        html = '<table><tr><td width="64px"><img src="./img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                         $('#messagewindow').empty().append(html);
                         $('#messagewindow').dialog('open');
                     }
                 }
                 else{
-                    html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                    html = '<table><tr><td width="64px"><img src="./img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                     $('#messagewindow').empty().append(html);
                     $('#messagewindow').dialog('open');
                 }

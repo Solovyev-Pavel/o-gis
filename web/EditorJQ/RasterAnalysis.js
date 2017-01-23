@@ -33,14 +33,14 @@ function CompositionEditorRasterAnalysis(){
     // Show the starting screen
     this.beginRasterOperations = function(){
         if (this.parent.user === null){
-            var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+            var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                         'You need to login in order to perform raster analysis!</td></tr></table>';
             $( "#messagewindow2" ).empty().append(html);
             $( "#messagewindow2" ).dialog("open");
             return;
         }
         if (this.parent.user.limit === 0){
-            var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+            var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                         'You\'ve reached the allowed limit of layers on your profile and can\'t perform' +
                         'raster analysis operations!</td></tr></table>';
             $( "#messagewindow" ).dialog('option', 'title', 'Error');
@@ -97,7 +97,7 @@ function CompositionEditorRasterAnalysis(){
     // Show the window with available raster layers
     this.showSelectRasterWindow = function(){
         if ($('#' + this.parent.params.selectRasterWindow).children().length === 0){
-            var html = '<iframe style="width:99%;height:200px;" src="/o-gis/web/app.php/list/rasters_editor" />';
+            var html = '<iframe style="width:99%;height:200px;" src="./app.php/list/rasters_editor" />';
             $('#' + this.parent.params.selectRasterWindow).append(html);
         }
         $('#' + this.parent.params.selectRasterWindow).dialog("open");
@@ -654,8 +654,7 @@ function CompositionEditorRasterAnalysis(){
                 for (var j = 0; j < this.RasterOperation.selectedRasters.length; j++){
                     if ('{' + this.RasterOperation.selectedRasters[j].text + '}' === layerName){
                         layer = this.RasterOperation.selectedRasters[j];
-                        layer.variable = 'layer' + j;
-                        break;
+                        layer.variable = 'layer' + (operation.selectedRasters.length + 1);
                     }
                 }
                 var is_used = false;
@@ -732,12 +731,12 @@ function CompositionEditorRasterAnalysis(){
             $('#' + this.parent.params.waitAnimBox).css('display', 'block');
         }
 
-        $.ajax({url: "/o-gis/web/app.php/rasterop", method: "POST", data: json})
+        $.ajax({url: "./app.php/rasterop", method: "POST", data: json})
                 .done(function(msg){
                     if (msg.success){
                         this.treeReboot = true;
                         $( "#messagewindow" ).dialog('option', 'title', 'Raster Operations');
-                        var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' +
+                        var html =  '<table><tr><td width="64px"><img src="./img/ok.png"/></td><td valign="middle">' +
                                     msg.message + '</td></tr></table>';
                         $( "#messagewindow" ).empty().append(html);
                         $( "#messagewindow" ).dialog("open");
@@ -745,7 +744,7 @@ function CompositionEditorRasterAnalysis(){
                     }
                     else{
                         $( "#messagewindow" ).dialog('option', 'title', 'Raster Operations');
-                        var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                        var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                     msg.message + '</td></tr></table>';
                         $( "#messagewindow" ).empty().append(html);
                         $( "#messagewindow" ).dialog("open");
@@ -754,7 +753,7 @@ function CompositionEditorRasterAnalysis(){
                 }).fail(function(){
                     c_editor.user.limit++;
                     $( "#messagewindow" ).dialog('option', 'title', 'Raster Operation');
-                    var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                    var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 'An error occured while processing your request!</td></tr></table>';
                     $( "#messagewindow" ).empty().append(html);
                     $( "#messagewindow" ).dialog("open");

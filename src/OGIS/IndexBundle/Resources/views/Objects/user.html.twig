@@ -99,21 +99,21 @@
                     method: 'POST'
                 }).done(function(response){
                     if (!response.success){
-                        var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' + response.message + '</td></tr></table>';
+                        var html = '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' + response.message + '</td></tr></table>';
                         $( "#messagewindow" ).dialog('option', 'title', 'Sending Message');
                         $( "#messagewindow" ).empty();
                         $( "#messagewindow" ).append(html);
                         $( "#messagewindow" ).dialog("open");
                     }
                     else {
-                        var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' + response.message + '</td></tr></table>';
+                        var html = '<table><tr><td width="64px"><img src="./img/ok.png"/></td><td valign="middle">' + response.message + '</td></tr></table>';
                         $( "#messagewindow" ).dialog('option', 'title', 'Sending Message');
                         $( "#messagewindow" ).empty();
                         $( "#messagewindow" ).append(html);
                         $( "#messagewindow" ).dialog("open");
                     }
                 }).fail(function(){
-                    var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">Unknown error while sending your message!</td></tr></table>';
+                    var html = '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">Unknown error while sending your message!</td></tr></table>';
                     $( "#messagewindow" ).dialog('option', 'title', 'Sending Message');
                     $( "#messagewindow" ).empty();
                     $( "#messagewindow" ).append(html);

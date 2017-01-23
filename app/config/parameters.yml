@@ -1,0 +1,14 @@
+# This file is auto-generated during the composer install
+parameters:
+    database_host: localhost
+    database_port: 5432
+    database_name: ogis
+    database_user: postgres
+    database_password: 12345
+    mailer_transport: smtp
+    mailer_host: localhost
+    mailer_user: null
+    mailer_password: null
+    secret: ogissystem
+    locale: en
+    database_driver: pdo_pgsql

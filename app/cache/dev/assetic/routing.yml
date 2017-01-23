@@ -1,0 +1,5 @@
+_assetic:
+    resource: .
+    type: assetic
+_app:
+    resource: 'D:\dev\o-gis\app/config/routing_dev.yml'

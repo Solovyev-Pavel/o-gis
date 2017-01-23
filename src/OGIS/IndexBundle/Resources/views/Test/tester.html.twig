@@ -5,7 +5,7 @@
 
 		function SubmitTest(){
 			var json = document.getElementById('input').value;
-			$.ajax({url: "/o-gis/web/app.php/operation/algebra", method: "POST", data: json})
+			$.ajax({url: "./app.php/operation/algebra", method: "POST", data: json})
 		       	.done(function(msg){
 					$('#output').empty().append(msg);
 				});

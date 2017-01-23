@@ -47,7 +47,7 @@ function CompositionEditorLayerStyler(){
         }
         // we need to learn the type of the layer
         else{
-            var url = "/o-gis/web/app.php/gettype/layer/" + cs;
+            var url = "./app.php/gettype/layer/" + cs;
             $.ajax(url)
                 .done(function(responseText){
                     switch(responseText){
@@ -64,7 +64,7 @@ function CompositionEditorLayerStyler(){
                 .fail(function(){
                     $('#messagewindow').dialog('option', 'title', 'Error while reading layer data');
                     $('#messagewindow').empty();
-                    var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                    var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 'Error: could not determine layer type! Styling aborted!</td></tr></table>';
                     $( "#messagewindow" ).append(html);
                     $( "#messagewindow" ).dialog("open");
@@ -186,7 +186,7 @@ function CompositionEditorLayerStyler(){
             .done(function(msg){
                 if (!msg.success){
                     $( '#messagewindow' ).dialog('option', 'title', 'Error!');
-                    var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                    var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 'Error while loading palette <b>' + name + '</b>: ' + msg.message + '</td></tr></table>';
                     $( "#messagewindow" ).empty().append(html);
                     $( "#messagewindow" ).dialog("open");
@@ -209,7 +209,7 @@ function CompositionEditorLayerStyler(){
             })
             .fail(function(){
                 $( '#messagewindow' ).dialog('option', 'title', 'Error!');
-                var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                             'Error while loading palette <b>' + name + '</b>.</td></tr></table>';
                 $( "#messagewindow" ).empty().append(html);
                 $( "#messagewindow" ).dialog("open");
@@ -689,7 +689,7 @@ function CompositionEditorLayerStyler(){
             case 'raster':  // make sure that a palette is selected
                             if (this.current_palette === null){
                                 $( '#messagewindow' ).dialog('option', 'title', 'Error!');
-                                var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                             'You must choose a palette!</td></tr></table>';
                                 $( "#messagewindow" ).empty().append(html);
                                 $( "#messagewindow" ).dialog("open");

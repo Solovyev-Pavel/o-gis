@@ -34,52 +34,53 @@ function contextMenuItems(node){
     if (flags.match(/f/i)){
         items.favItem = {       label: "Add To Favorites",
                                 action: function(){ addToFavorites(node); },
-                                icon: "/o-gis/web/img/icons/fav.png"      }; 
+                                icon: "./img/icons/fav.png"      }; 
     }
     // creating new catalog inside the current one
     if (flags.match(/n/i)){
         items.createItem = {
                                 label: "Create Child Catalog",
                                 action: function(){ createCatalog(node); },
-                                icon: "/o-gis/web/img/icons/add.png"     };
+                                icon: "./img/icons/add.png"     };
     }
     // renaming
     if (flags.match(/r/i)){
         items.renameItem = {    // rename selected node | affects only links, not actual objects behind it
                                 label: "Rename",
                                 action: function(){ renameCatalog(node); },
-                                icon: "/o-gis/web/img/icons/edit.png"    };
+                                icon: "./img/icons/edit.png"    };
     }
     // moving
     if (flags.match(/m/i)){
         items.copyItem = {      // copy a node
                                 label: "Copy",
                                 action: function(){ copyNode(node, true); },
-                                icon: "/o-gis/web/img/icons/copy.png"     };
+                                icon: "./img/icons/copy.png"     };
         items.cutItem = {       // cut a node
                                 label: "Cut",
                                 action: function(){ copyNode(node, false); },
-                                icon: "/o-gis/web/img/icons/cut.png"       };
+                                icon: "./img/icons/cut.png"       };
     }
     // pasting into
     if (flags.match(/p/i) && copyBuffer !== null){
         items.pasteItem = {     // paste a node
                                 label: "Paste",
                                 action: function(){ pasteNode(node);   },
-                                icon: "/o-gis/web/img/icons/paste.png" };
+                                icon: "./img/icons/paste.png" };
     }
     // properties
     if (flags.match(/s/i)){
         items.propertiesItem = {
                                 label: "Catalog settings",
                                 action: function(){ editCatalogProperties(node); },
-                                icon: "/o-gis/web/img/icons/properties.png"      };
+                                icon: "./img/icons/properties.png"      };
     }
     // deleting
     if (flags.match(/d/i) || flags.match(/u/i)){
         items.deleteItem = {   // delete current node | affects only links, not actual objects behind it
                                 label: "Delete " + item_type,
                                 action: function() { deleteNode(node);  },
-                                icon: "/o-gis/web/img/icons/delete.png" };
+                                icon: "./img/icons/delete.png" };
     }
     return items;
+}

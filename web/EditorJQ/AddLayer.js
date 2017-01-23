@@ -35,7 +35,7 @@ function CompositionEditorAddLayers(){
         }
         $('#' + this.parent.params.addLayerWindow).dialog("open");
         if ($('#' + this.parent.params.addLayerWindow).children().length === 0){
-            var html = '<iframe style="width:99%;height:97%" src="/o-gis/web/app.php/list/layers/global" />';
+            var html = '<iframe style="width:99%;height:97%" src="./app.php/list/layers/global" />';
             $('#' + this.parent.params.addLayerWindow).append(html);
         }
     };
@@ -70,7 +70,7 @@ function CompositionEditorAddLayers(){
             this.parent.composition.layers.push(layer);
             var target = new OpenLayers.Layer.WMS(
                     layer.name,
-                    "/o-gis/web/app.php/wms", {
+                    "./app.php/wms", {
                         LAYERS: layer.workspace + ':' + layer.cs,
                         format: 'image/png',
                         transparent: true
@@ -94,7 +94,7 @@ function CompositionEditorAddLayers(){
         $.ajax({url: getCompositionData.replace('ID', id), method: 'GET'})
             .done(function(msg){
                 if (!msg.success){
-                    var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                    var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 'The composition "' + title + '" was not found in the database!</td></tr></table>';
                     $( '#messagewindow' ).empty().append(html);
                     $( '#messagewindow' ).dialog("open");
@@ -111,7 +111,7 @@ function CompositionEditorAddLayers(){
                 $('#' + c_editor.parent.params.addCmpWindow).dialog('open');
             })
             .fail(function(){
-                var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                             'Error while loading composition "' + title + '"!</td></tr></table>';
                 $( '#messagewindow' ).empty().append(html);
                 $( '#messagewindow' ).dialog("open");
@@ -151,7 +151,7 @@ function CompositionEditorAddLayers(){
                     this.parent.composition.layers.push(layer);
                     var target = new OpenLayers.Layer.WMS(
                         layer.name,
-                        "/o-gis/web/app.php/wms", {
+                        "./app.php/wms", {
                             LAYERS: layer.workspace + ':' + layer.cs,
                             format: 'image/png',
                             transparent: true

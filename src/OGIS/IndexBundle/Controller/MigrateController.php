@@ -22,7 +22,7 @@ namespace OGIS\IndexBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
 
-class RestoreController extends Controller{
+class MigrateController extends Controller{
     
     // registers a style
     protected function registerStyle($styleName){

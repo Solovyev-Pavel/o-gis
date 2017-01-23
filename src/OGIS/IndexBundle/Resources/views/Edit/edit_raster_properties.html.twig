@@ -81,7 +81,7 @@
                 var name = document.getElementById("layername").value;
                 if (name === "" || name.match(/^\s+$/g)){
                     $( '#messagewindow' ).dialog('option', 'title', 'Error!');
-                    var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                    var html =	'<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 'Layer\'s title must include meaningful symbols!</td></tr></table>';
                     $( "#messagewindow" ).empty().append(html);
                     $( "#messagewindow" ).dialog("open");
@@ -100,7 +100,7 @@
                         .done(function(msg){
                             if (!msg.success){
                                 $( '#messagewindow' ).dialog('option', 'title', 'Error!');
-                                var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                             'Error while loading palette: ' + msg.message + '</td></tr></table>';
                                 $( "#messagewindow" ).empty().append(html);
                                 $( "#messagewindow" ).dialog("open");
@@ -113,7 +113,7 @@
                         })
                         .fail(function(){
                             $( '#messagewindow' ).dialog('option', 'title', 'Error!');
-                            var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                            var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                         'Error while loading palette.</td></tr></table>';
                             $( "#messagewindow" ).empty().append(html);
                             $( "#messagewindow" ).dialog("open");
@@ -154,7 +154,7 @@
                         .done(function(msg){
                             if (!msg.success){
                                 $( '#messagewindow' ).dialog('option', 'title', 'Error!');
-                                var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                                var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                             'Error while loading palette: ' + msg.message + '</td></tr></table>';
                                 $( "#messagewindow" ).empty().append(html);
                                 $( "#messagewindow" ).dialog("open");
@@ -167,7 +167,7 @@
                         })
                         .fail(function(){
                             $( '#messagewindow' ).dialog('option', 'title', 'Error!');
-                            var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                            var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                         'Error while loading palette.</td></tr></table>';
                             $( "#messagewindow" ).empty().append(html);
                             $( "#messagewindow" ).dialog("open");

@@ -27,7 +27,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Response;
 use OGIS\IndexBundle\Entity\Role;
 
-class CreateEntityController extends Controller{
+class SetupController extends Controller{
 
     public function createRolesAction(){
   		$classType = 'Role';

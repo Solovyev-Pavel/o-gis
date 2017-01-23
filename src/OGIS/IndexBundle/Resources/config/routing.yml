@@ -247,7 +247,7 @@ deletecomposition:
 deletecompositionsuccess:
     pattern: /deletecomposition/success/{name}
     defaults: { _controller: OGISIndexBundle:Composition:deleteCompositionSuccess }
-    
+
 altercompositionsharing:
     pattern: /edit/composition/project/alter
     defaults: { _controller: OGISIndexBundle:Composition:addProjectSharing }
@@ -451,10 +451,6 @@ geoexpl:
     pattern: /editor/{datasource}/{id}
     defaults: { _controller: OGISIndexBundle:Editor:showEditor, datasource: null, id: null }   
 
-compositioneditor:
-    pattern: /ceditor/{datasource}/{id}
-    defaults: { _controller: OGISIndexBundle:Editor:showCompositionEditor, datasource: null, id: null }
-
 getlayertype:
     pattern: /gettype/layer/{cs}
     defaults: { _controller: OGISIndexBundle:Layer:getLayerType }
@@ -463,6 +459,10 @@ editorlogin:
     pattern: /auth/editor
     defaults: { _controller: OGISIndexBundle:AuthManager:loginFromEditor }
     methods: [POST]
+
+compositioneditor:
+    pattern: /ceditor/{datasource}/{id}
+    defaults: { _controller: OGISIndexBundle:Editor:showCompositionEditor, datasource: null, id: null } 
 
  # ########################################################################## #
  #                                 user's favorites                           #

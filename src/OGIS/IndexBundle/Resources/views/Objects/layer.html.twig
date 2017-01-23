@@ -138,7 +138,7 @@
                             map.maxExtent = new OpenLayers.Bounds({{ layer.boundingBoxMinX }}, {{ layer.boundingBoxMinY }}, {{ layer.boundingBoxMaxX }}, {{ layer.boundingBoxMaxY }});
                             var target =  new OpenLayers.Layer.WMS(
                                 "{{ layer.name }}",
-                                "/o-gis/web/app.php/wms", {
+                                "./app.php/wms", {
                                     LAYERS: '{{ layer.workspace }}:{{ layer.conString }}',
                                     STYLES: '',
                                     format: 'image/png',

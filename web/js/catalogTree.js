@@ -157,14 +157,14 @@ function pasteNode(parent){
                 copyBuffer = null;
             }
             else{
-                var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                var html = '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                 $( "#errormessagewinow" ).empty().append(html);
                 $( "#errormessagewinow" ).dialog("open");
                 isCopy = null;
                 copyBuffer = null;
             }
         }).fail(function(){
-            var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">Error while performing this action!</td></tr></table>';
+            var html = '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">Error while performing this action!</td></tr></table>';
             $( "#errormessagewinow" ).empty().append(html);
             $( "#errormessagewinow" ).dialog("open");
             isCopy = null;
@@ -185,14 +185,14 @@ function pasteNode(parent){
                 copyBuffer = null;
             }
             else{
-                var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                var html = '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                 $( "#errormessagewinow" ).empty().append(html);
                 $( "#errormessagewinow" ).dialog("open");
                 isCopy = null;
                 copyBuffer = null;
             }
         }).fail(function(){
-            var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">Error while performing this action!</td></tr></table>';
+            var html = '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">Error while performing this action!</td></tr></table>';
             $( "#errormessagewinow" ).empty().append(html);
             $( "#errormessagewinow" ).dialog("open");
             isCopy = null;
@@ -220,7 +220,7 @@ function saveCatalog(node){
                 tree.set_text(node.id, oldName);
                 oldName = null;
                 console.log(msg.message);
-                var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                var html = '<table><tr><td width="64px"><img src="./img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                 $('#errormessagewinow').empty().append(html);
                 $('#errormessagewinow').dialog('open');
             }
@@ -228,7 +228,7 @@ function saveCatalog(node){
             tree.set_text(node.id, oldName);
             oldName = null;
             console.log(msg.message);
-            var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">Error while perforimng this action!</td></tr></table>';
+            var html = '<table><tr><td width="64px"><img src="./img/stop.png"/></td><td valign="middle">Error while perforimng this action!</td></tr></table>';
             $('#errormessagewinow').empty().append(html);
             $('#errormessagewinow').dialog('open');
         });
@@ -246,7 +246,7 @@ function saveUpdatedLink(node){
         tree.set_text(node.id, oldName);
         oldName = null;
         console.log(msg.message);
-        var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+        var html = '<table><tr><td width="64px"><img src="./img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
         $('#errormessagewinow').empty().append(html);
         $('#errormessagewinow').dialog('open');
     });
@@ -266,12 +266,12 @@ function deleteNode(node){
         }).done(function(msg){
             if(msg.success){ tree.delete_node(node.id); }
             else{
-                var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                var html = '<table><tr><td width="64px"><img src="./img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                 $('#errormessagewinow').empty().append(html);
                 $('#errormessagewinow').dialog('open');
             }
         }).fail(function(){
-            var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">Error while deleting the link!</td></tr></table>';
+            var html = '<table><tr><td width="64px"><img src="./img/stop.png"/></td><td valign="middle">Error while deleting the link!</td></tr></table>';
             $('#errormessagewinow').empty().append(html);
             $('#errormessagewinow').dialog('open');
         });
@@ -287,12 +287,12 @@ function deleteNode(node){
             }).done(function(msg){
                 if(msg.success){ tree.delete_node(node.id); }
                 else{
-                    var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                    var html = '<table><tr><td width="64px"><img src="./img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                     $('#errormessagewinow').empty().append(html);
                     $('#errormessagewinow').dialog('open');
                 }
             }).fail(function(){
-                var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">Error while deleting the catalog!</td></tr></table>';
+                var html = '<table><tr><td width="64px"><img src="./img/stop.png"/></td><td valign="middle">Error while deleting the catalog!</td></tr></table>';
                 $('#errormessagewinow').empty().append(html);
                 $('#errormessagewinow').dialog('open');
             });
@@ -308,12 +308,12 @@ function deleteNode(node){
                     tree.delete_node(node.id);
                 }
                 else{
-                    var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+                    var html = '<table><tr><td width="64px"><img src="./img/stop.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
                     $('#errormessagewinow').empty().append(html);
                     $('#errormessagewinow').dialog('open');
                 }
             }).fail(function(){
-                var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/stop.png"/></td><td valign="middle">Error while deleting the catalog!</td></tr></table>';
+                var html = '<table><tr><td width="64px"><img src="./img/stop.png"/></td><td valign="middle">Error while deleting the catalog!</td></tr></table>';
                 $('#errormessagewinow').empty().append(html);
                 $('#errormessagewinow').dialog('open');
             });
@@ -332,17 +332,17 @@ function loadUserCatalogs(){
                     'check_callback': true
                 },
                 'types':{
-                    "catalog": {icon: "/o-gis/web/img/icons/catalog.png"},
-                    "layer": {icon: "/o-gis/web/img/icons/layer.png"},
-                    "raster": {icon: "/o-gis/web/img/icons/raster.png"},
-                    "line": {icon: "/o-gis/web/img/icons/line.png"},
-                    "point": {icon: "/o-gis/web/img/icons/point.png"},
-                    "polygon": {icon: "/o-gis/web/img/icons/polygon.png"},
-                    "composition": {icon: "/o-gis/web/img/icons/composition.png"},
-                    "style": {icon: "/o-gis/web/img/icons/style.png"},
-                    "palette": {icon: "/o-gis/web/img/icons/palette.png"},
-                    "external": {icon: "/o-gis/web/img/icons/external.png"},
-                    "user": {icon: "/o-gis/web/img/icons/user.png"}
+                    "catalog": {icon: "./img/icons/catalog.png"},
+                    "layer": {icon: "./img/icons/layer.png"},
+                    "raster": {icon: "./img/icons/raster.png"},
+                    "line": {icon: "./img/icons/line.png"},
+                    "point": {icon: "./img/icons/point.png"},
+                    "polygon": {icon: "./img/icons/polygon.png"},
+                    "composition": {icon: "./img/icons/composition.png"},
+                    "style": {icon: "./img/icons/style.png"},
+                    "palette": {icon: "./img/icons/palette.png"},
+                    "external": {icon: "./img/icons/external.png"},
+                    "user": {icon: "./img/icons/user.png"}
                 },
 		            'plugins': [ "sort", "types", "contextmenu" ],
 	             	'sort': function (a, b) {
@@ -381,17 +381,17 @@ function loadProjectCatalogs(){
                     'check_callback': true
                 },
                 'types':{
-                    "catalog": {icon: "/o-gis/web/img/icons/catalog.png"},
-                    "layer": {icon: "/o-gis/web/img/icons/layer.png"},
-                    "raster": {icon: "/o-gis/web/img/icons/raster.png"},
-                    "line": {icon: "/o-gis/web/img/icons/line.png"},
-                    "point": {icon: "/o-gis/web/img/icons/point.png"},
-                    "polygon": {icon: "/o-gis/web/img/icons/polygon.png"},
-                    "composition": {icon: "/o-gis/web/img/icons/composition.png"},
-                    "palette": {icon: "/o-gis/web/img/icons/palette.png"},
-                    "style": {icon: "/o-gis/web/img/icons/style.png"},
-                    "external": {icon: "/o-gis/web/img/icons/external.png"},
-                    "user": {icon: "/o-gis/web/img/icons/user.png"}
+                    "catalog": {icon: "./img/icons/catalog.png"},
+                    "layer": {icon: "./img/icons/layer.png"},
+                    "raster": {icon: "./img/icons/raster.png"},
+                    "line": {icon: "./img/icons/line.png"},
+                    "point": {icon: "./img/icons/point.png"},
+                    "polygon": {icon: "./img/icons/polygon.png"},
+                    "composition": {icon: "./img/icons/composition.png"},
+                    "palette": {icon: "./img/icons/palette.png"},
+                    "style": {icon: "./img/icons/style.png"},
+                    "external": {icon: "./img/icons/external.png"},
+                    "user": {icon: "./img/icons/user.png"}
                 },
 		            'plugins': [ "sort", "types", "contextmenu" ],
 		            'sort': function (a, b) {

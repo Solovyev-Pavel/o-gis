@@ -31,7 +31,7 @@ function CompositionEditorCompositionSave(){
         var user = this.parent.getUser();
         if (user === null){
             $( "#messagewindow2" ).empty();
-            var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+            var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                         'You need to be logged in to save a composition!</td></tr></table>';
             $( "#messagewindow2" ).append(html);
             $( "#messagewindow2" ).dialog("open");
@@ -54,7 +54,7 @@ function CompositionEditorCompositionSave(){
             if (!save_as && this.parent.composition.id !== null && !this.parent.composition.isAuthor(user.id)){
                 $( "#messagewindow" ).empty();
                 $( "#messagewindow" ).dialog('option', 'title', 'Saving the composition');
-                var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                             'You aren\'t the author of this composition and can\'t change it!</td></tr></table>';
                 $( "#messagewindow" ).append(html);
                 $( "#messagewindow" ).dialog("open");
@@ -140,7 +140,7 @@ function CompositionEditorCompositionSave(){
     this.postCompositionData = function(data, save_as){
         var json = JSON.stringify(data);
         var local = "http://" + window.location.hostname;
-        var url = '/o-gis/web/app.php/savecomposition';
+        var url = './app.php/savecomposition';
         var c_editor = this.parent;
         url += (this.parent.composition.id === null || save_as) ? '' : '/' + this.parent.composition.id;
         
@@ -159,7 +159,7 @@ function CompositionEditorCompositionSave(){
                     if (isNaN(response)){
                         $('#messagewindow').dialog('option', 'title', 'Error!');
                         $('#messagewindow').empty();
-                        var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                        var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                     'Error:<br/>' + response + '</td></tr></table>';
                         $('#messagewindow').append(html);
                         $('#messagewindow').dialog("open");
@@ -168,14 +168,14 @@ function CompositionEditorCompositionSave(){
                         c_editor.composition.id = response;
                         c_editor.cmpBackUp = c_editor.composition;
                         var pagetitle = c_editor.composition.name +  " :: Composition Editor :: project O-GIS";
-                        var pageurl = local + "/o-gis/web/app.php/editor/composition/" + c_editor.composition.id;
+                        var pageurl = local + "./app.php/editor/composition/" + c_editor.composition.id;
                         window.history.pushState({}, pagetitle, pageurl);
                         // update composition description
                         $('#descriptionwindow').empty().append(c_editor.composition.description);
                         // show popup for successful composition save
                         $('#messagewindow').dialog('option', 'title', 'Composition Saved!');
                         $('#messagewindow').empty();
-                        var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' +
+                        var html =  '<table><tr><td width="64px"><img src="./img/ok.png"/></td><td valign="middle">' +
                                     'Composition "' + c_editor.composition.name + '" was successfully saved!</td></tr></table>';
                         $('#messagewindow').append(html);
                         $('#messagewindow').dialog("open");
@@ -184,7 +184,7 @@ function CompositionEditorCompositionSave(){
                 else if(xmlhttp.status === 403) {
                     $('#messagewindow').dialog('option', 'title', 'Error!');
                     $('#messagewindow').empty();
-                    var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                    var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 'Error: you aren\'t allowed to save a composition!</td></tr></table>';
                     $('#messagewindow').append(html);
                     $('#messagewindow').dialog("open");
@@ -193,7 +193,7 @@ function CompositionEditorCompositionSave(){
                 else {
                     $('#messagewindow').dialog('option', 'title', 'Error!');
                     $('#messagewindow').empty();
-                    var html =  '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                    var html =  '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 'An error occurred while saving the composition!</td></tr></table>';
                     $('#messagewindow').append(html);
                     $('#messagewindow').dialog("open");
@@ -218,7 +218,7 @@ function CompositionEditorCompositionSave(){
             var layer = this.parent.composition.layers[i];
             var target =  new OpenLayers.Layer.WMS(
                 layer.name,
-                "/o-gis/web/app.php/wms", {
+                "./app.php/wms", {
                     LAYERS: layer.workspace + ':' + layer.cs,
                     format: 'image/png',
                     transparent: true

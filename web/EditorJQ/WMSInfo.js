@@ -69,7 +69,7 @@ function CompositionEditorWMSFeatureInfo(){
         if (!target){ return; }
         var layer = this.getLayer(target);
         // request url
-        var url =   '/o-gis/web/app.php/geoserver/wms?SERVICE=WMS&REQUEST=GetFeatureInfo&EXCEPTIONS=application/vnd.ogc.se_xml&' +
+        var url =   './app.php/geoserver/wms?SERVICE=WMS&REQUEST=GetFeatureInfo&EXCEPTIONS=application/vnd.ogc.se_xml&' +
                     'INFO_FORMAT=application/json&BBOX=' + this.getExtent().toBBOX() + '&QUERY_LAYERS=' + 
                     layer.params.LAYERS + '&STYLES=&SRS=' + layer.params.SRS + '&LAYERS=' + layer.params.LAYERS +
                     '&FEATURE_COUNT=10&WIDTH=' + this.size.w + '&HEIGHT=' + this.size.h;

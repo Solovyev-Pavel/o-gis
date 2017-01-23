@@ -749,7 +749,7 @@ class RasterOperationsController extends Controller {
 
     // proceess IDRISI RST file
     protected function RstReclassification($source, $params, $nodata){
-        return '{"success":false,"message":"IDRISI RST isn't supported right now!"}';
+        return '{"success":false,"message":"IDRISI RST isn\'t supported right now!"}';
     }
     
     // raster algebra
@@ -1041,7 +1041,7 @@ class RasterOperationsController extends Controller {
         $data = $calc->GetTokens();
         $tokens = $calc->GetTokens();
         
-        $value = true;
+        $value = false;
         for ($i = 0; $i < $count; $i++){
             fseek($tiffs[$i], $stripOffsets[$i][1]);
             $indexes[$i] = 1;
@@ -1057,7 +1057,7 @@ class RasterOperationsController extends Controller {
                 $in_buffers[$i] = unpack($valueins[$i], $dataBytes);
                 $index_lims[$i] = $lim;
             }
-            if ($in_buffers[$i][$indexes[$i]] != $nodatas[$i]){ $value = false; }
+            if ($in_buffers[$i][$indexes[$i]] == $nodatas[$i]){ $value = true; }
             $layers[$i] = $in_buffers[$i][$indexes[$i]];
             for ($j = 0; $j < count($data); $j++){
                 if ($data[$j] == '{{' . $json->sources[$i]->variable . '}}'){
@@ -1075,7 +1075,7 @@ class RasterOperationsController extends Controller {
             if ($data < $min && $data > $nodata){ $min = $data; }
             $buffer .= pack($valueout, $data);
             $pointsleft--;
-            $value = true;
+            $value = false;
             $i = 0;
             while ($i < $count){
                 $indexes[$i]++;
@@ -1100,7 +1100,7 @@ class RasterOperationsController extends Controller {
                         $buffer = '';
                     }
                 }
-                if ($in_buffers[$i][$indexes[$i]] != $nodatas[$i]){ $value = false; }
+                if ($in_buffers[$i][$indexes[$i]] == $nodatas[$i]){ $value = true; }
                 $layers[$i] = $in_buffers[$i][$indexes[$i]];
                 $i++;
             }
@@ -1275,7 +1275,6 @@ class Expression{
         $left; $right;                                      // operands holders
         for ($i = 0; $i < $count; $i++){
             $token = $this->_tokens[$i];
-            $token = "$token";
             switch($token){
                 case '+' :  $right = array_pop($this->_evstack);
                             $left = array_pop($this->_evstack);

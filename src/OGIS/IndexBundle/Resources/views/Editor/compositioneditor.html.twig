@@ -42,16 +42,16 @@
         <link rel="stylesheet" href="{{ asset('./js/jquery/themes/default/style.css') }}" />
         <link rel="stylesheet" href="{{ asset('./css/jstree-types.css') }}" />
 
-        <script type="text/javascript" src="{{ asset('./EditorJQ_1/AddLayer.js') }}"></script>
-        <script type="text/javascript" src="{{ asset('./EditorJQ_1/Authorize.js') }}"></script>
-        <script type="text/javascript" src="{{ asset('./EditorJQ_1/CompositionEditor.js') }}"></script>
-        <script type="text/javascript" src="{{ asset('./EditorJQ_1/CompositionObject.js') }}"></script>
-        <script type="text/javascript" src="{{ asset('./EditorJQ_1/CompositionSave.js') }}"></script>
-        <script type="text/javascript" src="{{ asset('./EditorJQ_1/RasterAnalysis.js') }}"></script>
-        <script type="text/javascript" src="{{ asset('./EditorJQ_1/Styler.js') }}"></script>
-        <script type="text/javascript" src="{{ asset('./EditorJQ_1/WMSInfo.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./EditorJQ/AddLayer.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./EditorJQ/Authorize.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./EditorJQ/CompositionEditor.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./EditorJQ/CompositionObject.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./EditorJQ/CompositionSave.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./EditorJQ/RasterAnalysis.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./EditorJQ/Styler.js') }}"></script>
+        <script type="text/javascript" src="{{ asset('./EditorJQ/WMSInfo.js') }}"></script>
 
-        <link rel="stylesheet" href="{{ asset('./EditorJQ/styler-previews.css') }}" />
+        <link rel="stylesheet" href="{{ asset('./EditorJQ/styler-preview.css') }}" />
         <link rel="stylesheet" href="{{ asset('./js/colors/jquery.minicolors.css') }}" />
         <script type="text/javascript" src="{{ asset('./js/colors/jquery.minicolors.min.js') }}"></script>
         
@@ -110,22 +110,22 @@
                     <div id="layerlistpanel" style="width:240px;height:100%;float:left;">
                         <div class="editorwestpaneltoolbar">
                             <span class="controlicon" onclick="editor.AddLayers.showAvaliableLayers();" title="Add...">
-                                <img src="/o-gis/web/./EditorJQ/img/add.png" />
+                                <img src="./EditorJQ/img/add.png" />
                             </span>
                             <span class="controlicon" onclick="editor.RasterAnalysis.beginRasterOperations();" title="Raster operations...">
-                                <img src="/o-gis/web/./EditorJQ/img/mathops.png" />
+                                <img src="./EditorJQ/img/mathops.png" />
                             </span>
                             <span class="controlicon" onclick="editor.CompositionSave.reloadComposition();" title="Rollback to last save">
-                                <img src="/o-gis/web/./EditorJQ/img/refresh.png" />
+                                <img src="./EditorJQ/img/refresh.png" />
                             </span>
                             <span class="controlicon" onclick="editor.CompositionSave.saveTheComposition(false);" title="Save">
-                                <img src="/o-gis/web/./EditorJQ/img/save.png" />
+                                <img src="./EditorJQ/img/save.png" />
                             </span>
                             <span class="controlicon" onclick="editor.CompositionSave.saveTheComposition(true);" title="Save as..">
-                                <img src="/o-gis/web/./EditorJQ/img/saveas.png" />
+                                <img src="./EditorJQ/img/saveas.png" />
                             </span>
                             <span class="controlicon" onclick="editor.addCompositionToFavorites()" title="Add composition to favorites">
-                                <img src="/o-gis/web/./EditorJQ/img/star.png" />
+                                <img src="./EditorJQ/img/star.png" />
                             </span>
                             {% if composition != null %}
                             <span class="controlicon" onclick="editor.goToEntity('composition', {{ composition.id }});" title="Leave editor">
@@ -134,7 +134,7 @@
                             {% else %}
                             <span class="controlicon" onclick="goToHomePage();" title="Leave editor">
                             {% endif %}
-                                <img src="/o-gis/web/./EditorJQ/img/door.png" />
+                                <img src="./EditorJQ/img/door.png" />
                             </span>
                         </div>
                         <div class="dragsortlistcontainer">

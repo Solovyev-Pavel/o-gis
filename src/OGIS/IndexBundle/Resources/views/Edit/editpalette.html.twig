@@ -247,12 +247,12 @@
                             palette.id = msg.id;
                             document.getElementById('savepalettebutton').disabled = false;
                             var pagetitle = palette.name +  " :: Palette editor :: project O-GIS";
-                            var pageurl = 'http://' + window.location.hostname + '/o-gis/web/app.php/paletteeditor/' + palette.id;
+                            var pageurl = 'http://' + window.location.hostname + './app.php/paletteeditor/' + palette.id;
                             window.history.pushState({}, pagetitle, pageurl);
                             new_palette = false;
                             $( '#messagewindow' ).dialog('option', 'title', 'Error!');
                             $( '#messagewindow' ).empty();
-                            var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' +
+                            var html =	'<table><tr><td width="64px"><img src="./img/ok.png"/></td><td valign="middle">' +
                                 msg.msg + '</td></tr></table>';
                             $( "#messagewindow" ).append(html);
                             $( "#messagewindow" ).dialog("open");
@@ -260,7 +260,7 @@
                         else{
                             $( '#messagewindow' ).dialog('option', 'title', 'Error!');
                             $( '#messagewindow' ).empty();
-                            var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                            var html =	'<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 msg.msg + '</td></tr></table>';
                             $( "#messagewindow" ).append(html);
                             $( "#messagewindow" ).dialog("open");
@@ -269,7 +269,7 @@
                     .fail(function(){
                         $( '#messagewindow' ).dialog('option', 'title', 'Ошибка!');
                             $( '#messagewindow' ).empty();
-                            var html =	'<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' +
+                            var html =	'<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' +
                                 'Error while saving palette.</td></tr></table>';
                             $( "#messagewindow" ).append(html);
                             $( "#messagewindow" ).dialog("open");

@@ -63,7 +63,7 @@ function showTargetCatalogTree(id, type){
                     'check_callback': true
                 },
                 'types': {
-                    "catalog": {icon: "/o-gis/web/img/icons/catalog.png"}
+                    "catalog": {icon: "./img/icons/catalog.png"}
                 },
 		'plugins': [ "sort", "types" ],
 		'sort': function (a, b) {   return this.get_text(a) > this.get_text(b) ? 1 : -1; }
@@ -91,7 +91,7 @@ function showSaveTargetCatalogTree(){
                     'check_callback': true
                 },
                 'types': {
-                    "catalog": {icon: "/o-gis/web/img/icons/catalog.png"}
+                    "catalog": {icon: "./img/icons/catalog.png"}
                 },
 		'plugins': [ "sort", "types" ],
 		'sort': function (a, b) {   return this.get_text(a) > this.get_text(b) ? 1 : -1; }
@@ -115,19 +115,19 @@ function sendAddToFavoritesRequest(){
         method: 'POST'
     }).done(function(msg){
         if(msg.success){
-            var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+            var html = '<table><tr><td width="64px"><img src="./img/ok.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
             $( "#messagewindow" ).dialog('option', 'title', 'Adding to Favorites');
             $( "#messagewindow" ).empty().append(html);
             $( "#messagewindow" ).dialog("open");
         }
         else{
-            var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
+            var html = '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">' + msg.message + '</td></tr></table>';
             $( "#messagewindow" ).dialog('option', 'title', 'Adding to favorites');
             $( "#messagewinow" ).empty().append(html);
             $( "#messagewinow" ).dialog("open");
         }
     }).fail(function(){
-        var html = '<table><tr><td width="64px"><img src="/o-gis/web/img/error.png"/></td><td valign="middle">Ошибка при добавлении в избранное!</td></tr></table>';
+        var html = '<table><tr><td width="64px"><img src="./img/error.png"/></td><td valign="middle">Ошибка при добавлении в избранное!</td></tr></table>';
 	      $( "#messagewindow" ).dialog('option', 'title', 'Adding to favorites');
         $( "#messagewinow" ).empty().append(html);
 	      $( "#messagewinow" ).dialog("open");
@@ -151,10 +151,10 @@ function showSaveRasterOperationTree(target){
                     'check_callback': true
                 },
                 'types': {
-                    "catalog": {icon: "/o-gis/web/img/icons/catalog.png"},
-                    "catalog_r": {icon: "/o-gis/web/img/icons/catalog.png"},
-                    "catalog_n": {icon: "/o-gis/web/img/icons/catalog.png"},
-                    "catalog_d": {icon: "/o-gis/web/img/icons/catalog.png"}
+                    "catalog": {icon: "./img/icons/catalog.png"},
+                    "catalog_r": {icon: "./img/icons/catalog.png"},
+                    "catalog_n": {icon: "./img/icons/catalog.png"},
+                    "catalog_d": {icon: "./img/icons/catalog.png"}
                 },
 		'plugins': [ "sort", "types" ],
 		'sort': function (a, b) {   return this.get_text(a) > this.get_text(b) ? 1 : -1; }
